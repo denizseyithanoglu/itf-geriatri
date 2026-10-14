@@ -1,99 +1,62 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1">
-  <title>İTF Geriatri</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f8f7;
-      color: #243b39;
-    }
-    header {
-      background: #123f3e;
-      color: white;
-      padding: 60px 25px;
-      text-align: center;
-    }
-    header h1 { font-size: 36px; }
-    main {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-    .cards {
-      display: grid;
-      grid-template-columns:
-        repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px #00000010;
-    }
-    footer {
-      text-align: center;
-      padding: 25px;
-      color: #666;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="İTF Geriatri: yaşlı sağlığı, hasta bilgilendirme, eğitim ve klinik değerlendirme araçları.">
+<title>İTF Geriatri | Geriatri Bilim Dalı</title>
+<style>
+:root{--wine:#6a123c;--wine-dark:#4c0b2a;--navy:#1b214f;--cream:#faf7f9;--ink:#273044;--muted:#626b79;--line:#e6dce3}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.6;background:#fff}
+a{color:inherit}a:focus-visible,button:focus-visible{outline:3px solid #d798b5;outline-offset:3px}
+.container{max-width:1180px;margin:0 auto;padding:0 24px}
+.topline{background:var(--navy);color:#fff;font-size:.82rem}.topline .container{min-height:36px;display:flex;align-items:center;justify-content:space-between;gap:16px}.topline a{text-decoration:none}.topline a:hover{text-decoration:underline}
+.masthead{background:#fff;border-bottom:1px solid var(--line)}.masthead .container{display:flex;align-items:center;gap:17px;padding-top:24px;padding-bottom:24px}
+.seal{width:78px;height:78px;border:5px double var(--wine);border-radius:50%;display:grid;place-items:center;color:var(--wine);font-family:Georgia,serif;font-size:1.35rem;font-weight:700;flex:none;position:relative}.seal:after{content:"İTF";position:absolute;bottom:10px;font:600 9px system-ui;letter-spacing:.16em}
+.brand-overline{font-size:.85rem;color:var(--wine);font-weight:700;letter-spacing:.07em}.brand-title{font-family:Georgia,serif;color:var(--navy);font-size:clamp(1.45rem,3.4vw,2.15rem);line-height:1.18;margin:4px 0}.brand-sub{color:var(--muted);font-size:.88rem}
+.nav{background:var(--wine);color:#fff}.nav .container{display:flex;align-items:center;gap:1px;flex-wrap:wrap}.nav a{padding:14px 15px;font-size:.93rem;text-decoration:none;font-weight:600}.nav a:hover,.nav a:focus-visible{background:var(--wine-dark)}.nav a:first-child{background:var(--wine-dark)}
+.hero{background:linear-gradient(110deg,rgba(27,33,79,.96),rgba(106,18,60,.90)),radial-gradient(circle at 80% 20%,#d9afc7,transparent 50%);color:#fff;padding:70px 0 76px}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:.79rem;font-weight:750;color:#f0ccd9}.hero h2{font:normal clamp(2.1rem,5vw,3.65rem)/1.14 Georgia,serif;max-width:760px;margin:16px 0}.hero p{max-width:690px;font-size:1.09rem;color:#f1e7ee}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}.button{display:inline-flex;align-items:center;justify-content:center;padding:12px 19px;border-radius:4px;font-weight:700;text-decoration:none;border:1px solid #fff;transition:transform .15s}.button:hover{transform:translateY(-2px)}.button.light{background:#fff;color:var(--wine)}.button.ghost{color:#fff}
+.notice{padding:12px 0;background:#f6eaf0;color:var(--wine-dark);font-size:.85rem;border-bottom:1px solid #e5cad6}
+section{padding:58px 0}section.alt{background:var(--cream)}.section-kicker{font-size:.79rem;text-transform:uppercase;letter-spacing:.14em;color:var(--wine);font-weight:750}.section-title{font:normal clamp(1.7rem,3.3vw,2.35rem) Georgia,serif;color:var(--navy);margin:8px 0 14px}.intro{max-width:810px;color:var(--muted);margin-bottom:28px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:19px}.card{background:#fff;border:1px solid var(--line);border-top:4px solid var(--wine);padding:25px;box-shadow:0 6px 20px rgba(30,20,38,.045);border-radius:4px}.card .symbol{font-size:1.8rem;display:block;margin-bottom:12px}.card h3{font-size:1.12rem;color:var(--navy);margin:0 0 10px}.card p{font-size:.93rem;color:var(--muted);margin:0 0 14px}.card a{color:var(--wine);font-weight:700;text-decoration-thickness:1px;text-underline-offset:4px}.columns{display:grid;grid-template-columns:1.3fr 1fr;gap:38px;align-items:start}.highlight{border-left:4px solid var(--wine);padding:16px 22px;background:#f8f1f5}.feature-list{list-style:none;padding:0;margin:0}.feature-list li{padding:12px 0;border-bottom:1px solid var(--line)}.feature-list li:before{content:"›";font-size:1.4em;color:var(--wine);margin-right:12px}.tag{display:inline-block;background:#f4e7ee;color:var(--wine-dark);font-size:.74rem;padding:3px 9px;border-radius:3px;font-weight:700}
+.footer{background:var(--navy);color:#e1e2ed;padding:42px 0 20px}.footer a{color:#fff}.footer-grid{display:grid;grid-template-columns:2fr 1fr;gap:30px}.footer p{font-size:.87rem}.footer-bottom{margin-top:30px;padding-top:17px;border-top:1px solid #596080;color:#bfc3d5;font-size:.79rem}
+@media(max-width:780px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.columns,.footer-grid{grid-template-columns:1fr}.nav a{padding:12px}.hero{padding:52px 0}.masthead .container{padding-top:16px;padding-bottom:16px}}@media(max-width:510px){.cards{grid-template-columns:1fr}.seal{width:60px;height:60px;font-size:1rem}.topline .container{flex-wrap:wrap;padding-top:8px;padding-bottom:8px}.nav .container{padding:0 12px}.nav a{font-size:.81rem;padding:11px}.hero-actions .button{width:100%}}
+</style>
 </head>
 <body>
-  <header>
-    <h1>İTF Geriatri</h1>
-    <p>Sağlıklı ve Aktif Yaşlanma</p>
-    <p>Geriatri bilgilendirme ve dijital
-       değerlendirme platformu</p>
-  </header>
-
-  <main>
-    <h2>Nasıl Yardımcı Olabiliriz?</h2>
-
-    <div class="cards">
-      <div class="card">
-        <h3>🏥 Bölümümüz</h3>
-        <p>Geriatri ve sunduğumuz hizmetler.</p>
-      </div>
-
-      <div class="card">
-        <h3>📅 Randevu</h3>
-        <p>Poliklinik randevu bilgileri.</p>
-      </div>
-
-      <div class="card">
-        <h3>📋 Kendinizi Değerlendirin</h3>
-        <p>Sağlıklı yaşlanma tarama araçları.</p>
-      </div>
-
-      <div class="card">
-        <h3>🥗 Beslenme</h3>
-        <p>Kalori ve protein hesaplama.</p>
-      </div>
-
-      <div class="card">
-        <h3>📚 Hekimler İçin</h3>
-        <p>Rehberler ve eğitim kaynakları.</p>
-      </div>
-
-      <div class="card">
-        <h3>🔬 Akademik Çalışmalar</h3>
-        <p>Bilimsel faaliyetler ve araştırmalar.</p>
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    İTF Geriatri — Web Sitesi Taslak Sürümü
-    <p>
-      Bu site tıbbi tanı ve tedavi yerine geçmez.
-    </p>
-  </footer>
+<div class="topline"><div class="container"><span>İstanbul Üniversitesi · İstanbul Tıp Fakültesi</span><a href="https://istanbultip.istanbul.edu.tr/tr" target="_blank" rel="noopener noreferrer">Fakülte web sitesi ↗</a></div></div>
+<header class="masthead"><div class="container">
+<div class="seal" role="img" aria-label="İTF harflerinden oluşan geçici amblem">İÜ</div>
+<div><div class="brand-overline">İSTANBUL ÜNİVERSİTESİ · İSTANBUL TIP FAKÜLTESİ</div><h1 class="brand-title">Geriatri Bilim Dalı</h1><div class="brand-sub">Yaşlı sağlığı, eğitim ve bilimsel çalışmalar</div></div>
+</div></header>
+<nav class="nav" aria-label="Ana menü"><div class="container">
+<a href="#anasayfa">Ana Sayfa</a><a href="#bolumumuz">Bölümümüz</a><a href="#hastalar">Hastalar İçin</a><a href="#randevu">Randevu</a><a href="#hekimler">Hekimler İçin</a><a href="#akademik">Akademik</a><a href="#iletisim">İletişim</a>
+</div></nav>
+<main id="anasayfa">
+<div class="notice"><div class="container"><strong>Geliştirme sürümü:</strong> Bu site henüz resmî üniversite yayını değildir. Hasta bilgisi veya sağlık verisi göndermeyiniz.</div></div>
+<section class="hero" aria-labelledby="hero-title"><div class="container">
+<div class="eyebrow">İTF Geriatri</div><h2 id="hero-title">Bilimsel birikimle sağlıklı ve nitelikli yaşlanma.</h2>
+<p>Yaşlı bireyler ve yakınları için güvenilir bilgi; hekimler ve sağlık profesyonelleri için eğitim ve klinik kaynaklar.</p>
+<div class="hero-actions"><a class="button light" href="#hastalar">Hastalar İçin</a><a class="button ghost" href="#hekimler">Sağlık Profesyonelleri İçin</a></div>
+</div></section>
+<section id="bolumumuz"><div class="container columns">
+<div><div class="section-kicker">Geriatri Bilim Dalı</div><h2 class="section-title">Bölümümüzü Tanıyın</h2><p>Geriatri; ileri yaşta görülen hastalıkların, çoklu ilaç kullanımının, beslenme ve hareket sorunlarının, bilişsel ve işlevsel değişikliklerin bütüncül değerlendirmesine odaklanır.</p><p>Bu web sitesi bölüm tanıtımı, hasta eğitimi ve sağlık profesyonellerine yönelik kaynaklar için geliştirilmekte olan bir prototiptir.</p></div>
+<div class="highlight"><strong>Kapsamlı geriatrik değerlendirme</strong><p>Fonksiyonel durum, düşme riski, beslenme, kas sağlığı, bilişsel işlevler ve çoklu ilaç kullanımı gibi alanları birlikte ele alır.</p><span class="tag">Bilgilendirme</span></div>
+</div></section>
+<section class="alt" id="hastalar"><div class="container"><div class="section-kicker">Hasta ve yakınları</div><h2 class="section-title">Size nasıl yardımcı olabiliriz?</h2><p class="intro">Güvenilir sağlık bilgilerine ve geliştirilecek dijital araçlara bu bölümden ulaşabileceksiniz.</p>
+<div class="cards">
+<article class="card"><span class="symbol" aria-hidden="true">🏥</span><h3>Poliklinik ve Başvuru</h3><p>Geriatri polikliniğine başvuru ve muayene süreci hakkında bilgiler.</p><a href="#randevu">Başvuru bilgileri →</a></article>
+<article class="card"><span class="symbol" aria-hidden="true">📋</span><h3>Kendinizi Değerlendirin</h3><p>Düşme riski, beslenme ve genel sağlık için bilgilendirici tarama araçları planlanıyor.</p><span class="tag">Hazırlanıyor</span></article>
+<article class="card"><span class="symbol" aria-hidden="true">🥗</span><h3>Beslenme ve Kas Sağlığı</h3><p>Kalori ve protein gereksinimleri, sağlıklı beslenme ve sarkopeni hakkında bilgiler.</p><span class="tag">Araçlar yakında</span></article>
+</div></div></section>
+<section id="randevu"><div class="container columns"><div><div class="section-kicker">Randevu</div><h2 class="section-title">Randevu ve Poliklinik Bilgileri</h2><p>Güncel randevu kanalları ve poliklinik saatleri kurum tarafından doğrulandıktan sonra bu alana eklenecektir.</p><p>Bu prototip üzerinden randevu alınamaz ve kişisel veri toplanmaz.</p></div><div class="highlight"><strong>Resmî kanallar</strong><p>Randevu süreci için yalnızca hastanenin duyurduğu güncel ve yetkili bağlantıları kullanınız.</p><a href="https://istanbultip.istanbul.edu.tr/tr" target="_blank" rel="noopener noreferrer">Fakülte web sitesini ziyaret et ↗</a></div></div></section>
+<section class="alt" id="hekimler"><div class="container"><div class="section-kicker">Sağlık profesyonelleri</div><h2 class="section-title">Hekimler ve Araştırmacılar İçin</h2><div class="cards">
+<article class="card"><span class="symbol" aria-hidden="true">📚</span><h3>Klinik Rehberler</h3><p>Geriatri, beslenme, sarkopeni ve polifarmasi alanlarında seçilmiş kaynaklar.</p><span class="tag">Hazırlanıyor</span></article>
+<article class="card"><span class="symbol" aria-hidden="true">🧮</span><h3>Hesaplayıcılar</h3><p>Harris–Benedict ve ESPEN temelli enerji-protein gereksinimi hesaplayıcıları.</p><span class="tag">Entegrasyon planlandı</span></article>
+<article class="card"><span class="symbol" aria-hidden="true">🎓</span><h3>Eğitim ve Toplantılar</h3><p>Seminerler, makale saatleri, eğitim duyuruları ve asistan kaynakları.</p><span class="tag">Hazırlanıyor</span></article>
+</div></div></section>
+<section id="akademik"><div class="container columns"><div><div class="section-kicker">Akademik çalışmalar</div><h2 class="section-title">Eğitim, Araştırma ve Yayınlar</h2><p>Bilim dalımızın akademik etkinlikleri, araştırmaları ve yayınları için düzenli güncellenebilen bir alan oluşturuyoruz. Doğrulanmış kadro ve yayın listesi daha sonra eklenecektir.</p></div><div><ul class="feature-list"><li>Bilimsel yayınlar</li><li>Güncel eğitim etkinlikleri</li><li>Araştırma projeleri</li><li>Asistan ve yan dal eğitimi</li></ul></div></div></section>
+</main>
+<footer class="footer" id="iletisim"><div class="container"><div class="footer-grid"><div><strong>İTF Geriatri · Geriatri Bilim Dalı</strong><p>İstanbul Üniversitesi, İstanbul Tıp Fakültesi</p><p>Bu sayfa kamuya açık bir taslak çalışmadır; resmî kurumsal site olarak kullanılmadan önce kurum onayı alınmalıdır.</p></div><div><strong>Bağlantılar</strong><p><a href="https://istanbultip.istanbul.edu.tr/tr" target="_blank" rel="noopener noreferrer">İstanbul Tıp Fakültesi</a></p><p><a href="#anasayfa">Sayfa başına dön ↑</a></p></div></div><div class="footer-bottom">© İTF Geriatri — Geliştirme sürümü. Bu içerikler tanı ve tedavi yerine geçmez. Bu site hasta verisi toplamaz.</div></div></footer>
 </body>
 </html>
-    
