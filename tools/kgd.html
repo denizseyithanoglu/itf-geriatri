@@ -54,7 +54,7 @@ function sectionResets(){document.querySelectorAll("#fullFields>section,#section
   ["historyFracture","alcoholQuantity","medicationRows","clinical_6_19","clinical_6_1","clinical_6_2","clinical_3_0","clinical_3_1","clinical_3_2"].forEach(k=>delete moreText[k]);
   moreText.medicationRows=[""];
   const alcoholField=$("alcoholQuantity");if(alcoholField)alcoholField.value="";
-  sec.querySelectorAll("[data-history-choice]").forEach(b=>b.setAttribute("aria-pressed","false"));
+  sec.querySelectorAll("[data-history-choice]").forEach(b=>b.setAttribute("aria-pressed","false"));sec.querySelectorAll(".history-legacy-note").forEach(el=>el.remove());
   renderMedicationRows();
   const box=$("clinical_3_1")?.closest(".extra-field");if(box)box.hidden=true;
   if(alcoholField)alcoholField.closest(".extra-field").hidden=true;
@@ -209,7 +209,11 @@ function reorderClinicalSections(){
    note.textContent="Önceki kayıt: "+String(previous);fields[i].appendChild(note);
  }
 }
- const fracture=historyBox("extra-field");
+ diagnoses.querySelectorAll(".history-legacy-note").forEach(note=>{
+ const card=note.closest(".extra-field");
+ card.querySelectorAll("button[data-answer]").forEach(b=>b.addEventListener("click",()=>note.remove()));
+});
+const fracture=historyBox("extra-field");
  fracture.innerHTML='<label>Kırık Var Mı?</label>'+makeHistoryChoice("historyFracture",["Hayır","Evet"]);
  diagnoses.appendChild(fracture);
  const replacement=historyBox("history-implant-row");
