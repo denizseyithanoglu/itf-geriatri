@@ -169,7 +169,7 @@ nutritionItems.slice(11,15).forEach(el=>pain.appendChild(el));
 activity.appendChild(pain);
 const transferredSleep=document.createElement("div");transferredSleep.className="merged-clinical-fields sleep-fields";
 nutritionItems.slice(16,19).forEach(el=>transferredSleep.appendChild(el));
-sleep.querySelector("h2").after(transferredSleep);
+(sleep.querySelector(".section-bar")||sleep.querySelector("h2")).after(transferredSleep);
 vision.remove();
 history.querySelector("h2").textContent="2. Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar";
 activity.querySelector("h2").textContent="3. Fiziksel Aktivite, Düşme ve Kırık";
