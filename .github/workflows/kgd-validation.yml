@@ -471,5 +471,120 @@ jobs:
           assert.equal(copied,'FRAIL: 2/5 (pre-frail), SARC-F: 3/10 (negatif), SOF: 1/3 (pre-frail)');
           assert.ok(button.textContent.includes('kopyalandı'));
           console.log('Probel: comma-separated per-tab short scores, copy button, unchanged full/detailed layouts: OK');
+
+          // Turkish-only MNA source text & original PDF score thresholds.
+          const mnaForm=forms.find(f=>f.id==='mna');
+          assert.equal(mnaForm.items.length,6);
+          assert.equal(mnaForm.options.length,6);
+          assert.ok(mnaForm.items[0].startsWith('Son üç ayda iştahsızlığa'));
+          assert.ok(mnaForm.items[5].includes('Baldır')||mnaForm.items[5].includes('baldır'));
+          for(const options of mnaForm.options)
+            assert.ok(options.every(row=>!/No|Yes|Unknown|Severe|Moderate|None|Mild|Mobility|BMI or calf/.test(row[1])),'MNA-SF must be in Turkish');
+          const lfmatch=src.match(/const mnaLFOptions=(\[[\s\S]*?\]);const eqOptions=/);
+          assert.ok(lfmatch,'MNA-LF 12 question choices');
+          const lfOptions=JSON.parse(lfmatch[1]);
+          assert.equal(lfOptions.length,12);
+          assert.ok(lfOptions[6].some(row=>row[1]===0.5));
+          assert.ok(lfOptions[10].some(row=>row[1]===0.5));
+          assert.ok(src.includes('Son 3 ayda kilo kaybı')&&src.includes('Son 6 ayda kilo kaybı')&&src.includes('Son 1 yılda kilo kaybı'));
+          assert.ok(src.includes('Çiğneme sorunu')&&src.includes('Yutma sorunu'));
+          assert.ok(src.includes('nutritionChoice("clinical_4_10",["Katı","Sıvı","Hem katı hem sıvı"])'));
+          assert.ok(src.includes('nutritionCard("Özel diyet"')&&src.includes('nutritionCard("Kaçırdığı öğün"'));
+          assert.ok(src.includes('formatNutritionFields();'),'Nutrition layout must bind during initialization');
+          assert.ok(src.includes('data-nutrition-detail'));
+          assert.ok(src.includes('moreText[input.id]=input.value;summarize();writeKGDDraft()'),'Numeric and descriptive answers must persist');
+          // Test clinical anthropometric cutoffs, source precedence and correction.
+          const measureStart=src.indexOf('function mnaPositiveMeasurement(key){');
+          const measureEnd=src.indexOf('function updateAnthropometry(){',measureStart);
+          assert.ok(measureStart>=0&&measureEnd>measureStart);
+          const mnaVals={};
+          const itemClass={toggle(name,enabled){this[name]=enabled}};
+          const scoreButtons=[0,1,2,3].map(v=>({dataset:{value:String(v)},setAttribute(name,val){this[name]=val}}));
+          const lfButtons=[10,11].flatMap(i=>[0,.5,1,3].map(v=>({
+            dataset:{key:'additional_0_'+i,value:String(v)},setAttribute(name,val){this[name]=val}
+          })));
+          const sfSelect={value:'',parentElement:{querySelector:()=>({querySelectorAll:()=>scoreButtons})},closest:()=>({classList:itemClass})};
+          const switchControl={checked:false},lfPanel={hidden:false};
+          const notice={textContent:''};
+          const elements={mna_5:sfSelect,mnaLFTogglePanel:{},mnaLFShowSwitch:switchControl,mnaLFStatus:notice,mnaMeasurementHint:{textContent:''},mnaLFMeasurementHint:{textContent:''}};
+          for(let i=0;i<5;i++)elements['mna_'+i]={value:''};
+          const mnaCtx={
+            moreText:mnaVals,moreAnswers:{},
+            forms,
+            $:id=>elements[id]||null,
+            document:{
+              querySelectorAll:selector=>{
+                const match=selector.match(/additional_0_(10|11)/);
+                return match?lfButtons.filter(button=>button.dataset.key==='additional_0_'+match[1]):[];
+              },
+              querySelector:selector=>selector==='#extraScales > section:nth-child(1)'?lfPanel:null
+            },
+            scaleTotal:(form,vals)=>vals.reduce((a,v)=>a+Number(v),0)
+          };
+          vm.runInNewContext(src.slice(measureStart,measureEnd),mnaCtx);
+          function measure(key,val){if(val===null)delete mnaVals[key];else mnaVals[key]=String(val)}
+          assert.equal(mnaCtx.mnaAnthropometricScores().sf,null);
+          sfSelect.value='3';mnaCtx.syncMNAAnthropometry();
+          assert.equal(sfSelect.value,'3','Manual MNA-SF item 6 remains before measurements');
+          measure('clinical_1_15',30.9);
+          assert.equal(mnaCtx.mnaAnthropometricScores().sf.score,0,'Calf <31 scores 0 when BMI missing');
+          mnaCtx.syncMNAAnthropometry();
+          assert.equal(sfSelect.value,'0','Calf measurement overrides manual MNA-SF answer');
+          assert.equal(mnaCtx.moreAnswers.additional_0_11,'0');
+          measure('clinical_1_12',21.5);
+          mnaCtx.syncMNAAnthropometry();
+          assert.equal(mnaCtx.moreAnswers.additional_0_10,'0.5');
+          measure('clinical_1_12',22);
+          mnaCtx.syncMNAAnthropometry();
+          assert.equal(mnaCtx.moreAnswers.additional_0_10,'1');
+          measure('clinical_1_15',31);
+          mnaCtx.syncMNAAnthropometry();
+          assert.equal(sfSelect.value,'3');
+          assert.equal(mnaCtx.moreAnswers.additional_0_11,'1');
+          measure('clinical_1_0',170);
+          for(const [weight,expected] of [[54,0],[58,1],[63,2],[68,3]]){
+            measure('clinical_1_1',weight);
+            mnaCtx.syncMNAAnthropometry();
+            assert.equal(sfSelect.value,String(expected),'BMI category for weight '+weight);
+          }
+          measure('clinical_1_1',54);
+          mnaCtx.syncMNAAnthropometry();
+          assert.equal(sfSelect.value,'0','BMI takes priority over calf even if calf is >=31');
+          mnaCtx.moreAnswers.additional_0_10='0';
+          mnaCtx.syncMNAAnthropometry();
+          assert.equal(mnaCtx.moreAnswers.additional_0_10,'1','Measured arm overrides manual LF answer');
+          measure('clinical_1_0',null);
+          measure('clinical_1_1',null);
+          measure('clinical_1_15',null);
+          mnaCtx.syncMNAAnthropometry();
+          assert.equal(sfSelect.value,'','Deleting BMI and calf clears automatically derived SF score');
+          assert.equal(mnaCtx.moreAnswers.additional_0_11,undefined,'Deleting calf clears LF item 18');
+          measure('clinical_1_12',null);
+          mnaCtx.syncMNAAnthropometry();
+          assert.equal(mnaCtx.moreAnswers.additional_0_10,undefined,'Deleting arm clears LF item 17');
+          for(let i=0;i<6;i++)elements['mna_'+i]={value:'',parentElement:sfSelect.parentElement,closest:sfSelect.closest};
+          elements.mna_5=sfSelect;
+          for(const [i,v] of [2,3,2,2,2].entries())elements['mna_'+i].value=String(v);
+          sfSelect.value='3';
+          assert.equal(mnaCtx.mnaSFStatus(),'normal');
+          mnaCtx.syncMNAVisibility();
+          assert.equal(lfPanel.hidden,true,'Normal MNA-SF keeps LF closed');
+          elements.mna_0.value='0';elements.mna_1.value='0';
+          mnaCtx.syncMNAVisibility();
+          assert.equal(mnaCtx.mnaSFStatus(),'risk');
+          assert.equal(lfPanel.hidden,false,'Risk MNA-SF automatically opens LF');
+          assert.equal(switchControl.checked,true);
+          mnaVals.mnaLFManualPreference='Hayır';
+          mnaCtx.syncMNAVisibility();
+          assert.equal(lfPanel.hidden,true,'Manual switch can close LF');
+          mnaVals.mnaLFManualPreference='Evet';
+          mnaCtx.syncMNAVisibility();
+          assert.equal(lfPanel.hidden,false,'Manual switch can reopen LF');
+          assert.ok(src.includes('syncMNAVisibility();document.querySelectorAll("#extraScales'),'MNA-LF auto-opening must update with overall score recalculation');
+          assert.ok(src.includes('if(sel.id==="mna_5"&&mnaAnthropometricScores().sf)'),'Manual MNA-SF score cannot conflict with measured anthropometry');
+          assert.ok(src.includes('if(k==="additional_0_10"||k==="additional_0_11")syncMNAAnthropometry()'),'Manual MNA-LF scores cannot conflict with measured anthropometry');
+          assert.ok(src.includes('if(sec.id==="form_mna")')&&src.includes('if(sec.id==="mnaLFPanel")'),'Section resets must reapply measured scores');
+          console.log('MNA Turkish scales, nutrition rows, BMI/calves/arms cross-tab authority, LF risk toggle and reset: OK');
+
           console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
           NODE
