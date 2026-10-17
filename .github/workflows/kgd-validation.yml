@@ -657,7 +657,7 @@ jobs:
             'Four clinical SGA assessment buttons must be present in the existing nutrition section');
           assert.ok(src.includes('hidden.type="hidden";hidden.id="clinical_4_15"'),
             'The SGA score must keep the previous saved/printed field key');
-          assert.ok(src.includes('aria-pressed="'+(normalized===grade)'),
+          assert.ok(src.includes('aria-pressed="\'+(normalized===grade)'),
             'Restored SGA grade must display as selected');
           assert.ok(src.includes('choices.addEventListener("click",event=>'),
             'SGA grade buttons must be wired to click handlers');
