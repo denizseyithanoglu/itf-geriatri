@@ -172,6 +172,41 @@ jobs:
           assert.equal(ctx.moreAnswers.mmse_standard_19,'0');
           assert.equal(ctx.moreAnswers.mmse_recall_standard_1,undefined,'Zero after free recall clears unsupported free mode');
           assert.equal(ctx.moreAnswers.mmse_recall_uneducated_1,undefined,'MMSE versions remain separate');
+          // Mini-COG impairment is a manual Yok/Var interpretation, not an automated diagnosis.
+          const minicogPos=src.indexOf('section.appendChild(impairment);');
+          const minicogNotesPos=src.indexOf('section.appendChild(notes);',minicogPos);
+          assert.ok(minicogPos>0&&minicogNotesPos>minicogPos,'Mini-COG Yok/Var must appear above notes');
+          assert.ok(src.includes('["Yok","Var"].map(value=>'),'Both Mini-COG choices must render');
+          assert.ok(src.includes('if(sec.querySelector("#minicogImpairment"))delete moreAnswers.miniCogImpairment'),'Mini-COG reset must clear choice');
+          assert.ok(src.includes('["Mini-COG kognitif bozukluk",moreAnswers.miniCogImpairment]'),'Short PDF should print choice');
+          assert.ok(src.includes('["Mini-COG’a Göre Kognitif Bozukluk",moreAnswers.miniCogImpairment]'),'Detailed PDF should print choice');
+          const choiceStart=src.indexOf('function setMiniCogImpairment(value){');
+          const choiceEnd=src.indexOf('function updateMiniClockScore(){',choiceStart);
+          assert.ok(choiceStart>=0&&choiceEnd>choiceStart,'Mini-COG button action function must exist');
+          let saves=0,updates=0;
+          const btnYok={dataset:{miniCogImpairment:'Yok'},setAttribute(name,value){if(name==='aria-pressed')this.pressed=value}};
+          const btnVar={dataset:{miniCogImpairment:'Var'},setAttribute(name,value){if(name==='aria-pressed')this.pressed=value}};
+          const minicogContext={
+            moreAnswers:{},
+            document:{querySelectorAll:()=>[btnYok,btnVar]},
+            summarize:()=>{updates++},
+            writeKGDDraft:()=>{saves++}
+          };
+          vm.runInNewContext(src.slice(choiceStart,choiceEnd),minicogContext);
+          minicogContext.setMiniCogImpairment('Var');
+          assert.equal(minicogContext.moreAnswers.miniCogImpairment,'Var');
+          assert.equal(btnVar.pressed,'true');
+          assert.equal(btnYok.pressed,'false');
+          minicogContext.setMiniCogImpairment('Yok');
+          assert.equal(minicogContext.moreAnswers.miniCogImpairment,'Yok');
+          assert.equal(btnVar.pressed,'false');
+          assert.equal(btnYok.pressed,'true');
+          minicogContext.setMiniCogImpairment('Yok');
+          assert.equal(minicogContext.moreAnswers.miniCogImpairment,undefined,'Second tap can clear an accidental selection');
+          minicogContext.setMiniCogImpairment('invalid');
+          assert.equal(saves,3);
+          assert.equal(updates,3);
+          console.log('Mini-COG Yok/Var: above notes, selects/toggles, persists and prints: OK');
           console.log('MMSE recall: 9 interactive options, small notes, wider fields, isolated and scored click handlers: OK');
           console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
           NODE
