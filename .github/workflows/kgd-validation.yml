@@ -43,9 +43,19 @@ jobs:
             },
             $:id=>({value:inputs[id]??''}),
             scaleItemScore:(f,i,v)=>f.scoreOptions?f.scoreOptions[i][Number(v)]:Number(v),
-            moreAnswers:{},mmseVariant:'standard'
+            moreAnswers:{},moreText:{},mmseVariant:'standard',mmseAttentionMode:'subtract'
           };
           ctx.scaleTotal=(f,v)=>v.reduce((a,x,i)=>a+ctx.scaleItemScore(f,i,x),0);
+          const extraMatch=src.match(/,additional=(\[[\s\S]*?\]),gds30=/);
+          assert.ok(extraMatch,'PDF-scale question lists must exist');
+          ctx.additional=JSON.parse(extraMatch[1]);
+          ctx.safe=x=>String(x);
+          ctx.mmseCopyPrompt=()=>'<figure>copy task</figure>';
+          ctx.mmseReadPrompt=()=>'<figure>read task</figure>';
+          const viewStart=src.indexOf('const mmseWorldLetters=[');
+          const viewEnd=src.indexOf('function organizeMiniCog(){',viewStart);
+          assert.ok(viewStart>=0&&viewEnd>viewStart,'MMSE UI and attention helper must be extractable');
+          vm.runInNewContext(src.slice(viewStart,viewEnd),ctx);
           vm.runInNewContext(src.slice(start,finish),ctx);
           function provide(id,v){v.forEach((x,i)=>inputs[id+'_'+i]=String(x));}
           provide('adl',[0,0,0,0,1,0]);
@@ -62,5 +72,36 @@ jobs:
           assert.equal(ctx.kgdMMSEPrintScore(),'28/30 (-1 oryantasyon, -1 dikkat)');
           delete ctx.moreAnswers.mmse_standard_14;
           assert.equal(ctx.kgdMMSEPrintScore(),'eksik (29/30 yanıt)');
-          console.log('KGD script + sample GYA/EGYA/FRAIL/MNA/MMSE results: OK');
+          ctx.moreAnswers.mmse_standard_14='1';
+          const primaryScore=ctx.kgdMMSEPrintScore();
+          assert.equal(primaryScore,'28/30 (-1 oryantasyon, -1 dikkat)');
+          let standard=ctx.renderMMSEGroups();
+          assert.equal((standard.match(/class="mmse-group mmse-cards-three"/g)||[]).length,3);
+          assert.equal((standard.match(/class="mmse-group mmse-cards-two"/g)||[]).length,1);
+          assert.ok(standard.includes('data-mmse="mmse_standard_13"'),'Primary attention keeps original keys');
+          assert.ok(standard.includes('İpucu:')&&standard.includes('Çoktan Seçmeli:'));
+          assert.ok(standard.includes('Bir renk')&&standard.includes('Kartal, Şahin, Şahıs'));
+          assert.ok(standard.includes('mmseAttentionSwitch'),'Standard MMSE has alternate attention switch');
+          assert.ok(standard.includes('Uygulayıcı notu:'),'Source-based clinical notes included');
+          ctx.mmseAttentionMode='world';
+          const alternative=ctx.renderMMSEGroups();
+          assert.ok(alternative.includes('data-mmse="mmse_world_0"'),'Alternative has independent keys');
+          assert.ok(alternative.includes('A – Y – N – Ü – D'),'DÜNYA sequence should match PDF');
+          assert.equal(ctx.kgdMMSEPrintScore(),'eksik (25/30 yanıt)','Unanswered alternate must not use subtraction score');
+          for(let i=0;i<5;i++)ctx.moreAnswers['mmse_world_'+i]='1';
+          ctx.moreAnswers.mmse_world_0='0';
+          ctx.moreAnswers.mmse_world_1='0';
+          assert.equal(ctx.kgdMMSEPrintScore(),'27/30 (-1 oryantasyon, -2 dikkat)');
+          assert.equal(ctx.mmseScoreSummary(),'27/30 (normal)');
+          ctx.mmseAttentionMode='subtract';
+          assert.equal(ctx.kgdMMSEPrintScore(),primaryScore,'Switching back must preserve primary results');
+          ctx.mmseVariant='uneducated';
+          const uneducated=ctx.renderMMSEGroups();
+          assert.ok(uneducated.includes('Bir devlet sembolü')&&uneducated.includes('Bayram, Bayrak, Sancak'));
+          assert.ok(uneducated.includes('Pazar’dan önce Cumartesi gelir'));
+          assert.ok(!uneducated.includes('id="mmseAttentionSwitch"'),'Uneducated MMSE uses PDF day-sequence only');
+          assert.equal(ctx.kgdMMSEPrintScore(),null,'No scores in uneducated MMSE remains incomplete');
+          assert.ok(src.includes('mmseAttentionMode=data.mmseAttentionMode==="world"?"world":"subtract"'));
+          assert.ok(src.includes('noDiseases:frailNone,mmseVariant,mmseAttentionMode'));
+          console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
           NODE
