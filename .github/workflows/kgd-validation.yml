@@ -504,7 +504,7 @@ jobs:
             dataset:{key:'additional_0_'+i,value:String(v)},setAttribute(name,val){this[name]=val}
           })));
           const sfSelect={value:'',parentElement:{querySelector:()=>({querySelectorAll:()=>scoreButtons})},closest:()=>({classList:itemClass})};
-          const switchControl={checked:false},lfPanel={hidden:false};
+          const switchControl={checked:false,setAttribute(name,v){this[name]=v}},lfPanel={hidden:false,classList:{remove(value){this.removed=value}}};
           const notice={textContent:''};
           const elements={mna_5:sfSelect,mnaLFTogglePanel:{dataset:{}},mnaLFShowSwitch:switchControl,mnaLFStatus:notice,mnaMeasurementHint:{textContent:''},mnaLFMeasurementHint:{textContent:''}};
           for(let i=0;i<5;i++)elements['mna_'+i]={value:''};
@@ -566,6 +566,29 @@ jobs:
           elements.mna_5=sfSelect;
           for(const [i,v] of [2,3,2,2,2].entries())elements['mna_'+i].value=String(v);
           sfSelect.value='3';
+          // MNA-SF visible label uses Turkish only, while MNA-LF combined total
+          // follows <17 malnutrition, 17–23.5 risk, >23.5 normal.
+          const categoryMeaningStart=src.indexOf('function meaning(s,score){');
+          const categoryMeaningEnd=src.indexOf('function fullKGDOverview(){',categoryMeaningStart);
+          const clinicalMeaning={};
+          vm.runInNewContext(src.slice(categoryMeaningStart,categoryMeaningEnd),clinicalMeaning);
+          for(const [score,expected] of [[0,'malnütrisyon'],[7,'malnütrisyon'],[8,'malnütrisyon riski'],
+            [11,'malnütrisyon riski'],[12,'normal'],[14,'normal']])
+            assert.equal(clinicalMeaning.meaning({id:'mna'},score),expected);
+          for(const [score,expected] of [[0,'malnütrisyon'],[16.5,'malnütrisyon'],
+            [17,'malnütrisyon riski'],[23.5,'malnütrisyon riski'],[24,'normal'],[30,'normal']])
+            assert.equal(mnaCtx.mnaTotalCategory(score),expected);
+          assert.ok(src.includes('if(sec.id==="mnaLFPanel"){'),'MNA-LF onscreen score must show combined /30');
+          assert.ok(src.includes('output.textContent=total?"MNA toplam: "+total'),
+            'MNA LF must show result and Turkish classification after full entry');
+          assert.ok(src.includes('if(sel.id.startsWith("mna_"))syncMNAVisibility()'),
+            'A MNA-SF selection must immediately recalculate LF visibility');
+          assert.ok(src.includes('form.addEventListener("change",()=>syncMNAVisibility())'),
+            'MNA-SF keyboard/select changes must also open LF');
+          assert.ok(src.includes('lf.classList.remove("wizard-hidden")'),
+            'Completing MNA-SF on nutrition tab must unhide MNA-LF');
+          assert.ok(src.includes('lastMNARiskClass===null&&moreText.mnaLFManualPreference==="Hayır"'),
+            'Old saved manual LF-off switch must not suppress first automatic risk opening');
           assert.equal(mnaCtx.mnaSFStatus(),'normal');
           mnaCtx.syncMNAVisibility();
           assert.equal(lfPanel.hidden,true,'Normal MNA-SF keeps LF closed');
@@ -649,10 +672,16 @@ jobs:
           const figureContext={};
           vm.runInNewContext(src.slice(sgaStart,sgaEnd),figureContext);
           const diagram=figureContext.sgaAnatomyFigure();
-          assert.ok(diagram.includes('role="img"')&&diagram.includes('sgaDiagramDesc'));
-          for(const number of [1,2,3,4,5,6])
-            assert.ok(diagram.includes('>'+number+'</text>'),'Numbered anatomical landmark '+number);
-          assert.ok(diagram.includes('ÖNDEN')&&diagram.includes('ARKADAN'));
+          assert.ok(diagram.includes('<img class="sga-anatomy"')&&diagram.includes('data:image/webp;base64,'));
+          assert.ok(!diagram.includes('<svg'), 'Obsolete stick-figure drawing must be removed');
+          for(const anatomy of ['şakak','klavikula','skapula','el sırtı','uyluk','baldır'])
+            assert.ok(diagram.toLocaleLowerCase('tr-TR').includes(anatomy),'Anatomical landmark '+anatomy);
+          const imageBase64=diagram.match(/data:image\/webp;base64,([A-Za-z0-9+/=]+)/)?.[1];
+          assert.ok(imageBase64&&imageBase64.length>6000,'Inline detailed anatomical image must be present');
+          const imageBytes=Buffer.from(imageBase64,'base64');
+          assert.equal(imageBytes.subarray(0,4).toString('ascii'),'RIFF');
+          assert.equal(imageBytes.subarray(8,12).toString('ascii'),'WEBP');
+          assert.ok(imageBytes.length>5000,'Detailed illustration must contain real WebP image data');
           assert.ok(src.includes('const grades=["Normal","Hafif","Orta","Ciddi"]'),
             'Four clinical SGA assessment buttons must be present in the existing nutrition section');
           assert.ok(src.includes('hidden.type="hidden";hidden.id="clinical_4_15"'),
