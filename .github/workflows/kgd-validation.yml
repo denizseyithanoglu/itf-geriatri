@@ -672,16 +672,27 @@ jobs:
           const figureContext={};
           vm.runInNewContext(src.slice(sgaStart,sgaEnd),figureContext);
           const diagram=figureContext.sgaAnatomyFigure();
-          assert.ok(diagram.includes('<img class="sga-anatomy"')&&diagram.includes('data:image/webp;base64,'));
-          assert.ok(!diagram.includes('<svg'), 'Obsolete stick-figure drawing must be removed');
-          for(const anatomy of ['şakak','klavikula','skapula','el sırtı','uyluk','baldır'])
+          assert.ok(diagram.includes('<img class="sga-anatomy"')&&diagram.includes('images/sga-anatomy-755.webp'));
+          assert.ok(!diagram.includes('data:image/'),'SGA picture must be fetched from a real full-resolution file, not upscaled old data');
+          assert.ok(diagram.includes('width="755" height="863"'));
+          assert.ok(diagram.includes('href=')&&diagram.includes('target="_blank"'),
+            'Clicking illustration should allow full-resolution viewing');
+          assert.ok(!diagram.includes('<svg'),'Obsolete stick-figure drawing must not remain');
+          for(const anatomy of ['şakak','klavikula','skapula','el sırtı','kuadriseps','baldır'])
             assert.ok(diagram.toLocaleLowerCase('tr-TR').includes(anatomy),'Anatomical landmark '+anatomy);
-          const imageBase64=diagram.match(/data:image\/webp;base64,([A-Za-z0-9+/=]+)/)?.[1];
-          assert.ok(imageBase64&&imageBase64.length>6000,'Inline detailed anatomical image must be present');
-          const imageBytes=Buffer.from(imageBase64,'base64');
+          const fs=await import('node:fs');
+          const imagePath='tools/images/sga-anatomy-755.webp';
+          assert.ok(fs.existsSync(imagePath),'High-resolution SGA artwork must be committed as a file');
+          const imageBytes=fs.readFileSync(imagePath);
+          assert.ok(imageBytes.length>60000,'SGA artwork should not be reduced to a tiny image');
           assert.equal(imageBytes.subarray(0,4).toString('ascii'),'RIFF');
           assert.equal(imageBytes.subarray(8,12).toString('ascii'),'WEBP');
-          assert.ok(imageBytes.length>5000,'Detailed illustration must contain real WebP image data');
+          // WEBP lossy VP8 frame width/height are little-endian, bottom 14 bits.
+          assert.equal(imageBytes.subarray(12,16).toString('ascii'),'VP8 ');
+          const frame=imageBytes.indexOf(Buffer.from([0x9d,0x01,0x2a]));
+          assert.ok(frame>0&&frame<50,'VP8 frame marker');
+          assert.equal(imageBytes.readUInt16LE(frame+3)&0x3fff,755,'Native artwork width');
+          assert.equal(imageBytes.readUInt16LE(frame+5)&0x3fff,863,'Native artwork height');
           assert.ok(src.includes('const grades=["Normal","Hafif","Orta","Ciddi"]'),
             'Four clinical SGA assessment buttons must be present in the existing nutrition section');
           assert.ok(src.includes('hidden.type="hidden";hidden.id="clinical_4_15"'),
@@ -706,6 +717,70 @@ jobs:
             'SGA illustration must stack under the note on mobile');
           assert.ok(src.includes('#fullFields > section.supplement[data-clinical-index="4"].wizard-hidden'),
             'SGA visualization remains visible only on the nutrition wizard tab');
+          // Tab reorder: keep original clinical_* keys; pain & VAS move as DOM nodes.
+          assert.ok(src.includes('{tr:"Ağrı, Uyku Kalitesi ve Boşaltım"'));
+          const groupsStart=src.indexOf('const wizardGroups=['),groupsEnd=src.indexOf('];',groupsStart);
+          const groups=src.slice(groupsStart,groupsEnd);
+          const positions=[
+            groups.indexOf('tr:"Aktivite, Düşme ve Kırık"'),
+            groups.indexOf('tr:"Ağrı, Uyku Kalitesi ve Boşaltım"'),
+            groups.indexOf('tr:"Beslenme Değerlendirmesi (MNA)"'),
+            groups.indexOf('tr:"Yaşam Aktiviteleri ve Kalitesi')
+          ];
+          assert.ok(positions.every(i=>i>=0)&&positions.every((i,j)=>!j||i>positions[j-1]),
+            'Wizard order should be Activity then Pain/Sleep then MNA then GYA');
+          assert.ok(src.includes('wizardStep===4&&show'),
+            'MNA-LF automatic unhide should operate on the fifth tab');
+          assert.ok(src.includes('nutritionItems.slice(11,15).forEach(el=>pain.appendChild(el))'),
+            'Pain and VAS items retain their original clinical_4_11–14 identifiers');
+          assert.ok(src.includes('(sleep.querySelector(".section-bar")||sleep.querySelector("h2")).after(pain,transferredSleep)'),
+            'Pain and VAS must appear first in the 4th tab');
+          assert.ok(!src.includes('activity.appendChild(pain)'),
+            'Chronic pain must no longer appear in Activity tab');
+          assert.ok(src.includes('[0,6,2,5,4].forEach(i=>host.appendChild(parts[i]))'),
+            'Visual DOM order must match wizard order');
+          assert.ok(src.includes('#fullFields > section.supplement[data-clinical-index="5"].wizard-hidden{display:none!important}'),
+            'Pain/Sleep panel must respect wizard tabs despite overriding grid styles');
+          assert.ok(src.includes('grid-template-columns:repeat(4,minmax(0,1fr));gap:12px'),
+            'Sleep symptoms retain multi-column screen layout');
+          assert.ok(src.includes('const payload={version:4,savedAt:')&&src.includes('[1,2,3,4].includes(data.version)'),
+            'Draft upgrade must preserve data and record reordered wizard position');
+          assert.ok(src.includes('priorStep===3?4:priorStep===4?3:priorStep'),
+            'Existing V3 MNA and sleep draft tabs should map correctly');
+          const fullStart=src.indexOf('function fullKGDOverview(){');
+          const fullEnd=src.indexOf('function summarize(){',fullStart);
+          const overview=src.slice(fullStart,fullEnd);
+          const orderedLabels=[
+            'item("3. Fiziksel Aktivite, Düşme ve Kırık"',
+            'item("4. Ağrı, Uyku Kalitesi ve Boşaltım"',
+            'item("5. Beslenme"',
+            'scaleGroup("5.1 MNA-SF"',
+            'item("5.2 MNA-LF',
+            'scaleGroup("6. GYA ve EGYA"',
+            'item("6.1 EQ-5D',
+            'scaleGroup("7. Kırılganlık',
+            'item("8. Mini-COG',
+            'item("8.1 MMSE',
+            'item("9. GDS-30',
+            'item("10. Fiziksel'
+          ];
+          const orderedPositions=orderedLabels.map(label=>overview.indexOf(label));
+          assert.ok(orderedPositions.every(i=>i>=0)&&
+            orderedPositions.every((i,j)=>!j||i>orderedPositions[j-1]),
+            'Full KGD overview must have exactly the new tab order: '+JSON.stringify(orderedPositions));
+          assert.ok(src.includes('if(step===3)return compactKGDStep(4,inline)'),
+            '4th tab single-section short print must be Pain/Sleep');
+          assert.ok(src.includes('if(step===4){')&&src.includes('["MNA toplam",kgdMNATotalScore()]'),
+            '5th tab short print includes MNA combined score');
+          assert.ok(src.includes('if(step===3)return kgdDetailedClinical(4,[11,12,13,14]'),
+            '4th tab detailed print begins with Pain/VAS');
+          assert.ok(src.includes('if(step===4){')&&src.includes('kgdDetailedScale("mna")'),
+            '5th tab detailed print contains MNA');
+          assert.ok(src.includes('const steps=all?wizardGroups.slice(0,-1).map((_,i)=>i):[step]'),
+            'Full print must follow new wizard tab order');
+          assert.ok(src.includes('const contents=kgdShortPrintStep(step,false)'),
+            'Legacy single-tab print must respect new tab mapping');
+          console.log('Tab order Pain/Sleep #4, Nutrition MNA #5, old drafts, short/full/detail prints, SGA HQ asset: OK');
           console.log('SGA four saved categories, reset, legacy text, and front/back anatomical UI: OK');
           console.log('Nutrition screenshot regression: full-width 3-card rows and accessible MMSE-size MNA-LF switch: OK');
           console.log('MNA Turkish scales, nutrition rows, BMI/calves/arms cross-tab authority, LF risk toggle and reset: OK');
