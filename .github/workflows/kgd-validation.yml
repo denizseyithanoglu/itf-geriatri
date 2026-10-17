@@ -591,8 +591,24 @@ jobs:
           assert.ok(src.includes('.supplement:has(.extra-field > textarea){display:grid;grid-template-columns:repeat(4'),
             'Legacy generic grid expected for regression test');
           assert.ok(src.includes(overrideSelector+'{')&&
-            src.includes('display:block!important;width:100%;max-width:100%;min-width:0;box-sizing:border-box'),
+            src.includes('display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box'),
             'The nutrition section must override the generic four-column grid and span full width');
+          // Never override the wizard's display:none!important with a nutrition display:block!important.
+          // A panel hidden by showWizardStep() must remain hidden even with the layout override.
+          const nutritionStyle=src.match(/#fullFields > section\.supplement\[data-clinical-index="4"\]\s*\{([^}]*)\}/);
+          assert.ok(nutritionStyle&&/display:\s*block\s*;/.test(nutritionStyle[1]),
+            'Nutrition must retain its full-width block layout without an !important override');
+          assert.ok(!/display:\s*block\s*!important/.test(nutritionStyle[1]),
+            'Visible nutrition block must not defeat the wizard-hidden rule');
+          const hiddenStyle=src.match(/#fullFields > section\.supplement\[data-clinical-index="4"\]\.wizard-hidden\s*\{([^}]*)\}/);
+          assert.ok(hiddenStyle&&/display:\s*none\s*!important/.test(hiddenStyle[1]),
+            'Nutrition must be fully invisible on all non-nutrition wizard tabs');
+          assert.ok(src.includes('.wizard-hidden{display:none!important}'),
+            'Base wizard hide/show logic must remain intact');
+          assert.ok(src.includes('el.classList.toggle("wizard-hidden",!visible.has(el))'),
+            'Wizard navigation must continue hiding inactive panels');
+          assert.ok(src.includes('const sgaField=$("clinical_4_15")?.closest(".extra-field")'),
+            'SGA note must remain attached only to the nutrition field');
           assert.ok(src.includes(overrideSelector+' > :not(.section-bar)'),
             'Nutrition children must span their section rather than narrow grid cells');
           assert.ok(src.includes('.nutrition-entry-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))'),
