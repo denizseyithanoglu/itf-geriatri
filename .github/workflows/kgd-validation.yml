@@ -384,6 +384,15 @@ jobs:
           checkboxes[4].checked=false;checkboxes[4].onchange();
           assert.equal(sel.value,'0','4 illnesses again give 0 points');
           assert.ok(summaries>=7,'Score summary must refresh when a disease changes');
+          const meaningFrom=src.indexOf('function meaning(s,score){');
+          const meaningEnd=src.indexOf('function fullKGDOverview(){',meaningFrom);
+          assert.ok(meaningFrom>=0&&meaningEnd>meaningFrom,'Inline score label function must be found');
+          const scoreLabels={};
+          vm.runInNewContext(src.slice(meaningFrom,meaningEnd),scoreLabels);
+          for(const [score,expected] of [[0,'Normal'],[1,'pre-frail'],[2,'pre-frail'],[3,'frail'],[4,'frail'],[5,'frail']])
+            assert.equal(scoreLabels.meaning({id:'frail'},score),expected,'FRAIL ('+score+'/5) label');
+          assert.equal(scoreLabels.meaning({id:'sof'},1),'Kırılganlık öncesi','Unrelated SOF wording must remain unchanged');
+          console.log('FRAIL inline scoring labels 0 Normal, 1–2 pre-frail, 3–5 frail: OK');
           console.log('KGD frailty tab titles, PDF questions, inline buttons and 4×3 illness grid with ≥5-point rule: OK');
 
           console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
