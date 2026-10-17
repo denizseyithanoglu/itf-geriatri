@@ -241,13 +241,13 @@
 /* EQ-5D: separate patient-reported health today (0 worst–100 best). */
 .eq-vas{grid-column:1/-1;margin-top:20px;padding:18px;border-radius:12px;border:1px solid #bdcfbf;background:#f4faf5}
 .eq-vas label{display:block;font-size:1.06rem;font-weight:750;color:#264c3c;margin-bottom:12px}
-.eq-vas-main{display:flex;align-items:center;gap:18px}
-.eq-vas-main input[type="range"]{width:100%;flex:1;min-width:80px;height:32px;cursor:pointer;accent-color:#285b4d}
+.eq-vas-main{display:flex;align-items:center;gap:18px}.eq-vas-track{flex:1 1 auto;min-width:0}
+.eq-vas-main input[type="range"]{display:block;width:100%;min-width:80px;height:32px;margin:0;cursor:pointer;accent-color:#285b4d}
 .eq-vas output{flex:0 0 auto;min-width:74px;text-align:center;font-size:1.55rem;font-weight:800;color:#285b4d;background:white;padding:8px;border:1px solid #9cb9a5;border-radius:10px;font-variant-numeric:tabular-nums}
-.eq-vas-ticks{display:flex;justify-content:space-between;max-width:calc(100% - 92px);font-size:.82rem;color:#4f6558;font-weight:650}
+.eq-vas-ticks{display:flex;justify-content:space-between;padding:0 8px;margin-top:2px;color:#4f6558;font-weight:700}.eq-vas-ticks span{width:0;flex:0 0 0;display:flex;flex-direction:column;align-items:center;font-size:.72rem;line-height:1.45;white-space:nowrap}.eq-vas-ticks span::before{content:"";display:block;width:2px;height:11px;margin-bottom:3px;background:#739482}
 .eq-vas-ends{display:flex;justify-content:space-between;gap:15px;font-size:.8rem;color:#43584b;margin-top:7px}
 .eq-vas input[type="range"]:focus-visible{outline:3px solid #ae7700;outline-offset:3px}
-@media(max-width:490px){.eq-vas-main{gap:9px}.eq-vas output{min-width:66px;font-size:1.2rem}.eq-vas-ticks{max-width:calc(100% - 74px)}}
+@media(max-width:490px){.eq-vas-main{gap:9px}.eq-vas output{min-width:66px;font-size:1.2rem}.eq-vas-ticks span{font-size:.63rem}.eq-vas-ticks span::before{height:9px}}
 /* Read printouts left-to-right by row, retaining detailed history but short scale scores. */
 @media print{
  #printSheet[data-mode="full"],#printSheet[data-mode="section"]{font:9pt/1.4 Arial,sans-serif!important;color:#111;width:100%}
@@ -280,7 +280,7 @@ function sectionResets(){document.querySelectorAll("#fullFields>section,#section
   const box=$("clinical_3_1")?.closest(".extra-field");if(box)box.hidden=true;
   if(alcoholField)alcoholField.closest(".extra-field").hidden=true;
   syncHistoryCounts();
-}if(sec.id==="form_frail"){frailSelected.clear();frailNone=false;sec.querySelectorAll(".frail-disease-box input").forEach(ch=>ch.checked=false);const count=sec.querySelector("#frailCount");if(count)count.textContent="0 / 11 hastalık · Yanıt bekleniyor"}if(sec.id==="physicalSection"||sec.querySelector("#sarcoState")){syncSarco()}if(sec.querySelector("#eq5dHealthVAS")){delete moreAnswers.eq5dHealthVAS;const slider=$("eq5dHealthVAS");slider.value="50";$("eq5dHealthValue").textContent="— %"}if(sec.id==="clock-assessment")delete moreAnswers.clock;if(sec.id==="mmse-assessment")Object.keys(moreAnswers).filter(k=>k.startsWith("mmse_")).forEach(k=>delete moreAnswers[k]);;sec.querySelectorAll("[aria-pressed]").forEach(el=>el.setAttribute("aria-pressed","false"));sec.querySelectorAll(".redstar").forEach(el=>el.style.display="");summarize()};bar.appendChild(b)})}
+}if(sec.id==="form_frail"){frailSelected.clear();frailNone=false;sec.querySelectorAll(".frail-disease-box input").forEach(ch=>ch.checked=false);const count=sec.querySelector("#frailCount");if(count)count.textContent="0 / 11 hastalık · Yanıt bekleniyor"}if(sec.id==="physicalSection"||sec.querySelector("#sarcoState")){syncSarco()}if(sec.querySelector("#eq5dHealthVAS")){delete moreAnswers.eq5dHealthVAS;const slider=$("eq5dHealthVAS");slider.value="50";$("eq5dHealthValue").textContent="— %";sec.querySelector("#eq5dLegacyNote")?.remove()}if(sec.id==="clock-assessment")delete moreAnswers.clock;if(sec.id==="mmse-assessment")Object.keys(moreAnswers).filter(k=>k.startsWith("mmse_")).forEach(k=>delete moreAnswers[k]);;sec.querySelectorAll("[aria-pressed]").forEach(el=>el.setAttribute("aria-pressed","false"));sec.querySelectorAll(".redstar").forEach(el=>el.style.display="");summarize()};bar.appendChild(b)})}
 function renderClockAndMMSE(){const variants={standard:additional[3][1],uneducated:additional[4][1]};const list=variants[mmseVariant];const groups=[["Oryantasyon — Zaman",0,5],["Oryantasyon — Mekân",5,10],["Kayıt Hafızası",10,13],["Dikkat ve Hesaplama",13,18],["Hatırlama",18,21],["Dil, Anlama, Yazı/Okuma ve Kopya",21,30]];const clockOptions=[["5","Kollarını da tam yaparsa"],["4","Saat organizasyonu kötü"],["3","Sayı düzgün, akrep, yelkovan yanlış"],["2","Sayılar tam ama yeri uygun değil"],["1","Sayıları yazıyor en (3-4 sayı)"],["0","Hiçbir sayı ve kollar yerinde değil"]];return '<section class="supplement" id="clock-assessment"><h2>SAAT ÇİZME TESTİ</h2><p>Bu bir saattir. İçine sayılarını yazınız. Bu saatin içine kollarını yaparak 11.10 geçeyi gösteriniz.</p><p class="optional-note">Kaynak form 0–5 arasındaki altı puan seçeneğini tanımlar; hiçbir seçenek çıkarılmamıştır.</p><div class="clock-options">'+clockOptions.map(([n,desc])=>'<button type="button" data-clock="'+n+'" aria-pressed="'+(moreAnswers.clock===n)+'"><b>'+n+' puan</b> — '+desc+'</button>').join("")+'</div><div class="extra-field"><label for="clock-notes">Saat çizme testi — gözlem notları</label><textarea id="clock-notes" rows="2">'+safe(moreText["clock-notes"]||"")+'</textarea></div></section><section class="supplement" id="mmse-assessment"><h2>MMSE — Mini-Mental Durum Değerlendirmesi</h2><label for="mmseVariant">Hastanın eğitim durumuna uygun sürüm</label><select id="mmseVariant" class="field"><option value="standard" '+(mmseVariant==="standard"?"selected":"")+'>Standart MMSE</option><option value="uneducated" '+(mmseVariant==="uneducated"?"selected":"")+'>Eğitimsizler İçin Standardize Mini-Mental Test</option></select><p class="optional-note">Her soruda hastanın verdiği yanıtı kaydedebilir ve puanlayabilirsiniz. Yalnızca seçilen sürümün puanı hesaplanır.</p>'+groups.map(([name,start,end])=>'<div class="mmse-group"><h3>'+name+'</h3>'+list.slice(start,end).map((q,offset)=>{const i=start+offset,key="mmse_"+mmseVariant+"_"+i,observation="response_"+key;return '<div class="mmse-question"><label for="'+observation+'">'+(i+1)+'. '+safe(q)+' <span class="redstar" '+(moreAnswers[key]!==undefined?'style="display:none"':'')+'>*</span></label><input type="text" id="'+observation+'" placeholder="Hastanın yanıtı / Patient response" value="'+safe(moreText[observation]||"")+'"><div class="simple-choice"><button type="button" data-mmse="'+key+'" data-v="0" aria-pressed="'+(moreAnswers[key]==="0")+'">0</button><button type="button" data-mmse="'+key+'" data-v="1" aria-pressed="'+(moreAnswers[key]==="1")+'">1</button></div></div>'}).join("")+'</div>').join("")+'</section>'}
 function attachMMSE(){document.querySelectorAll("[data-clock]").forEach(btn=>btn.onclick=()=>{moreAnswers.clock=btn.dataset.clock;document.querySelectorAll("[data-clock]").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));summarize()});const sel=$("mmseVariant");if(sel)sel.onchange=()=>{document.querySelectorAll("#mmse-assessment input").forEach(x=>moreText[x.id]=x.value);mmseVariant=sel.value;fullRender();reorderClinicalSections();summarize()};document.querySelectorAll("[data-mmse]").forEach(btn=>btn.onclick=()=>{moreAnswers[btn.dataset.mmse]=btn.dataset.v;btn.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));const star=btn.closest(".mmse-question").querySelector(".redstar");if(star)star.style.display="none";summarize()});document.querySelectorAll("#mmse-assessment input,#clock-notes").forEach(el=>el.oninput=()=>{moreText[el.id]=el.value})}
 const demographics={0:{type:"text",label:"Hastanın Adı Soyadı"},1:{type:"text",label:"TC No"},2:{type:"date",label:"Tarih"},3:{type:"date",label:"Doğum Tarihi",age:true},4:{type:"buttons",options:["Kadın","Erkek"]},5:{type:"tel"},6:{type:"select",options:["Okur-yazar değil","Okur-yazar","İlkokul","Ortaokul","Lise","Ön lisans","Üniversite","Yüksek lisans","Doktora","Diğer"]},7:{type:"select",options:["Evli","Bekâr","Boşanmış","Dul"]},8:{type:"text"},9:{type:"number"},10:{type:"buttons",options:["Ev","Huzurevi","Bakımevi","Diğer"]},11:{type:"buttons",options:["Yok","Var"]},12:{type:"buttons",options:["Yok","Var"]},13:{type:"number"}};
@@ -516,17 +516,25 @@ function installEqHealthVAS(){
  if(!sec||sec.querySelector("#eq5dHealthVAS"))return;
  const div=document.createElement("div");
  div.className="eq-vas";
- div.innerHTML='<label for="eq5dHealthVAS">Bugünkü sağlık durumunuzu 0–100 arasında değerlendiriniz</label>'+
- '<div class="eq-vas-main"><input type="range" id="eq5dHealthVAS" min="0" max="100" step="1" value="50" aria-describedby="eq5dHealthEnds eq5dHealthValue">'+
+ div.innerHTML='<label for="eq5dHealthVAS">EQ5D Skala — Bugünkü sağlık durumunuzu 0–100 arasında değerlendiriniz</label>'+
+ '<div class="eq-vas-main"><div class="eq-vas-track"><input type="range" id="eq5dHealthVAS" min="0" max="100" step="10" value="50" aria-describedby="eq5dHealthEnds eq5dHealthValue">'+
+ '<div class="eq-vas-ticks" aria-hidden="true">'+Array.from({length:11},(_,i)=>'<span>'+i*10+'</span>').join('')+'</div></div>'+
  '<output id="eq5dHealthValue" for="eq5dHealthVAS" aria-live="polite">— %</output></div>'+
- '<div class="eq-vas-ticks" aria-hidden="true"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>'+
  '<div class="eq-vas-ends" id="eq5dHealthEnds"><span>0 — En kötü sağlık durumu</span><span>100 — En iyi sağlık durumu</span></div>';
  sec.appendChild(div);
  const slider=$("eq5dHealthVAS"),out=$("eq5dHealthValue");
  const prior=moreAnswers.eq5dHealthVAS;
- if(prior!==undefined&&prior!==null&&/^(100|[0-9]|[1-9][0-9])$/.test(String(prior)))slider.value=String(prior);
- out.textContent=prior===undefined?"— %":slider.value+" %";
+ const valid=prior!==undefined&&prior!==null&&/^(100|[0-9]|[1-9][0-9])$/.test(String(prior));
+ if(valid)slider.value=String(Math.round(Number(prior)/10)*10);
+ out.textContent=valid?String(prior)+" %":"— %";
+ if(valid&&Number(prior)%10!==0){
+   const note=document.createElement("small");
+   note.id="eq5dLegacyNote";
+   note.textContent="Önceki kayıt: "+prior+"%. Cetvel artık 10’ar basamaklı; yeni seçim yapana kadar önceki değer korunur.";
+   div.appendChild(note);
+ }
  const update=()=>{
+   div.querySelector("#eq5dLegacyNote")?.remove();
    moreAnswers.eq5dHealthVAS=slider.value;
    out.textContent=slider.value+" %";
    summarize();
@@ -541,7 +549,7 @@ function renderA4(){
   holder.dataset.mode="full";
   holder.innerHTML='<header class="print-head"><strong>İTF Geriatri — KGD Özeti</strong><span>'+new Date().toLocaleDateString("tr-TR")+'</span></header>'+
     '<div class="report-columns">'+(contents||'<p>Henüz değerlendirme girilmedi.</p>')+'</div>'+
-    '<footer class="print-note">Yalnızca girilmiş bulgular ve puan özetleri gösterilir. EQ5D 5–15 düzey toplamıdır, tercih temelli indeks değildir; bugünkü sağlık puanı (0–100) ayrı bildirilir. Eğitim amaçlıdır.</footer>';
+    '<footer class="print-note">Yalnızca girilmiş bulgular ve puan özetleri gösterilir. EQ5D 5–15 düzey toplamıdır, tercih temelli indeks değildir; EQ5D Skala (0–100) ayrı bildirilir. Eğitim amaçlıdır.</footer>';
 }
 function emailOnly(){const scores=[];for(const q of forms){let values=q.items.map((_,i)=>$(q.id+"_"+i)?.value||"");if(values.every(x=>x!==""))scores.push(q.tr+": "+scaleTotal(q,values)+"/"+q.max)}const gd=gdsScore();if(gd!==null)scores.push("GDS-30: "+gd+"/30");if(!confirm("Sadece anonim toplam puanlarla e-posta uygulaması açılsın mı? Hasta kimliği, notları ve cevaplar eklenmez."))return;const href="mailto:itfgeriatri2000@gmail.com?subject="+encodeURIComponent("Anonim KGD puan özeti")+"&body="+encodeURIComponent(scores.join("\n")||"Tamamlanan ölçek bulunmuyor");location.href=href}
 function gdsScore(){const arr=Array.from({length:30},(_,i)=>moreAnswers["gds30_"+i]);if(arr.some(x=>x===undefined))return null;const reverse=new Set([0,4,6,10,12,15,21,26,28,29]);return arr.reduce((n,v,i)=>n+(reverse.has(i)?(v==="0"?1:0):(v==="1"?1:0)),0)}
@@ -593,7 +601,7 @@ const shortVals=mnaShort.items.map((_,i)=>document.getElementById("mna_"+i)?.val
 const shortTotal=shortVals.every(v=>v!=="")?scaleTotal(mnaShort,shortVals):null;
 item("9. MNA-LF — Uzun Beslenme Değerlendirmesi",[["MNA-LF Ek Puanı",mnaLF===null?"__":mnaLF],["MNA Toplam Puanı",mnaLF===null||shortTotal===null?"__":(shortTotal+mnaLF)+"/30"],...auxiliary(0)]);
 const eq=moreScore("additional_1_",additional[1][1].length);
-item("10. EQ-5D — Yaşam Kalitesi",[["EQ-5D Durum Puanları",eq===null?"__":eq+"/15"+(eq===5?" (tüm alanlarda sorun yok)":"")],["Bugünkü Sağlık (VAS)",moreAnswers.eq5dHealthVAS===undefined?"__":moreAnswers.eq5dHealthVAS+"/100 ("+moreAnswers.eq5dHealthVAS+"%)"],...auxiliary(1)]);
+item("10. EQ-5D — Yaşam Kalitesi",[["EQ-5D Durum Puanları",eq===null?"__":eq+"/15"+(eq===5?" (tüm alanlarda sorun yok)":"")],["EQ5D Skala",moreAnswers.eq5dHealthVAS===undefined?"__":moreAnswers.eq5dHealthVAS+"/100 ("+moreAnswers.eq5dHealthVAS+"%)"],...auxiliary(1)]);
 item("11. Mini-COG ve Saat Çizme",[["Saat Çizme",moreAnswers.clock===undefined?"__":moreAnswers.clock+"/5"],["Saat Notları",moreText["clock-notes"]],...auxiliary(2)]);
 const qlist=mmseVariant==="uneducated"?additional[4][1]:additional[3][1];
 const mvals=qlist.map((_,i)=>moreAnswers["mmse_"+mmseVariant+"_"+i]);
@@ -729,7 +737,7 @@ function compactKGDStep(i){
      ["GYA",scale("adl",adl)?.replace(/^GYA: /,"")],
      ["EGYA",scale("iadl",iadl)?.replace(/^EGYA: /,"")],
      ["EQ5D",eqLine?.replace(/^EQ5D: /,"")],
-     ["Sağlık VAS",present(vas)?vas+"%":null]
+     ["EQ5D Skala",present(vas)?vas+"%":null]
    ]);
  if(i===6)return simple("Kırılganlık ve Sarkopeni",[
     ["FRAIL",scale("frail",frail)?.replace(/^FRAIL: /,"")],
@@ -767,7 +775,7 @@ function renderWizardStepPrint(step){
  holder.dataset.mode="section";
  holder.innerHTML='<header class="print-head"><strong>İTF Geriatri — '+safe(group.tr)+'</strong><span>'+new Date().toLocaleDateString("tr-TR")+'</span></header>'+
   '<div class="report-columns">'+(contents||'<p>Bu bölümde henüz girilmiş bilgi yok.</p>')+'</div>'+
-  '<footer class="print-note">Yalnızca bu sekmenin girilmiş bilgileri. Eksik ölçekler puanlanmaz. EQ5D düzey toplamı indeks değildir; sağlık VAS (0–100) ayrı ölçülür.</footer>';
+  '<footer class="print-note">Yalnızca bu sekmenin girilmiş bilgileri. Eksik ölçekler puanlanmaz. EQ5D düzey toplamı indeks değildir; EQ5D Skala (0–100) ayrı ölçülür.</footer>';
 }
 function selectedScaleValues(){const picked={};for(const f of forms){picked[f.id]=f.items.map((_,i)=>$(f.id+"_"+i)?.value??"")}return picked}
 function applyScaleValues(picked){if(!picked||typeof picked!=="object")return;for(const f of forms){const values=picked[f.id];if(!Array.isArray(values))continue;f.items.forEach((_,i)=>{const sel=$(f.id+"_"+i);if(!sel||(f.id==="frail"&&i===3))return;const v=String(values[i]??"");if([...sel.options].some(o=>o.value===v))sel.value=v})}enhanceChoices();const frailGrid=$("frail_3")?.closest(".item")?.querySelector(".choice-grid");if(frailGrid)frailGrid.hidden=true;document.querySelectorAll("#sections .choice-grid button").forEach(btn=>{const sel=btn.closest(".item")?.querySelector("select");if(sel)btn.setAttribute("aria-pressed",String(sel.value!==""&&sel.value===btn.dataset.value))})}
