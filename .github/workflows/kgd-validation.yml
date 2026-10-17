@@ -28,5 +28,39 @@ jobs:
           for(const method of ['kgdMMSEPrintScore','kgdScalePrintScore','kgdDetailedPrintStep','kgdShortPrintStep','printKGD'])
             assert.ok(src.includes('function '+method),'Missing print function: '+method);
           assert.ok(src.includes('n>5?"1":"0"'),'FRAIL illness threshold must match attached KGD PDF');
-          console.log('KGD JS syntax, printing entrypoints, and FRAIL rule: OK');
+          const fjson=src.match(/const forms=(\[[\s\S]*?\]),texts=/);
+          assert.ok(fjson,'Forms schema must be readable');
+          const forms=JSON.parse(fjson[1]);
+          const start=src.indexOf('function kgdScalePrintScore(id){');
+          const finish=src.indexOf('function kgdMNATotalScore(){',start);
+          assert.ok(start>=0&&finish>start,'Print scorers must be extractable');
+          const inputs={};
+          const ctx={
+            forms,
+            KGD_PRINT_LABELS:{
+              adl:['banyo','giyinme','tuvalet','transfer','kontinans','beslenme'],
+              iadl:['telefon','alışveriş','yemek hazırlama','ev temizliği','çamaşır','yolculuk','ilaç kullanımı','mali işler']
+            },
+            $:id=>({value:inputs[id]??''}),
+            scaleItemScore:(f,i,v)=>f.scoreOptions?f.scoreOptions[i][Number(v)]:Number(v),
+            moreAnswers:{},mmseVariant:'standard'
+          };
+          ctx.scaleTotal=(f,v)=>v.reduce((a,x,i)=>a+ctx.scaleItemScore(f,i,x),0);
+          vm.runInNewContext(src.slice(start,finish),ctx);
+          function provide(id,v){v.forEach((x,i)=>inputs[id+'_'+i]=String(x));}
+          provide('adl',[0,0,0,0,1,0]);
+          assert.equal(ctx.kgdScalePrintScore('adl'),'5/6 (-1 kontinans)');
+          provide('iadl',[0,0,0,0,2,4,0,0]);
+          assert.equal(ctx.kgdScalePrintScore('iadl'),'6/8 (-1 çamaşır, -1 yolculuk)');
+          provide('frail',[1,0,0,0,0]);
+          assert.equal(ctx.kgdScalePrintScore('frail'),'1/5 (pre-frail)');
+          provide('mna',[2,3,2,1,2,3]);
+          assert.equal(ctx.kgdScalePrintScore('mna'),'14/14 (normal)');
+          for(let i=0;i<30;i++)ctx.moreAnswers['mmse_standard_'+i]='1';
+          ctx.moreAnswers.mmse_standard_0='0';
+          ctx.moreAnswers.mmse_standard_13='0';
+          assert.equal(ctx.kgdMMSEPrintScore(),'28/30 (-1 oryantasyon, -1 dikkat)');
+          delete ctx.moreAnswers.mmse_standard_14;
+          assert.equal(ctx.kgdMMSEPrintScore(),'eksik (29/30 yanıt)');
+          console.log('KGD script + sample GYA/EGYA/FRAIL/MNA/MMSE results: OK');
           NODE
