@@ -487,6 +487,29 @@
  #extraScales .minicog-impairment button:focus-visible{outline:3px solid #b77c00;outline-offset:3px}
  @media(max-width:540px){#extraScales .minicog-impairment{gap:8px;padding:11px}#extraScales .minicog-impairment-label{flex-basis:100%;margin-right:0}#extraScales .minicog-impairment button{flex:1}}
 }
+
+/* Larger MMSE copy stimuli and compact, resettable exam countdown timers. */
+@media screen{
+ #extraScales .mmse-copy-figure svg{width:min(100%,670px);max-height:460px;height:auto}
+ #extraScales .mmse-copy-figure{padding:24px 10px}
+ #mmse-assessment .mmse-group-heading{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+ #mmse-assessment .mmse-group-heading h3{margin:0}
+ #mmse-assessment .mmse-timer{display:flex;flex-wrap:wrap;align-items:center;gap:5px 7px;padding:5px 7px;background:#f0f5f8;border:1px solid #c3d4df;border-radius:9px}
+ #mmse-assessment .mmse-timer output{font:750 1.05rem/1.25 ui-monospace,monospace;min-width:52px;color:#173b5d;font-variant-numeric:tabular-nums;text-align:center}
+ #mmse-assessment .mmse-timer button{border:1px solid #91aabf;border-radius:6px;padding:5px 9px;min-height:33px;background:#fff;color:#173b5d;font:650 .8rem system-ui,sans-serif;cursor:pointer}
+ #mmse-assessment .mmse-timer button:focus-visible{outline:3px solid #b77c00;outline-offset:2px}
+ #mmse-assessment .mmse-timer [data-mmse-timer-status]{font-size:.74rem;color:#9b3426}
+ #mmse-assessment .mmse-copy-upload{grid-column:1/-1;width:100%;min-width:0;border:1px dashed #b4cabc;background:#f8fbf9;border-radius:10px;padding:13px;margin:10px 0}
+ #mmse-assessment .mmse-copy-upload>label{font-size:.92rem;color:#285b4d;font-weight:750;display:block}
+ #mmse-assessment .mmse-copy-upload input[type=file]{display:block;max-width:100%;margin:10px 0;font-size:.82rem}
+ #mmse-assessment .mmse-copy-upload .mmse-copy-preview{display:block;margin:12px 0;max-width:100%;width:auto;max-height:460px;object-fit:contain;border:1px solid #c7d5d1;border-radius:8px;background:#fff}
+ #mmse-assessment .mmse-copy-upload .mmse-copy-remove{padding:6px 10px;border:1px solid #af9b95;background:#fff;color:#854539;border-radius:7px;font:inherit;cursor:pointer}
+ #mmse-assessment .mmse-copy-upload [hidden]{display:none!important}
+ @media(max-width:600px){#mmse-assessment .mmse-timer{width:100%}#extraScales .mmse-copy-figure svg{max-height:420px}}
+}
+@media print{
+ #printSheet[data-print-style="detailed"] .mmse-copy-patient-image{max-width:450px;max-height:500px;object-fit:contain;display:block;margin:10px 0}
+}
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><section class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite">Geçici taslak hazırlanıyor…</div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><p class="wizard-privacy"><strong>Önemli:</strong> Geçici taslak yalnızca bu tarayıcı sekmesinde saklanır; sayfa yenilense de korunur. Bu bir klinik kayıt sistemi değildir. Gerçek hasta kimlik veya sağlık verilerini girmeyiniz.</p></section><div id="fullFields"></div><div id="sections"></div><div id="extraScales"></div><div id="fullGds"></div><section class="panel summary result-summary" id="summary"></section><article id="printSheet" aria-label="A4 KGD özeti"></article><div id="wizardFooter" class="wizard-footer no-print" aria-label="Bölüm gezinme ve kayıt işlemleri"><button class="btn alt" id="wizardBack" type="button">← Önceki</button><button class="btn alt" id="wizardSave" type="button">Taslağı Kaydet</button><button class="btn alt" id="wizardPrintSection" type="button">Bu Sekmenin Özetini Yazdır / PDF</button><button class="btn alt" id="wizardPrintSectionDetailed" type="button">Bu Sekmeyi Detaylı Yazdır / PDF</button><button class="btn" id="wizardNext" type="button">Kaydet ve Devam Et →</button><button class="wizard-delete" id="wizardClear" type="button">Geçici Taslağı Sil</button></div><div class="actions no-print" id="finalActions"><button class="btn" id="printFinal">Tüm KGD — Özet Yazdır / PDF</button><button class="btn alt" id="printFinalDetailed" type="button">Tüm KGD — Detaylı Yazdır / PDF</button><button class="btn alt" id="emailFinal">E-posta ile anonim puan özeti</button></div><p class="optional-note">E-posta sadece tamamlanan ölçeklerin anonim toplamlarını içerir. Kimlik veya klinik notlar e-postaya eklenmez.</p></main><script>
 const forms=[{"id":"adl","tr":"GYA — Günlük Yaşam Aktiviteleri","max":6,"choices":[[1,"Bağımsız / Independent"],[0,"Yardım gerekli / Needs help"]],"items":["Banyo (Küvet, duş) — Yıkanırken hiç yardım almaz veya sadece vücudunun bir bölümünü yıkarken yardım alır","Giyinme — Ayakkabılarını bağlamak dışında kıyafetlerini ve elbiselerini kendisi giyebilir","Tuvalete Gitme — Herhangi bir yardım almadan tuvalete gider, tuvaleti kullanır, kıyafetlerini düzeltir ve tuvaletten geri çıkar. (tuvalete giderken destek için yürüteç veya baston kullanabilir ve gece alt bezi veya üriner kateter kullanabilir)","Transfer — Herhangi bir yardımcı olmadan yataktan sandalyeye veya sandalyeden yatağa geçebilir (baston veya yürüteç kullanabilir)","Kontinans — İdrara çıkma ve dışkılamayı kısmi de olsa bir kaçırma olmadan tamamen kendisi kontrol eder","Beslenme — Yardım almadan kendi kendine beslenir (etini kesme veya ekmeğine tereyağı sürmeye yardım edilmesi haricinde)"],"full":"GYA: 6 sorunun tam ifadeleri","options":[[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]]],"scoreOptions":[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]]},{"id":"iadl","tr":"EGYA — Enstrümantal Günlük Yaşam Aktiviteleri","max":8,"choices":[[1,"Bağımsız / Independent"],[0,"Bağımlı / Dependent"]],"items":["A. Telefonu Kullanabilme","B. Alış-veriş","C. Yemek Hazırlama","D. Ev Temizliği","E. Çamaşır","F. Yolculuk","G. İlaçlarını Kullanabilme Sorumluluğu","H. Mali İşler"],"full":"EGYA: 8 sorunun tam ifadeleri","options":[[[0,"Telefonu rahatlıkla kullanabilir"],[1,"Birkaç iyi bilinen numarayı çevirebilir"],[2,"Telefona cevap verir fakat arayamaz"],[3,"Telefonu hiç kullanamaz"]],[[0,"Tüm alış-verişlerini bağımsız olarak kendisi yapar"],[1,"Küçük alış-verişlerini kendisi yapar"],[2,"Tüm alış-verişlerinde yardıma ihtiyaç duyar"],[3,"Alış-veriş yapamaz"]],[[0,"Yeteri kadar yemeği planlar, hazırlar ve servis edebilir"],[1,"Kullanılacak malzeme sağlanırsa yeteri kadar yemek hazırlayabilir"],[2,"Hazır yemeği ısıtır ve servis eder veya yemek hazırlar ancak yeterli diyeti sağlayamaz"],[3,"Yemeğin hazırlanma ve servis edilmesine ihtiyacı vardır"]],[[0,"Yalnız başına veya nadir destekle evin üstesinden gelir"],[1,"Bulaşık yıkama, yatak yapma gibi günlük hafif işleri yapabilir"],[2,"Günlük hafif işleri yapar ancak yeterli temizliği sağlayamaz"],[3,"Tüm ev idame işlerinde yardıma ihtiyaç duyar"]],[[0,"Kişisel çamaşırını tamamen kendisi yıkar"],[1,"Çorap, mendil gibi küçük malzemelerini yıkayabilir"],[2,"Tüm çamaşır işi başkaları tarafından halledilmek zorundadır"]],[[0,"Toplu taşıma araçlarından bağımsız olarak faydalanır veya kendi arabasını kullanır"],[1,"Taksiye biner, toplu taşıma araçlarını kullanamaz"],[2,"Başkalarının yardımı ile toplu taşımadan faydalanabilir"],[3,"Yolculuğu başkalarının yardımı ile taksi/otomobille sınırlıdır"],[4,"Yolculuk yapamaz"]],[[0,"İlaçlarını zamanında ve belirtilen dozda alabilir"],[1,"İlaçları önceden dozlarına ayrılmış olarak hazırlanırsa düzenli kullanabilir"],[2,"İlaçlarını kendi başına düzenli kullanamaz"]],[[0,"Bağımsız olarak tüm mali işlerinin üstesinden gelebilir"],[1,"Günlük mali işlerini halleder ancak büyük mali işlerde ve banka işlerinde yardıma ihtiyaç duyar"],[2,"Mali işlerini takip edemez"]]],"scoreOptions":[[1,1,1,0],[1,0,0,0],[1,0,0,0],[1,1,1,0],[1,1,0],[1,1,1,1,0],[1,0,0],[1,1,0]]},{"id":"frail","tr":"FRAIL — Kırılganlık","max":5,"choices":[[0,"Hayır / No"],[1,"Evet / Yes"]],"items":["Yorgunluk / Fatigue","10 basamak merdiven çıkmada zorluk / Resistance","200 m yürümekte zorluk / Ambulation","Şu 11 hastalıktan 5’ten fazlası / Illnesses","Son yılda ≥%5 kilo kaybı / Weight loss"],"full":"0: robust, 1–2: prefrail, 3–5: frail"},{"id":"sarcf","tr":"SARC-F — Sarkopeni Taraması","max":10,"choices":[[0,"Zorluk yok / None"],[1,"Biraz / Some"],[2,"Çok / Severe"]],"items":["5 kg kaldırma / Strength","Oda içinde yürüme / Walking","Sandalyeden kalkma / Chair transfer","10 basamak merdiven / Stairs","Son bir yılda düşme / Falls (0 none, 1 1–3, 2 ≥4)"],"full":"≥4: sarcopenia screening positive"},{"id":"sof","tr":"SOF — Kırılganlık","max":3,"choices":[[0,"Hayır / No"],[1,"Evet / Yes"]],"items":["3 yılda ≥%5 kilo kaybı / Weight loss","5 kez otur-kalk yapamama / Unable to complete chair stands","Enerji dolu hissetmiyor / Low energy"],"full":"0 robust, 1 prefrail, 2–3 frail"},{"id":"mna","tr":"MNA-SF — Kısa Nütrisyonel Değerlendirme","max":14,"choices":null,"items":["Son 3 ay besin alımında azalma / Reduced food intake","Son 3 ay kilo kaybı / Weight loss","Mobilite / Mobility","Akut hastalık veya psikolojik stres / Acute illness or stress","Nöropsikolojik sorun / Neuropsychological problems","BKİ veya baldır çevresi puanı / BMI or calf score"],"options":[[[0,"Ciddi / Severe"],[1,"Orta / Moderate"],[2,"Yok / None"]],[[0,">3 kg"],[1,"Bilinmiyor / Unknown"],[2,"1–3 kg"],[3,"Yok / None"]],[[0,"Yatağa / sandalyeye bağımlı"],[1,"Ev dışına çıkamıyor"],[2,"Dışarı çıkabiliyor"]],[[0,"Evet / Yes"],[2,"Hayır / No"]],[[0,"Ciddi / Severe"],[1,"Hafif / Mild"],[2,"Yok / None"]],[[0,"BMI <19 / CC <31 cm"],[1,"BMI 19–<21"],[2,"BMI 21–<23"],[3,"BMI ≥23 / CC ≥31 cm"]]],"full":"0–7 malnutrition, 8–11 risk, 12–14 normal"}],texts={"tr":{"title":"Kapsamlı Geriatrik Değerlendirme","sub":"İTF KGD formu · Dijital çalışma prototipi","home":"← Ana sayfa","warning":"Yalnızca eğitim / demo amaçlıdır. GitHub Pages güvenli hasta kayıt sistemi değildir: ad, TC kimlik numarası, telefon veya tanımlanabilir klinik veri girmeyiniz. Girdi sunucuya gönderilmez; sayfa yenilenince silinir.","intro":"Bu ilk sürüm formun seçilmiş puanlanan alanlarını dijitalleştirir: GYA, EGYA, FRAIL, SARC-F, SOF ve MNA-SF. Diğer alanlar için özet girişleri vardır. Tam 8 sayfalık KGD formunun yerini henüz almaz.","details":"Anonim değerlendirme notları","measure":"Diğer ölçümler ve klinik değerlendirme","print":"Hasta için özet hazırla / Yazdır","clear":"Sıfırla","summary":"Kapsamlı Geriatrik Değerlendirme Özeti","date":"Tarih","completed":"Tamamlanan testler","missing":"Eksik testler","domains":"Ölçekte zorlanılan alanlar","meaning":"Yorum","none":"Belirtilen alanlarda puan kaybı yok.","incomplete":"Eksik — sonuç hesaplanmadı","general":"Bu özet tanı koymaz ve hekim değerlendirmesinin yerini almaz. Hasta ile paylaşılmadan önce tüm veriler ve yorumlar klinisyen tarafından kontrol edilmelidir.","pnote":"Hastanın adı veya kimlik numarası bu taslak sistemde istenmez. Rapor yazdırılırken tarayıcı yazdırma penceresinden yerel PDF seçilebilir.","labels":["Boy (cm)","Kilo (kg)","El kavrama (kg)","Yürüme hızı (m/sn)","TUG (sn)","SPPB (/12)","Chair stand (sn)","MMSE (/30)","GDS (/30)","Saat çizme (/5)","İlaç sayısı","Kısa klinik not (tanımlayıcı bilgi kullanmayın)"]}};const $=id=>document.getElementById(id);
 const comprehensive=[["1. Sosyal ve Kişisel Öykü",["Hasta Adı Soyadı","TC No","KGD Tarihi","Doğum Tarihi","Cinsiyet","Tel No","Eğitim Durumu","Medeni Durum","Kimle Yaşıyor","Ev Halkı Sayısı","Nerede Yaşıyor","Desteğe İhtiyaç?","Destek Veren?","Yaşlılık kaç yaşında başlar?"]],["Fiziksel Ölçümler ve Performans",["Boy (cm)","Kilo (kg)","BIAyağ (%)","BIAkas(FFM) (kg)","BIAbasal (kcal)","BKİ (kg/m²)","FAS (/5)","TUG (sn)","OYH (m/sn)","OYH’ın yaşıt sağlıklılardan düşük olduğunu düşünüyor mu?","El Kavrama Kuvveti (kg)","El kavrama kuvvetinin yaşıt sağlıklılardan düşük olduğunu düşünüyor mu?","Üst Kol (cm)","Bel (cm)","Kalça (cm)","Baldır (cm)","Chair Stand (sn)","Romberg","Postural İnstabilite","SPPB: 1a (/1)","SPPB: 1b (/1)","SPPB: 1c (/2)","SPPB: 2 (/4)","SPPB: 3 (/4)","SPPB: Toplam (/12)","Muhtemel SARKOPENİ","Kesin SARKOPENİ","Ciddi Sarkopeni"]],["4. Fiziksel Aktivite, Düşme ve Kırık",["Fiziksel Aktivite?","Tür?","Süre (dk)?","Geçtiğimiz hafta içinde fiziksel aktivite düzeyinizin yaşıt sağlıklılardan daha düşük olduğunu düşünüyor musunuz?","Yürüme/mobilizasyon için yardımcı cihaz?","Yardımcı cihaz türü","Son 1 yıl içinde düştü mü?","Defa/yıl","Düşme tanımı, zamanı, sonucu","Düşme korkusu var mı?","Düşme korkusu GYA’yı olumsuz etkiliyor mu?","Son 1 yıl içinde hastane yatışı?","Son 3 yıl içinde hastane yatışı?","Yaşıtlarınıza göre kendinizi daha fazla yorgun, bitkin, halsiz hissediyor musunuz?","Hiç Kırık Oldu mu?","Düşük Enerjili / Yüksek Enerjili","Kırık zamanı","Kırık bölgesi"]],["3. Görme ve İşitme Problemleri",["Sigara?","Sigara paket-yıl","Alkol?","Gözlük","Glokom","Katarakt","Son 1 yıl içinde göz muayenesi oldu mu?","Görme sorunu var mı?","Gazete okuma?","TV İzleme?","Telefonda konuşabiliyor mu?","Son 1 yıl içinde KBB muayenesi oldu mu?","İşitme sorunu var mı?","Yardımcı işitme cihazı kullanıyor mu?"]],["5. Beslenme, Kronik Ağrı ve Uyku",["Son 3 Ay Kilo Kaybı","3 ay kg","Son 6 Ay Kilo Kaybı","6 ay kg","Son 1 Yıl Kilo Kaybı","1 yıl kg","Çiğneme sorunu?","Özel Diyet?","Kaçırdığı Öğün?","Yutma sorunu?","Gıdaları yutarken zorluk çekiyor musunuz?","KRONİK AĞRI (en az 3-6 ay boyunca devam eden)?","Kronik Ağrının Kaynağı","VAS (0–10)","Koopere Değilse Ağrı Şiddeti","SGA’ya göre Kas Kütlesi","IPSS","Uyku sorununuz var mı?","Yetersiz uyku / Fazla uyuma"]],["6. Uyku, Boşaltım ve Yakınmalar",["REM Uykusu Davranış Bozukluğu?","Uykuda agresif hareketler","Canlı rüya-kâbus şeklinde görme","Uykuda konuşma: bağırma-çağırma","Obstrüktif Uyku Apne: HORLAMA","Obstrüktif Uyku Apne: APNE","Terleme","Nokturi","Yorgun uyanma","Gündüz uyku isteği","Huzursuz Bacak Sendromu?","Gece yoğun","Hareketle azalıyor","Huzursuz Bacak semptom tarifi","John Hopkins Skalası","Üriner İnkontinans?","Akut / kronik","Sıklığı (gün)","Tedavi gördü mü?","Yetişememe / Stres / Taşma / Fonksiyonel / Mixt","Fekal İnkontinans?","Fekal inkontinans sıklığı","Konstipasyon?","Seksüel disfonksiyon?","Cinsel İsteksizlik","Erektil Disfonksiyon"]],["2. Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar",["Osteoartrit GYA'yı olumsuz etkiliyor mu?","İlaç Sayısı","Hastalık Sayısı","Aritmi","Demans","Depresyon","Dislipidemi (DL)","Diyabet (DM)","Hipertansiyon (HT)","Hipotiroidi","İskemik Kalp Hastalığı (İKH)","Konjestif Kalp Yetmezliği (KKY)","Aktif Kanser (Deri Kanseri Hariç)","Kronik Böbrek Hastalığı (KBH)","Osteoartrit (OA)","Osteoporoz (OP)","Serebrovasküler Olay (SVO)","Total Endoprotez","Diğer Hastalıklar","İlaçlar","Soygeçmiş","Saat Çizme Testi Notları"]]],additional=[["MNA-LF (7–18)",["Birisine bağımlı olmadan yaşıyor (hastanede ya da hemşire olan bir evde değil)","Günde 3 adetten fazla reçeteli ilaç alıyor mu?","Deride hassaslık ya da ülser var mı?","Günde kaç öğün tüketiyor?","Protein alımı A) Günde en az 1 porsiyon süt ve süt ürünü B) Haftada 2 porsiyon kuru baklagil/yumurta C) Her gün et-balık/tavuk","Her gün iki ya da daha fazla porsiyon meyve ya da sebze tüketiyor mu?","Günde kaç bardak sıvı alıyor?","Yemek yeme şekli nasıl?","Beslenme durumu ile ilgili şahsi düşüncesi","Aynı yaştaki kişilerle karşılaştırıldığında sağlık durumu","Üst Orta Kol Çevresi (cm)","Baldır Çevresi (cm)"]],["EQ-5D",["A-Hareket","B-Öz - Bakım","C-Olağan Aktiviteler","D-Ağrı / rahatsızlık","E-Anksiyete / Depresyon"]],["Mini-COG",["Kayıt: AYAKKABI","Kayıt: ELMA","Kayıt: KÖPEK","Saat Çizme Testi (/5)","Hatırlama: AYAKKABI","Hatırlama: ELMA","Hatırlama: KÖPEK"]],["MMSE — Standart",["ORYANTASYON: Hangi yıldayız?","Hangi aydayız?","Hangi tarih?","Hangi gündeyiz?","Hangi mevsimdeyiz?","Hangi ülkede yaşıyoruz?","Hangi kentteyiz?","Hangi hastanedeyiz?","Hastanenin hangi bölümündeyiz?","Kaçıncı kattayız?","KAYIT: MAVİ","KAYIT: ŞAHİN","KAYIT: LALE","DİKKAT: 100'den 7 çıkarma, 1","100'den 7 çıkarma, 2","100'den 7 çıkarma, 3","100'den 7 çıkarma, 4","100'den 7 çıkarma, 5","HATIRLAMA: MAVİ","HATIRLAMA: ŞAHİN","HATIRLAMA: LALE","ADLANDIRMA: Saat","ADLANDIRMA: Kalem","TEKRARLAMA: \"O gelmiş olsaydı ben de giderdim\"","Kâğıdı doğru tutuyor","İkiye katlıyor","Yere bırakıyor","YAZI: anlamlı cümle","OKUMA: GÖZLERİNİZİ KAPAYIN","KOPYA: şekli doğru kopyalıyor"]],["MMSE — Eğitimsizler İçin",["Hangi yıldayız?","Hangi aydayız?","Hangi gündeyiz?","Hangi mevsimdeyiz?","Şu an sabah mı, öğle mi, akşam mı?","Hangi ülkede yaşıyoruz?","Hangi kentteyiz?","Bulunduğunuz semtin adı nedir?","Bulunduğunuz bina neresidir?","Kaçıncı kattayız?","KAYIT: MASA","KAYIT: BAYRAK","KAYIT: ELBİSE","DİKKAT: Cuma","Perşembe","Çarşamba","Salı","Pazartesi","HATIRLAMA: MASA","HATIRLAMA: BAYRAK","HATIRLAMA: ELBİSE","ADLANDIRMA: Saat","ADLANDIRMA: Kalem","TEKRARLAMA: \"O gelmiş olsaydı ben de giderdim\"","Kâğıdı doğru tutuyor","İkiye katlıyor","Yere bırakıyor","Anlamlı cümle söyleme","Gözlerinizi Kapayın","KOPYA: şekli doğru kopyalıyor"]]],gds30=["Yaşamınızdan temelde memnun musunuz?","Günlük uğraşı ve ilgilerinizin büyük bölümünü terk ettiniz mi?","Yaşamınızın bomboş olduğunu hissediyor musunuz?","Sık sık canınız sıkılır mı?","Genellikle keyfiniz yerinde midir?","Başınıza kötü bir şey geleceğinden korkuyor musunuz?","Çoğunlukla kendinizi mutlu hissediyor musunuz?","Sık sık kendinizi çaresiz hissediyor musunuz?","Dışarı çıkıp yeni bir şeyler yapmaktansa, evde kalmayı tercih eder misiniz?","Hafızanızın çoğu kişiden zayıf olduğunu hissediyor musunuz?","Sizce şu anda yaşıyor olmak güzel bir şey midir?","Kendinizi şu anki halinizle değersiz hissediyor musunuz?","Kendinizi enerji dolu hissediyor musunuz?","Çözümsüz bir durum içinde bulunduğunuzu düşünüyor musunuz?","Çoğu kişinin sizden daha iyi durumda olduğunu düşünüyor musunuz?","Gelecekten ümitli misiniz?","Kafanızdan atamadığınız düşünceler nedeniyle rahatsızlık duyduğunuz olur mu?","Sık sık huzursuz ve yerinde duramayan birisi olur musunuz?","Sıklıkla gelecekten endişe duyuyor musunuz?","Kendinizi sıklıkla kederli ve hüzünlü hissediyor musunuz?","Geçmiş ile ilgili olarak çokça üzülüyor musunuz?","Yaşamı zevk ve heyecan verici buluyor musunuz?","Yeni projelere başlamak sizin için zor mudur?","Sık sık küçük şeylerden dolayı üzülür müsünüz?","Sık sık kendinizi ağlayacakmış gibi hisseder misiniz?","Dikkatinizi toplamakta güçlük çekiyor musunuz?","Sabahları güne başlamak hoşunuza gidiyor mu?","Sosyal toplantılara katılmaktan kaçınır mısınız?","Karar vermek sizin için kolay oluyor mu?","Zihniniz eskiden olduğu kadar berrak mıdır?"];let moreAnswers={},moreText={},mmseVariant="standard",mmseAttentionMode="subtract";const mnaLFOptions=[[["0 = Hayır",0],["1 = Evet",1]],[["0 = Evet",0],["1 = Hayır",1]],[["0 = Evet",0],["1 = Hayır",1]],[["0 = 1 öğün",0],["1 = 2 öğün",1],["2 = 3 öğün",2]],[["0 = 0–1 evet",0],["0.5 = 2 evet",0.5],["1 = 3 evet",1]],[["0 = Hayır",0],["1 = Evet",1]],[["0 = 3 bardaktan az",0],["0.5 = 3–5 bardak",0.5],["1 = 5 bardaktan fazla",1]],[["0 = Yardımcı olmadan yemek yiyemez",0],["1 = Kendi kendine yiyebiliyor ama zorlanıyor",1],["2 = Sorunsuz bir biçimde kendi kendine yiyor",2]],[["0 = Kendisini iyi beslenmemiş olarak görüyor",0],["1 = Kararsız",1],["2 = Kendisinin beslenme sorunu olmadığını düşünüyor",2]],[["0 = İyi değil",0],["0.5 = Bilmiyor",0.5],["1 = İyi",1],["2 = Çok iyi",2]],[["0 = 21'den az",0],["0.5 = 21–22",0.5],["1 = 22 veya daha fazla",1]],[["0 = 31'den az",0],["1 = 31 veya daha fazla",1]]];const eqOptions=[["Yürürken, hiç bir güçlük çekmiyorum","Yürürken bazı güçlüklerim oluyor","Yatalağım"],["Kendime bakmakta güçlük çekmiyorum","Kendi kendime yıkanırken veya giyinirken bazı güçlüklerim oluyor","Kendi kendime yıkanacak veya giyinebilecek durumda değilim"],["Olağan işlerimi yaparken herhangi bir güçlük çekmiyorum","Olağan işlerimi yaparken bazı güçlüklerim oluyor","Olağan işlerimi yapabilecek durumda değilim"],["Ağrı veya rahatsızlığım yok","Orta derecede ağrı veya rahatsızlığım var","Aşırı derecede ağrı veya rahatsızlığım var"],["Endişeli veya moral bozukluğu içinde değilim","Orta derecede endişeliyim veya moralim bozuk","Aşırı derecede endişeliyim veya moralim çok bozuk"]];const extraIds=["height","weight","hgs","gait","tug","sppb","chair","mmse","gds","clock","meds","notes"];
@@ -504,7 +527,7 @@ function sectionResets(){document.querySelectorAll("#fullFields>section,#section
   const box=$("clinical_3_1")?.closest(".extra-field");if(box)box.hidden=true;
   if(alcoholField)alcoholField.closest(".extra-field").hidden=true;
   syncHistoryCounts();
-}if(sec.id==="form_frail"){frailSelected.clear();frailNone=false;sec.querySelectorAll(".frail-disease-box input").forEach(ch=>ch.checked=false);const count=sec.querySelector("#frailCount");if(count)count.textContent="0 / 11 hastalık · Yanıt bekleniyor"}if(sec.id==="physicalSection"||sec.querySelector("#sarcoState")){syncSarco()}if(sec.querySelector("#eq5dHealthVAS")){delete moreAnswers.eq5dHealthVAS;const slider=$("eq5dHealthVAS");slider.value="50";$("eq5dHealthValue").textContent="— %";sec.querySelector("#eq5dLegacyNote")?.remove()}if(sec.querySelector("#minicogImpairment"))delete moreAnswers.miniCogImpairment;if(sec.id==="clock-assessment"||sec.querySelector("#clock-assessment")){delete moreAnswers.clock;clearClockDrawing();updateMiniClockScore()}if(sec.id==="mmse-assessment"){Object.keys(moreAnswers).filter(k=>k.startsWith("mmse_")).forEach(k=>delete moreAnswers[k]);mmseAttentionMode="subtract";const mode=$("mmseVariantSwitch");if(mode)mode.checked=mmseVariant==="uneducated";const notes=sec.querySelector(":scope > .assessment-notes");sec.querySelectorAll(":scope > .mmse-domain-heading, :scope > .mmse-group").forEach(el=>el.remove());const draft=document.createElement("div");draft.innerHTML=renderMMSEGroups();while(draft.firstChild)sec.insertBefore(draft.firstChild,notes);attachMMSE();};sec.querySelectorAll("[aria-pressed]").forEach(el=>el.setAttribute("aria-pressed","false"));sec.querySelectorAll(".redstar").forEach(el=>el.style.display="");summarize()};bar.appendChild(b)})}
+}if(sec.id==="form_frail"){frailSelected.clear();frailNone=false;sec.querySelectorAll(".frail-disease-box input").forEach(ch=>ch.checked=false);const count=sec.querySelector("#frailCount");if(count)count.textContent="0 / 11 hastalık · Yanıt bekleniyor"}if(sec.id==="physicalSection"||sec.querySelector("#sarcoState")){syncSarco()}if(sec.querySelector("#eq5dHealthVAS")){delete moreAnswers.eq5dHealthVAS;const slider=$("eq5dHealthVAS");slider.value="50";$("eq5dHealthValue").textContent="— %";sec.querySelector("#eq5dLegacyNote")?.remove()}if(sec.querySelector("#minicogImpairment"))delete moreAnswers.miniCogImpairment;if(sec.id==="clock-assessment"||sec.querySelector("#clock-assessment")){delete moreAnswers.clock;clearClockDrawing();updateMiniClockScore()}if(sec.id==="mmse-assessment"){resetMMSEWidgets();Object.keys(moreAnswers).filter(k=>k.startsWith("mmse_")).forEach(k=>delete moreAnswers[k]);mmseAttentionMode="subtract";const mode=$("mmseVariantSwitch");if(mode)mode.checked=mmseVariant==="uneducated";const notes=sec.querySelector(":scope > .assessment-notes");sec.querySelectorAll(":scope > .mmse-domain-heading, :scope > .mmse-group").forEach(el=>el.remove());const draft=document.createElement("div");draft.innerHTML=renderMMSEGroups();while(draft.firstChild)sec.insertBefore(draft.firstChild,notes);attachMMSE();};sec.querySelectorAll("[aria-pressed]").forEach(el=>el.setAttribute("aria-pressed","false"));sec.querySelectorAll(".redstar").forEach(el=>el.style.display="");summarize()};bar.appendChild(b)})}
 
 /* The two MMSE copy tasks are redrawn as vector outlines from the official
    departmental KGD PDF pages 6 (uneducated) and 8 (standard).
@@ -580,9 +603,111 @@ function initClockAttachments(){
 }
 /* MMSE attention test: choose one 5-point method, never add both.
    Primary subtraction answers keep their legacy draft keys. The alternate
-   DÜNYA reverse-letter answers have independent keys, so switching methods
+   DÜNYA spoken reverse-letter answers have independent keys, so switching methods
    does not silently reuse or erase the other method's scores. */
 const mmseWorldLetters=["A","Y","N","Ü","D"];
+
+/* Browser-local copy images, never included in sessionStorage. */
+const mmseCopyImages={standard:null,uneducated:null};
+function mmseCopyUploadPanel(variant){
+ const url=mmseCopyImages[variant];
+ return '<div class="mmse-copy-upload" data-copy-upload="'+variant+'">'+
+ '<label for="mmseCopyFile-'+variant+'">Hastanın kopyaladığı şekli yükle (isteğe bağlı)</label>'+
+ '<p class="optional-note">JPG, PNG veya WebP; en fazla 8 MB. Görsel yalnızca bu sayfada tutulur, taslağa ya da sunucuya kaydedilmez. Kimlik bilgisi içermemelidir.</p>'+
+ '<input type="file" id="mmseCopyFile-'+variant+'" accept="image/jpeg,image/png,image/webp" aria-label="Hastanın kopya çizimi">'+
+ '<img class="mmse-copy-preview" alt="Hastanın kopyaladığı şekil"'+(url?' src="'+safe(url)+'"':"")+(url?"":" hidden")+'>'+
+ '<button type="button" class="mmse-copy-remove" data-remove-copy="'+variant+'"'+(url?"":" hidden")+' >Görseli kaldır</button>'+
+ '<p class="optional-note" data-copy-status="'+variant+'" role="status">'+(url?"Görsel bu sayfada tutuluyor.":"Henüz görsel eklenmedi.")+'</p></div>';
+}
+function updateMMSECopyPreview(variant){
+ const url=mmseCopyImages[variant],input=$("mmseCopyFile-"+variant);
+ const img=document.querySelector('[data-copy-upload="'+variant+'"] .mmse-copy-preview');
+ const remove=document.querySelector('[data-remove-copy="'+variant+'"]');
+ const status=document.querySelector('[data-copy-status="'+variant+'"]');
+ if(input&&!url)input.value="";
+ if(img){if(url)img.src=url;else img.removeAttribute("src");img.hidden=!url;}
+ if(remove)remove.hidden=!url;
+ if(status)status.textContent=url?"Görsel taslağa veya sunucuya kaydedilmez.":"Henüz görsel eklenmedi.";
+}
+function clearMMSECopyImage(variant){
+ if(!Object.hasOwn(mmseCopyImages,variant))return;
+ if(mmseCopyImages[variant])URL.revokeObjectURL(mmseCopyImages[variant]);
+ mmseCopyImages[variant]=null;
+ updateMMSECopyPreview(variant);
+}
+function handleMMSECopyImage(variant,file){
+ if(!file||!Object.hasOwn(mmseCopyImages,variant))return;
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)||!file.size||file.size>8*1024*1024){
+  alert("En fazla 8 MB boyutunda JPG, PNG veya WebP dosyası seçiniz.");
+  const input=$("mmseCopyFile-"+variant);if(input)input.value="";
+  return;
+ }
+ clearMMSECopyImage(variant);
+ mmseCopyImages[variant]=URL.createObjectURL(file);
+ updateMMSECopyPreview(variant);
+}
+/* Timer state lives in RAM, not in clinical results or PDF outputs. */
+const mmseTimers=Object.create(null);
+function mmseRemaining(key){
+ const t=mmseTimers[key];
+ return t?(t.running?Math.max(0,t.until-Date.now()):t.left):0;
+}
+function mmseTimerMarkup(key,seconds){
+ const t=mmseTimers[key],n=t?Math.ceil(mmseRemaining(key)/1000):seconds;
+ const time=String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");
+ return '<div class="mmse-timer" data-mmse-timer="'+key+'" role="group" aria-label="'+seconds+' saniye geri sayım">'+
+ '<output data-mmse-time aria-live="off">'+time+'</output>'+
+ '<button type="button" data-mmse-timer-action="toggle" data-mmse-timer-key="'+key+'">'+(t?.running?"Duraklat":n===0?"Yeniden başlat":"Başlat")+'</button>'+
+ '<button type="button" data-mmse-timer-action="reset" data-mmse-timer-key="'+key+'">Sıfırla</button>'+
+ '<small data-mmse-timer-status></small></div>';
+}
+function refreshMMSETimer(key){
+ const t=mmseTimers[key];if(!t)return;
+ let n=Math.ceil(mmseRemaining(key)/1000);
+ if(t.running&&n<=0){clearInterval(t.tick);t.tick=null;t.running=false;t.left=0;n=0;}
+ const root=document.querySelector('[data-mmse-timer="'+key+'"]');if(!root)return;
+ const output=root.querySelector("[data-mmse-time]");
+ if(output)output.textContent=String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");
+ const toggle=root.querySelector('[data-mmse-timer-action="toggle"]');
+ if(toggle)toggle.textContent=t.running?"Duraklat":n===0?"Yeniden başlat":"Başlat";
+ const status=root.querySelector("[data-mmse-timer-status]");
+ if(status)status.textContent=n===0?"Süre doldu":"";
+}
+function actMMSETimer(key,action){
+ const seconds={"writing-standard":30,"copy-standard":60,"copy-uneducated":60}[key];if(!seconds)return;
+ const t=mmseTimers[key]||(mmseTimers[key]={seconds,left:seconds*1000,running:false,until:0,tick:null});
+ if(action==="reset"){if(t.tick)clearInterval(t.tick);t.tick=null;t.running=false;t.left=seconds*1000;}
+ if(action==="toggle"){
+  if(t.running){t.left=mmseRemaining(key);clearInterval(t.tick);t.tick=null;t.running=false;}
+  else{if(t.left<=0)t.left=seconds*1000;t.until=Date.now()+t.left;t.running=true;t.tick=setInterval(()=>refreshMMSETimer(key),200);}
+ }
+ refreshMMSETimer(key);
+}
+function bindMMSEWidgets(){
+ document.querySelectorAll("[data-mmse-timer-action]").forEach(button=>{
+  button.onclick=()=>actMMSETimer(button.dataset.mmseTimerKey,button.dataset.mmseTimerAction);
+ });
+ document.querySelectorAll("[data-mmse-timer]").forEach(node=>{
+  const key=node.dataset.mmseTimer,seconds=key.startsWith("writing")?30:60;
+  if(!mmseTimers[key])mmseTimers[key]={seconds,left:seconds*1000,running:false,until:0,tick:null};
+  refreshMMSETimer(key);
+ });
+ for(const variant of ["standard","uneducated"]){
+  const input=$("mmseCopyFile-"+variant);
+  if(input)input.onchange=()=>handleMMSECopyImage(variant,input.files?.[0]);
+  const remove=document.querySelector('[data-remove-copy="'+variant+'"]');
+  if(remove)remove.onclick=()=>clearMMSECopyImage(variant);
+  updateMMSECopyPreview(variant);
+ }
+}
+function resetMMSEWidgets(){
+ for(const variant of ["standard","uneducated"])clearMMSECopyImage(variant);
+ for(const [key,t] of Object.entries(mmseTimers)){
+  if(t.tick)clearInterval(t.tick);t.tick=null;t.running=false;t.left=t.seconds*1000;
+  refreshMMSETimer(key);
+ }
+}
+
 function mmseAnswerKey(i,variant=mmseVariant){
  if(variant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18)return "mmse_world_"+(i-13);
  return "mmse_"+variant+"_"+i;
@@ -602,7 +727,7 @@ function mmseClinicianNote(start){
  let note="";
  if(start===10)note="Hastaya üç kelimeyi söyleyiniz. Üçünü de söyledikten sonra hemen tekrarlamasını isteyiniz ve birazdan tekrar soracağınızı belirtiniz.";
  if(start===13)note=standard?(mmseAttentionMode==="world"?
-  "Alternatif dikkat testi: DÜNYA kelimesini tersten yazmasını isteyiniz. Beklenen harf sırası: A – Y – N – Ü – D. Her doğru harfe 1 puan veriniz. İki dikkat testinin puanları birleştirilmez.":
+  "Alternatif dikkat testi: DÜNYA kelimesinin harflerini sondan başa doğru sesli olarak söylemesini isteyiniz. Beklenen harf sırası: A – Y – N – Ü – D. Her doğru harfe 1 puan veriniz. İki dikkat testinin puanları birleştirilmez.":
   "100’den geriye doğru yedi çıkararak devam etmesini isteyiniz. Her doğru işlem için 1 puan veriniz. Bu görev yapılamazsa alternatif DÜNYA testine geçebilirsiniz."):
   "Haftanın günlerini geriye doğru saymasını isteyiniz. Hastanın beş günü sayması gerekir. Örnek: Pazar’dan önce Cumartesi gelir; ondan önce hangi gün gelir?";
  if(start===18)note="Biraz önce söylenen üç kelimeyi sorunuz. Önce serbest hatırlamayı puanlayınız; gerekirse alttaki ipucu ve çoktan seçmeli seçenekleri kullanınız.";
@@ -651,14 +776,16 @@ function mmseAttentionSwitch(){
  return '<div class="mmse-attention-switch" role="group" aria-label="Standart MMSE dikkat testi yöntemi">'+
   '<span class="mmse-attention-label" data-attention-label="subtract">100’den 7 çıkarma</span>'+
   '<label class="mmse-switch-control" for="mmseAttentionSwitch">'+
-  '<input type="checkbox" role="switch" id="mmseAttentionSwitch" aria-label="DÜNYA alternatif dikkat testini seç" '+(mmseAttentionMode==="world"?"checked":"")+'>'+
+  '<input type="checkbox" role="switch" id="mmseAttentionSwitch" aria-label="DÜNYA harflerini tersten sözlü söyleme testini seç" '+(mmseAttentionMode==="world"?"checked":"")+'>'+
   '<span class="mmse-switch-track" aria-hidden="true"></span></label>'+
-  '<span class="mmse-attention-label" data-attention-label="world">DÜNYA — tersten yazma</span>'+
+  '<span class="mmse-attention-label" data-attention-label="world">DÜNYA — tersten söyleme</span>'+
   '</div>';
 }
 function mmseQuestionLabel(q,i){
  if(mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18)return mmseWorldLetters[i-13];
- return q.replace(/^(?:ORYANTASYON|KAYIT|DİKKAT|HATIRLAMA|ADLANDIRMA|TEKRARLAMA|ANLAMA|YAZI|OKUMA|KOPYA):\s*/u,"");
+ const label=q.replace(/^(?:ORYANTASYON|KAYIT|DİKKAT|HATIRLAMA|ADLANDIRMA|TEKRARLAMA|ANLAMA|YAZI|OKUMA|KOPYA):\s*/u,"");
+ if(mmseVariant==="standard"&&mmseAttentionMode==="subtract"&&i>=13&&i<18)return label+" ("+[93,86,79,72,65][i-13]+")";
+ return label;
 }
 function renderMMSEGroups(){
  const list=additional[mmseVariant==="standard"?3:4][1];
@@ -682,7 +809,7 @@ function renderMMSEGroups(){
    const i=start+offset,key=mmseAnswerKey(i),observation="response_"+key;
    const wordMode=mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18;
    const showObservation=!wordMode&&!((i>=10&&i<=12)||(i>=18&&i<=22)||(i>=24&&i<=26)||i===28||i===29);
-   const isLongResponse=i===23||(i===27&&mmseVariant==="standard");
+   const isLongResponse=i===23||i===27;
    const label=(i+1)+'. '+safe(mmseQuestionLabel(q,i));
    return '<div class="mmse-question">'+
     '<label '+(showObservation?'for="'+observation+'"':'')+'>'+label+
@@ -690,11 +817,12 @@ function renderMMSEGroups(){
     (showObservation?(isLongResponse?'<textarea class="mmse-long-answer" id="'+observation+'" rows="2" placeholder="Hastanın yanıtı / Patient response">'+safe(moreText[observation]||"")+'</textarea>':'<input type="text" id="'+observation+'" placeholder="Hastanın yanıtı / Patient response" value="'+safe(moreText[observation]||"")+'">'):"")+
     '<div class="simple-choice"><button type="button" data-mmse="'+key+'" data-v="0" aria-pressed="'+(moreAnswers[key]==="0")+'">0</button>'+
     '<button type="button" data-mmse="'+key+'" data-v="1" aria-pressed="'+(moreAnswers[key]==="1")+'">1</button></div>'+
-    (i===29?mmseCopyPrompt(mmseVariant):i===28&&mmseVariant==="standard"?mmseReadPrompt():"")+
+    (i===29?mmseCopyPrompt(mmseVariant)+mmseCopyUploadPanel(mmseVariant):i===28&&mmseVariant==="standard"?mmseReadPrompt():"")+
    '</div>';
   }).join("");
+  const timer=start===29?mmseTimerMarkup("copy-"+mmseVariant,60):start===27&&mmseVariant==="standard"?mmseTimerMarkup("writing-standard",30):"";
   return (language?'<h3 class="mmse-domain-heading">DİL</h3>':"")+
-   '<div class="mmse-group'+gridClass+'"'+ident+'><h3>'+name+'</h3>'+
+   '<div class="mmse-group'+gridClass+'"'+ident+'><div class="mmse-group-heading"><h3>'+name+'</h3>'+timer+'</div>'+
    (start===13?mmseAttentionSwitch():"")+mmseClinicianNote(start)+
    '<div class="mmse-items">'+questions+'</div>'+
    (start===18?mmseRecallAids():"")+'</div>';
@@ -796,7 +924,7 @@ function attachMMSE(){
   document.querySelectorAll("[data-clock]").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));
   updateMiniClockScore();summarize();
  });
- const captureMMSEText=()=>document.querySelectorAll("#mmse-assessment .mmse-question input,#mmse-assessment .mmse-question textarea").forEach(x=>moreText[x.id]=x.value);
+ const captureMMSEText=()=>document.querySelectorAll('#mmse-assessment .mmse-question input[type="text"],#mmse-assessment .mmse-question textarea').forEach(x=>moreText[x.id]=x.value);
  const toggle=$("mmseVariantSwitch");
  if(toggle)toggle.onchange=()=>{
   captureMMSEText();
@@ -858,9 +986,10 @@ function attachMMSE(){
   }
   summarize();writeKGDDraft();
  });
- document.querySelectorAll("#mmse-assessment .mmse-question input,#mmse-assessment .mmse-question textarea,#mmse-assessment textarea,#clock-notes,#minicog-notes").forEach(el=>el.oninput=()=>{
+ document.querySelectorAll('#mmse-assessment .mmse-question input[type="text"],#mmse-assessment .mmse-question textarea,#mmse-assessment textarea,#clock-notes,#minicog-notes').forEach(el=>el.oninput=()=>{
   moreText[el.id]=el.value;summarize();writeKGDDraft();
  });
+ bindMMSEWidgets();
 }
 const demographics={0:{type:"text",label:"Hastanın Adı Soyadı"},1:{type:"text",label:"TC No"},2:{type:"date",label:"Tarih"},3:{type:"date",label:"Doğum Tarihi",age:true},4:{type:"buttons",options:["Kadın","Erkek"]},5:{type:"tel"},6:{type:"select",options:["Okur-yazar değil","Okur-yazar","İlkokul","Ortaokul","Lise","Ön lisans","Üniversite","Yüksek lisans","Doktora","Diğer"]},7:{type:"select",options:["Evli","Bekâr","Boşanmış","Dul"]},8:{type:"text"},9:{type:"number"},10:{type:"buttons",options:["Ev","Huzurevi","Bakımevi","Diğer"]},11:{type:"buttons",options:["Yok","Var"]},12:{type:"buttons",options:["Yok","Var"]},13:{type:"number"}};
 function structuredField(j,i,label,key){const setting=j===0?demographics[i]:null;const basic=(type,extra="")=>'<input class="structured-input" type="'+type+'" id="'+key+'" value="'+safe(moreText[key]||"")+'" '+extra+'>';if(j===0){if(i===2||i===3)return '<input class="structured-input date-text" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="gg.aa.yyyy" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===5)return '<input class="structured-input tel-text" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="0 (___) ___ ____" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===4)return '<div class="simple-choice gender-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+o+'" aria-pressed="'+(moreText[key]===o)+'">'+(o==="Kadın"?"♀ ":"♂ ")+o+'</button>').join("")+'</div>';if(setting?.type==="buttons")return '<div class="simple-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+safe(o)+'" aria-pressed="'+(moreText[key]===o)+'">'+safe(o)+'</button>').join("")+'</div>';if(setting?.type==="select")return '<select class="structured-input" id="'+key+'"><option value="">Seçiniz…</option>'+setting.options.map(o=>'<option '+(moreText[key]===o?"selected":"")+'>'+safe(o)+'</option>').join("")+'</select>';if(setting?.age)return basic("date",'max="'+new Date().toISOString().slice(0,10)+'"')+'<output class="calculated" id="ageOut"></output>';return basic(setting?.type||"text")}
@@ -1185,7 +1314,7 @@ item("11. Mini-COG ve Saat Çizme",[["Kayıt (3 tekrar)",miniCogMemoryScore([0,1
 const qlist=(mmseVariant==="uneducated"?additional[4][1]:additional[3][1]).map((label,i)=>mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18?mmseWorldLetters[i-13]:label);
 const mvals=mmseActiveValues();
 const mtotal=mvals.some(v=>v===undefined)?null:mvals.reduce((n,v)=>n+Number(v),0);
-item("12. MMSE — "+(mmseVariant==="uneducated"?"Eğitimsizler İçin":"Standart"),[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA (tersten yazma)":"100’den 7 çıkarma"):"Haftanın günlerini tersten sayma"],["MMSE Puanı",mtotal===null?"__":mtotal+"/30"+(mtotal>=24?" (normal)":" (normalin altında)")],...qlist.map((label,i)=>{const answerKey=mmseAnswerKey(i);return [(i+1)+". "+label,mvals[i]===undefined?"__":mvals[i]+" puan"+(moreText["response_"+answerKey]?" — "+moreText["response_"+answerKey]:"")]}),["Hatırlama — Ek Notlar",moreText["mmse-recall-notes-"+mmseVariant]],["MMSE Ek Notlar",moreText["mmse-notes"]]]);
+item("12. MMSE — "+(mmseVariant==="uneducated"?"Eğitimsizler İçin":"Standart"),[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA (tersten söyleme)":"100’den 7 çıkarma"):"Haftanın günlerini tersten sayma"],["MMSE Puanı",mtotal===null?"__":mtotal+"/30"+(mtotal>=24?" (normal)":" (normalin altında)")],...qlist.map((label,i)=>{const answerKey=mmseAnswerKey(i);return [(i+1)+". "+label,mvals[i]===undefined?"__":mvals[i]+" puan"+(moreText["response_"+answerKey]?" — "+moreText["response_"+answerKey]:"")]}),["Hatırlama — Ek Notlar",moreText["mmse-recall-notes-"+mmseVariant]],["MMSE Ek Notlar",moreText["mmse-notes"]]]);
 const gd=gdsScore();
 item("13. GDS-30 — Duygudurum",[["GDS-30 Puanı",gd===null?"__":gd+"/30"+(gd<=10?" (normal)":gd<=13?" (olası depresyon)":" (pozitif tarama)")],...gds30.map((q,i)=>[(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?"__":moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"])]);
 const phys=clinical(1).map(([label,value],i)=>[label,i===5?document.getElementById("bmiOut")?.textContent:value]);
@@ -1519,7 +1648,7 @@ function kgdDetailedPrintStep(step){
   const wordIndices=[0,1,2,4,5,6];
   const words=wordIndices.map(i=>[additional[2][1][i],kgdPrintPresent(moreAnswers["additional_2_"+i])?moreAnswers["additional_2_"+i]+" puan":null]);
   const questions=additional[mmseVariant==="standard"?3:4][1];
-  const mmseEntries=[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA — tersten yazma":"100’den 7 çıkarma"):"Haftanın günlerini geriye sayma"],["MMSE toplam",kgdMMSEPrintScore()]];
+  const mmseEntries=[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA — tersten söyleme":"100’den 7 çıkarma"):"Haftanın günlerini geriye sayma"],["MMSE toplam",kgdMMSEPrintScore()]];
   const recallNames=mmseVariant==="standard"?["Mavi","Şahin","Lale"]:["Masa","Bayrak","Elbise"];
   const recallLabels={free:"Kendiliğinden",hint:"İpucu ile",multiple:"Çoktan seçmeli"};
   recallNames.forEach((name,index)=>{
@@ -1534,13 +1663,14 @@ function kgdDetailedPrintStep(step){
     if(kgdPrintPresent(score)||kgdPrintPresent(written))mmseEntries.push([(i+1)+". "+q,(kgdPrintPresent(score)?score+" puan":"puan girilmedi")+(kgdPrintPresent(written)?" — Yanıt: "+written:"")]);
   });
   const img=clockDrawingObjectURL?'<section class="kgd-detail-section"><h3>Hastanın Saat Çizimi</h3><img class="uploaded-clock-report" src="'+safe(clockDrawingObjectURL)+'" alt="Hastanın saat çizimi"></section>':"";
+  const copyPhoto=mmseCopyImages[mmseVariant]?'<section class="kgd-detail-section"><h3>Hastanın Kopya Çizimi — '+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+' MMSE</h3><img class="mmse-copy-patient-image" src="'+safe(mmseCopyImages[mmseVariant])+'" alt="Hastanın kopyaladığı şekil"></section>':"";
   return kgdDetailedBlock("Mini-COG",[
     ["Kayıt (3 tekrar)",miniCogMemoryScore([0,1,2])],
     ["Saat Çizme",kgdPrintPresent(moreAnswers.clock)?moreAnswers.clock+"/5":null],
     ["Hatırlama",miniCogMemoryScore([4,5,6])],...words,
     ["Mini-COG’a Göre Kognitif Bozukluk",moreAnswers.miniCogImpairment],
     ["Saat notları",moreText["clock-notes"]],["Mini-COG ek notları",moreText["minicog-notes"]]
-   ])+kgdDetailedBlock("MMSE — "+(mmseVariant==="standard"?"Standart":"Eğitimsizler İçin"),mmseEntries.concat([["MMSE ek notlar",moreText["mmse-notes"]]]))+img;
+   ])+kgdDetailedBlock("MMSE — "+(mmseVariant==="standard"?"Standart":"Eğitimsizler İçin"),mmseEntries.concat([["MMSE ek notlar",moreText["mmse-notes"]]]))+img+copyPhoto;
  }
  if(step===8){
   const responses=gds30.map((q,i)=>{
