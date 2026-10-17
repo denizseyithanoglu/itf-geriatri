@@ -1,0 +1,32 @@
+name: KGD JavaScript and print checks
+on:
+  pull_request:
+    paths:
+      - 'tools/kgd.html'
+      - '.github/workflows/kgd-validation.yml'
+  push:
+    paths:
+      - 'tools/kgd.html'
+      - '.github/workflows/kgd-validation.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check KGD inline JavaScript syntax and print controls
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          import vm from 'node:vm';
+          import assert from 'node:assert/strict';
+          const src=readFileSync('tools/kgd.html','utf8');
+          const scripts=[...src.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)];
+          assert.ok(scripts.length>0,'KGD script must exist');
+          for(const [i,m] of scripts.entries())new vm.Script(m[1],{filename:'kgd-'+i+'.js'});
+          for(const id of ['wizardPrintSection','wizardPrintSectionDetailed','printFinal','printFinalDetailed','printSheet'])
+            assert.ok(src.includes('id="'+id+'"'),'Missing button/print element: '+id);
+          for(const method of ['kgdMMSEPrintScore','kgdScalePrintScore','kgdDetailedPrintStep','kgdShortPrintStep','printKGD'])
+            assert.ok(src.includes('function '+method),'Missing print function: '+method);
+          assert.ok(src.includes('n>5?"1":"0"'),'FRAIL illness threshold must match attached KGD PDF');
+          console.log('KGD JS syntax, printing entrypoints, and FRAIL rule: OK');
+          NODE
