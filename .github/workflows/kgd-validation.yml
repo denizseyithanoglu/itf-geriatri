@@ -54,7 +54,7 @@ jobs:
           assert.equal(ctx.kgdScalePrintScore('iadl'),'6/8 (-1 çamaşır, -1 yolculuk)');
           provide('frail',[1,0,0,0,0]);
           assert.equal(ctx.kgdScalePrintScore('frail'),'1/5 (pre-frail)');
-          provide('mna',[2,3,2,1,2,3]);
+          provide('mna',[2,3,2,2,2,3]);
           assert.equal(ctx.kgdScalePrintScore('mna'),'14/14 (normal)');
           for(let i=0;i<30;i++)ctx.moreAnswers['mmse_standard_'+i]='1';
           ctx.moreAnswers.mmse_standard_0='0';
