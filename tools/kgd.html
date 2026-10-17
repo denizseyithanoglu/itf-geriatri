@@ -142,6 +142,75 @@
   height:64px;
   min-height:64px;
 }
+/* Görme ve İşitme: requested row order, same Evet/Hayır card design as diseases. */
+#fullFields > section.supplement[data-clinical-index="6"] .history-sensory-row{
+  display:grid;
+  gap:12px;
+  width:100%;
+  margin:12px 0;
+  align-items:stretch;
+}
+#fullFields > section.supplement[data-clinical-index="6"] .history-vision-four{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+#fullFields > section.supplement[data-clinical-index="6"] .history-vision-three{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+#fullFields > section.supplement[data-clinical-index="6"] .history-hearing-two{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+#fullFields > section.supplement[data-clinical-index="6"] .history-sensory-row > .extra-field{
+  min-width:0;
+  margin:0;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  border:1px solid #d8e7dc;
+  background:#fcfefd;
+  border-radius:8px;
+}
+#fullFields > section.supplement[data-clinical-index="6"] .history-sensory-row > .extra-field > label{
+  flex:1 0 auto;
+  display:block;
+  min-height:0;
+  margin:0 0 11px;
+  font-size:.9rem;
+  line-height:1.4;
+  font-weight:650;
+  overflow-wrap:break-word;
+}
+#fullFields > section.supplement[data-clinical-index="6"] .history-sensory-row .simple-choice{
+  width:100%;
+  margin-top:auto;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+#fullFields > section.supplement[data-clinical-index="6"] .history-sensory-row .simple-choice button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-width:0;
+  min-height:43px;
+  padding:8px 5px;
+  margin:0;
+  font-size:.82rem;
+  line-height:1.2;
+  white-space:nowrap;
+  box-sizing:border-box;
+}
+@media(max-width:900px){
+  #fullFields > section.supplement[data-clinical-index="6"] .history-vision-four,
+  #fullFields > section.supplement[data-clinical-index="6"] .history-vision-three{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:580px){
+  #fullFields > section.supplement[data-clinical-index="6"] .history-sensory-row{
+    grid-template-columns:1fr;
+  }
+}
 @media(max-width:850px){
   #fullFields > section.supplement[data-clinical-index="6"] .history-disease-grid{
     grid-template-columns:repeat(2,minmax(0,1fr));
@@ -369,10 +438,12 @@ const fracture=historyBox("extra-field");
  const alcoholWrap=historyBox("history-habit-pair");alcoholWrap.append(alcohol,alcoholQuantity);
  habitGrid.append(smokeWrap,alcoholWrap);
  const visibleHabits=()=>{pack.hidden=moreText.clinical_3_0!=="Evet";alcoholQuantity.hidden=moreText.clinical_3_2!=="Evet"};
- const visionBlock=historyBox("history-subsection history-vision");visionBlock.innerHTML="<h3>Görme ve İşitme</h3>";
- const visionGrid=historyBox("merged-clinical-fields");
- historyItems.slice(3).forEach(el=>visionGrid.appendChild(el));visionBlock.appendChild(visionGrid);
- history.append(diagnoses,other,meds,count,family,habits,visionBlock);
+ const sensoryRow=(kind,indices)=>{const row=historyBox("history-sensory-row "+kind);indices.forEach(i=>row.appendChild(historyItems[i]));return row};
+ const visionBlock=historyBox("history-subsection history-vision");visionBlock.innerHTML="<h3>Görme</h3>";
+ visionBlock.append(sensoryRow("history-vision-four",[3,4,5,6]),sensoryRow("history-vision-three",[7,8,9]));
+ const hearingBlock=historyBox("history-subsection history-hearing");hearingBlock.innerHTML="<h3>İşitme</h3>";
+ hearingBlock.append(sensoryRow("history-hearing-two",[10,11]),sensoryRow("history-hearing-two",[12,13]));
+ history.append(diagnoses,other,meds,count,family,habits,visionBlock,hearingBlock);
  history.addEventListener("click",event=>{
    const btn=event.target.closest("[data-history-choice]");if(!btn)return;
    const key=btn.dataset.historyChoice;moreText[key]=btn.dataset.historyValue;
@@ -395,7 +466,7 @@ const fracture=historyBox("extra-field");
  renderMedicationRows();visibleHabits();syncHistoryCounts();
  if(typeof wizardReady!=="undefined"&&wizardReady)showWizardStep(wizardStep);
 }
-function fullRender(){if(moreText.clinical_6_21&&!moreText["clock-notes"])moreText["clock-notes"]=moreText.clinical_6_21;delete moreText.clinical_6_21;if(!moreText.clinical_0_2)moreText.clinical_0_2=localKGDToday();const historyYesNo=new Set([0,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);const binary=x=>/var mı|oldu mu|düşünüyor mu|kullanıyor mu|mu\\?|mı\\?|mi\\?|mü\\?|^Gözlük$|^Glokom$|^Katarakt$|^DM$|^HT$|^KBH$|^OA$|^SVO$|^Aritmi$|^Demans$|^Depresyon$/i.test(x);const es=x=>safe(x);$("fullFields").innerHTML=comprehensive.map((sec,j)=>'<section class="supplement" data-clinical-index="'+j+'"><h2>'+es(sec[0])+'</h2>'+sec[1].map((label,i)=>{const key="clinical_"+j+"_"+i;return '<div class="extra-field"><label for="'+key+'">'+es(label)+'</label>'+(j===0||j===1&&!binary(label)?structuredField(j,i,label,key):(j===6?historyYesNo.has(i):binary(label))?'<div class="simple-choice" id="'+key+'"><button type="button" data-key="'+key+'" data-answer="Hayır" aria-pressed="'+(moreText[key]==="Hayır")+'">Hayır</button><button type="button" data-key="'+key+'" data-answer="Evet" aria-pressed="'+(moreText[key]==="Evet")+'">Evet</button></div>':'<textarea id="'+key+'" rows="1">'+es(moreText[key]||"")+'</textarea>')+'</div>'}).join("")+'</section>').join("");arrangePhysical();arrangeDemographics();$("extraScales").innerHTML=additional.filter((sec,j)=>j<3).map((sec,j)=>'<section class="supplement"><h2>'+es(sec[0])+'</h2><p class="optional-note">Madde işaretleme — klinik değerlendirme ve doğrulama gerektirir.</p>'+sec[1].map((q,i)=>simpleQuestion("additional_"+j+"_"+i,q,j===0?mnaLFOptions[i]:j===1?eqOptions[i].map((x,n)=>[(n+1)+" — "+x,n+1]):[["0",0],["1",1]])).join("")+'</section>').join("");$("extraScales").insertAdjacentHTML("beforeend",renderClockAndMMSE());$("fullGds").innerHTML='<section class="supplement"><h2>GDS-30 (Geriatrik Depresyon Skalası)</h2><p>Lütfen son bir haftanızda kendinizi nasıl hissettiğinize dair aşağıdaki sorularda uygun olan yanıtı işaretleyiniz.</p>'+gds30.map((q,i)=>simpleQuestion("gds30_"+i,(i+1)+". "+q,(new Set([0,4,6,10,12,15,21,26,28,29]).has(i)?[["Evet (0 puan)",1],["Hayır (1 puan)",0]]:[["Evet (1 puan)",1],["Hayır (0 puan)",0]]))).join("")+'</section>';document.querySelectorAll("#fullFields textarea,#fullFields input,#fullFields select").forEach(x=>x.oninput=()=>{moreText[x.id]=x.value;updateAnthropometry();summarize()});updateAnthropometry();sectionResets();attachMMSE();document.querySelectorAll(".simple-choice button").forEach(b=>b.onclick=()=>{const k=b.dataset.key,v=b.dataset.answer||b.dataset.value;if(b.dataset.answer){moreText[k]=v;if(k==="clinical_0_4")updateAnthropometry()}else moreAnswers[k]=v;b.parentElement.querySelectorAll("button").forEach(y=>y.setAttribute("aria-pressed",String(y===b)));const star=b.parentElement.parentElement.querySelector(".redstar");if(star)star.style.display="none";summarize()});}
+function fullRender(){if(moreText.clinical_6_21&&!moreText["clock-notes"])moreText["clock-notes"]=moreText.clinical_6_21;delete moreText.clinical_6_21;if(!moreText.clinical_0_2)moreText.clinical_0_2=localKGDToday();const historyYesNo=new Set([0,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);const sensoryYesNo=new Set([3,4,5,6,7,8,9,10,11,12,13]);const binary=x=>/var mı|oldu mu|düşünüyor mu|kullanıyor mu|mu\\?|mı\\?|mi\\?|mü\\?|^Gözlük$|^Glokom$|^Katarakt$|^DM$|^HT$|^KBH$|^OA$|^SVO$|^Aritmi$|^Demans$|^Depresyon$/i.test(x);const es=x=>safe(x);$("fullFields").innerHTML=comprehensive.map((sec,j)=>'<section class="supplement" data-clinical-index="'+j+'"><h2>'+es(sec[0])+'</h2>'+sec[1].map((label,i)=>{const key="clinical_"+j+"_"+i;return '<div class="extra-field"><label for="'+key+'">'+es(label)+'</label>'+(j===0||j===1&&!binary(label)?structuredField(j,i,label,key):(j===6?historyYesNo.has(i):j===3?i>2&&sensoryYesNo.has(i)||binary(label):binary(label))?'<div class="simple-choice" id="'+key+'"><button type="button" data-key="'+key+'" data-answer="Hayır" aria-pressed="'+(moreText[key]==="Hayır")+'">Hayır</button><button type="button" data-key="'+key+'" data-answer="Evet" aria-pressed="'+(moreText[key]==="Evet")+'">Evet</button></div>':'<textarea id="'+key+'" rows="1">'+es(moreText[key]||"")+'</textarea>')+'</div>'}).join("")+'</section>').join("");arrangePhysical();arrangeDemographics();$("extraScales").innerHTML=additional.filter((sec,j)=>j<3).map((sec,j)=>'<section class="supplement"><h2>'+es(sec[0])+'</h2><p class="optional-note">Madde işaretleme — klinik değerlendirme ve doğrulama gerektirir.</p>'+sec[1].map((q,i)=>simpleQuestion("additional_"+j+"_"+i,q,j===0?mnaLFOptions[i]:j===1?eqOptions[i].map((x,n)=>[(n+1)+" — "+x,n+1]):[["0",0],["1",1]])).join("")+'</section>').join("");$("extraScales").insertAdjacentHTML("beforeend",renderClockAndMMSE());$("fullGds").innerHTML='<section class="supplement"><h2>GDS-30 (Geriatrik Depresyon Skalası)</h2><p>Lütfen son bir haftanızda kendinizi nasıl hissettiğinize dair aşağıdaki sorularda uygun olan yanıtı işaretleyiniz.</p>'+gds30.map((q,i)=>simpleQuestion("gds30_"+i,(i+1)+". "+q,(new Set([0,4,6,10,12,15,21,26,28,29]).has(i)?[["Evet (0 puan)",1],["Hayır (1 puan)",0]]:[["Evet (1 puan)",1],["Hayır (0 puan)",0]]))).join("")+'</section>';document.querySelectorAll("#fullFields textarea,#fullFields input,#fullFields select").forEach(x=>x.oninput=()=>{moreText[x.id]=x.value;updateAnthropometry();summarize()});updateAnthropometry();sectionResets();attachMMSE();document.querySelectorAll(".simple-choice button").forEach(b=>b.onclick=()=>{const k=b.dataset.key,v=b.dataset.answer||b.dataset.value;if(b.dataset.answer){moreText[k]=v;if(k==="clinical_0_4")updateAnthropometry()}else moreAnswers[k]=v;b.parentElement.querySelectorAll("button").forEach(y=>y.setAttribute("aria-pressed",String(y===b)));const star=b.parentElement.parentElement.querySelector(".redstar");if(star)star.style.display="none";summarize()});}
 function simpleQuestion(key,q,options){return '<div class="extra-field"><label>'+safe(q)+' <span class="redstar">*</span></label><div class="simple-choice">'+options.map(([t,v])=>'<button type="button" data-key="'+key+'" data-value="'+v+'" aria-pressed="'+(moreAnswers[key]===String(v))+'">'+safe(t)+'</button>').join("")+'</div></div>'}
 function moreScore(prefix,count){let v=Array.from({length:count},(_,i)=>moreAnswers[prefix+i]);return v.some(x=>x===undefined)?null:v.reduce((n,x)=>n+Number(x),0)}
 function renderA4Detailed(){const col=[];const add=(title,rows)=>{if(!rows.length)return;col.push('<section class="report-section"><h3>'+safe(title)+'</h3><div>'+rows.map(([k,v])=>'<span class="report-item"><b>'+safe(k)+':</b> '+safe(String(v))+'</span>').join("")+'</div></section>')};for(let j=0;j<comprehensive.length;j++){const sec=comprehensive[j];const entries=sec[1].map((name,i)=>[name,moreText["clinical_"+j+"_"+i]]).filter(([name,v])=>v!==undefined&&String(v).trim()!=="");if(j===0){if(moreText.clinical_0_3&&$("ageOut"))entries.push(["Yaş",$("ageOut").textContent]);}if(j===1){if($("bmiOut"))entries.push(["VKİ",$("bmiOut").textContent]);if($("smmPhysical"))entries.push(["SMM",$("smmPhysical").textContent]);}add(sec[0],entries)}for(const form of forms){const rows=form.items.map((name,i)=>{const node=$(form.id+"_"+i);if(!node||node.value==="")return null;const opt=node.options[node.selectedIndex];return [name,opt?.textContent||node.value]}).filter(Boolean);const vals=form.items.map((_,i)=>$(form.id+"_"+i)?.value??"");if(vals.every(x=>x!==""))rows.unshift(["Toplam puan",scaleTotal(form,vals)+"/"+form.max]);add(form.tr,rows)}for(let j=0;j<3;j++){const list=additional[j];if(!list)continue;const rows=list[1].map((q,i)=>[q,moreAnswers["additional_"+j+"_"+i]]).filter(([a,v])=>v!==undefined);add(list[0],rows)}add("Saat çizme",[["Puan",moreAnswers.clock??"Eksik"],["Not",moreText["clock-notes"]||""]].filter(x=>x[1]!==""));const mm=additional[mmseVariant==="standard"?3:4][1];add("MMSE ("+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+")",mm.map((q,i)=>{const key="mmse_"+mmseVariant+"_"+i;let v=moreAnswers[key],spoken=moreText["response_"+key];return [q,((v!==undefined?v+"p":"")+(spoken?" — "+spoken:"")).trim()]}).filter(x=>x[1]));add("GDS-30",gds30.map((q,i)=>[String(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?null:moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"]).filter(x=>x[1]!==null));const holder=$("printSheet");holder.innerHTML='<header class="print-head"><strong>İTF Geriatri — Kapsamlı Geriatrik Değerlendirme Özeti</strong><span>'+new Date().toLocaleDateString("tr-TR")+'</span></header><div class="report-columns">'+col.join("")+'</div><footer>Yerel tarayıcıda hazırlanmış özet; klinisyen tarafından kontrol edilmelidir.</footer>'}
