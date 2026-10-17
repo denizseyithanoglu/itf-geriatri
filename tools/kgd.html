@@ -573,9 +573,28 @@
  .wizard-footer #wizardCopySectionSummary[hidden]{display:none!important}
 }
 
-/* Nutrition intake: three compact lines with conditional amounts/notes. */
+/* Override the generic 4-column :has(textarea) grid on the whole nutrition section,
+   just as the history and other structured sections override it. Otherwise the
+   three-row nutrition grid becomes a single narrow grid cell. */
 @media screen{
- #fullFields [data-clinical-index="4"] .nutrition-entry-grid{display:flex;flex-direction:column;gap:13px;margin:14px 0 22px}
+ #fullFields > section.supplement[data-clinical-index="4"]{
+  display:block!important;width:100%;max-width:100%;min-width:0;box-sizing:border-box
+ }
+ #fullFields > section.supplement[data-clinical-index="4"] > :not(.section-bar){
+  width:100%;max-width:100%;min-width:0;box-sizing:border-box
+ }
+ #fullFields > section.supplement[data-clinical-index="4"] > .section-bar{
+  width:100%;max-width:100%;box-sizing:border-box
+ }
+ #fullFields > section.supplement[data-clinical-index="4"] > .extra-field{
+  display:block;margin:10px 0;min-width:0
+ }
+}
+/* Nutrition intake: three complete rows of full-width cards. */
+@media screen{
+ #fullFields [data-clinical-index="4"] .nutrition-entry-grid{
+  display:flex;flex-direction:column;gap:13px;margin:14px 0 22px;width:100%;max-width:100%;min-width:0
+ }
  #fullFields [data-clinical-index="4"] .nutrition-entry-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
  #fullFields [data-clinical-index="4"] .nutrition-card{min-width:0;background:#f7faf8;border:1px solid #d4e4d9;border-radius:10px;padding:11px;align-self:stretch}
  #fullFields [data-clinical-index="4"] .nutrition-card-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
@@ -594,12 +613,68 @@
 }
 
 @media screen{
- #sections #form_mna .mna-lf-toggle{margin:16px 0 0;padding:12px 15px;background:#f2f7f3;border:1px solid #b8d6c2;border-radius:10px}
- #sections #form_mna .mna-lf-switch{display:flex;align-items:center;gap:11px;font-weight:780;color:#285b4d;cursor:pointer}
- #sections #form_mna .mna-lf-switch input{width:45px;height:24px;min-height:24px;max-width:none;accent-color:#285b4d;cursor:pointer}
- #sections #form_mna .mna-lf-toggle p{margin:6px 0 0;font-size:.78rem;line-height:1.4}
+ /* Same 70×40 switch, track, knob and two-sided labels as the MMSE version switch. */
+ #sections #form_mna .mna-lf-toggle{
+  display:flex;align-items:center;flex-wrap:wrap;column-gap:13px;row-gap:8px;
+  margin:16px 0 0;padding:13px 16px;background:#f0f7f2;
+  border:1px solid #c0d8c6;border-radius:12px
+ }
+ #sections #form_mna .mna-lf-switch-row{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+ #sections #form_mna .mna-lf-mode-label{
+  font-weight:650;font-size:.87rem;color:#50675b;line-height:1.35
+ }
+ #sections #form_mna .mna-lf-toggle[data-lf-open="false"] [data-mna-lf-label="closed"],
+ #sections #form_mna .mna-lf-toggle[data-lf-open="true"] [data-mna-lf-label="open"]{
+  color:#1e5942;font-weight:850
+ }
+ #sections #form_mna .mna-lf-switch-control{
+  position:relative;display:inline-flex;align-items:center;
+  width:70px;height:40px;flex:0 0 auto;cursor:pointer
+ }
+ #sections #form_mna .mna-lf-switch-control input{
+  position:absolute;inset:0;opacity:0;margin:0;padding:0;
+  width:100%;max-width:none;height:100%;min-height:0;z-index:1;cursor:pointer
+ }
+ #sections #form_mna .mna-lf-switch-track{
+  position:relative;display:block;width:70px;height:40px;
+  border-radius:22px;background:#91ab99;border:2px solid #597e68;transition:background .15s
+ }
+ #sections #form_mna .mna-lf-switch-track:before{
+  content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;
+  border-radius:50%;background:white;box-shadow:0 2px 5px #173e2f44;transition:transform .15s
+ }
+ #sections #form_mna .mna-lf-switch-control input:checked + .mna-lf-switch-track{background:#285b4d}
+ #sections #form_mna .mna-lf-switch-control input:checked + .mna-lf-switch-track:before{transform:translateX(30px)}
+ #sections #form_mna .mna-lf-switch-control input:focus-visible + .mna-lf-switch-track{outline:3px solid #b77c00;outline-offset:3px}
+ #sections #form_mna .mna-lf-toggle p{flex:1 1 100%;margin:1px 0 0;font-size:.78rem;line-height:1.4}
  .mna-measurement-hint{display:block;margin:8px 0 4px;padding:7px;background:#f3f9f5;border-left:3px solid #83b396;font-size:.8rem;color:#315744}
  #extraScales #mnaLFPanel[hidden]{display:none!important}
+ @media(max-width:520px){
+  #sections #form_mna .mna-lf-toggle{padding:10px;column-gap:9px}
+  #sections #form_mna .mna-lf-switch-row{gap:9px}
+  #sections #form_mna .mna-lf-mode-label{font-size:.8rem}
+ }
+}
+
+@media screen{
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance{
+  margin:12px 0 2px;padding:12px 15px;background:#f3f8f5;
+  border:1px solid #cadfd1;border-left:4px solid #285b4d;border-radius:9px;
+  font-size:.79rem;line-height:1.48;color:#345c48;max-width:100%;min-width:0
+ }
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance>strong{
+  display:block;margin-bottom:7px;font-size:.92rem;color:#234d40
+ }
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance p{margin:7px 0}
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance ul{
+  margin:5px 0 9px;padding-left:22px;display:grid;gap:4px;
+  grid-template-columns:repeat(2,minmax(0,1fr))
+ }
+ @media(max-width:700px){
+  #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance ul{
+   grid-template-columns:1fr
+  }
+ }
 }
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><section class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite">Geçici taslak hazırlanıyor…</div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><p class="wizard-privacy"><strong>Önemli:</strong> Geçici taslak yalnızca bu tarayıcı sekmesinde saklanır; sayfa yenilense de korunur. Bu bir klinik kayıt sistemi değildir. Gerçek hasta kimlik veya sağlık verilerini girmeyiniz.</p></section><div id="fullFields"></div><div id="sections"></div><div id="extraScales"></div><div id="fullGds"></div><section class="panel summary result-summary" id="summary"></section><article id="printSheet" aria-label="A4 KGD özeti"></article><div id="wizardFooter" class="wizard-footer no-print" aria-label="Bölüm gezinme ve kayıt işlemleri"><button class="btn alt" id="wizardBack" type="button">← Önceki</button><button class="btn alt" id="wizardSave" type="button">Taslağı Kaydet</button><button class="btn alt" id="wizardPrintSection" type="button">Bu Sekmenin Özetini Yazdır / PDF</button><button class="btn alt" id="wizardCopySectionSummary" type="button">Özet Metnini Kopyala</button><button class="btn alt" id="wizardPrintSectionDetailed" type="button">Bu Sekmeyi Detaylı Yazdır / PDF</button><button class="btn" id="wizardNext" type="button">Kaydet ve Devam Et →</button><button class="wizard-delete" id="wizardClear" type="button">Geçici Taslağı Sil</button></div><div class="actions no-print" id="finalActions"><button class="btn" id="printFinal">Tüm KGD — Özet Yazdır / PDF</button><button class="btn alt" id="printFinalDetailed" type="button">Tüm KGD — Detaylı Yazdır / PDF</button><button class="btn alt" id="emailFinal">E-posta ile anonim puan özeti</button></div><p class="optional-note">E-posta sadece tamamlanan ölçeklerin anonim toplamlarını içerir. Kimlik veya klinik notlar e-postaya eklenmez.</p></main><script>
 const forms=[{"id":"adl","tr":"GYA — Günlük Yaşam Aktiviteleri","max":6,"choices":[[1,"Bağımsız / Independent"],[0,"Yardım gerekli / Needs help"]],"items":["Banyo (Küvet, duş) — Yıkanırken hiç yardım almaz veya sadece vücudunun bir bölümünü yıkarken yardım alır","Giyinme — Ayakkabılarını bağlamak dışında kıyafetlerini ve elbiselerini kendisi giyebilir","Tuvalete Gitme — Herhangi bir yardım almadan tuvalete gider, tuvaleti kullanır, kıyafetlerini düzeltir ve tuvaletten geri çıkar. (tuvalete giderken destek için yürüteç veya baston kullanabilir ve gece alt bezi veya üriner kateter kullanabilir)","Transfer — Herhangi bir yardımcı olmadan yataktan sandalyeye veya sandalyeden yatağa geçebilir (baston veya yürüteç kullanabilir)","Kontinans — İdrara çıkma ve dışkılamayı kısmi de olsa bir kaçırma olmadan tamamen kendisi kontrol eder","Beslenme — Yardım almadan kendi kendine beslenir (etini kesme veya ekmeğine tereyağı sürmeye yardım edilmesi haricinde)"],"full":"GYA: 6 sorunun tam ifadeleri","options":[[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]]],"scoreOptions":[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]]},{"id":"iadl","tr":"EGYA — Enstrümantal Günlük Yaşam Aktiviteleri","max":8,"choices":[[1,"Bağımsız / Independent"],[0,"Bağımlı / Dependent"]],"items":["A. Telefonu Kullanabilme","B. Alış-veriş","C. Yemek Hazırlama","D. Ev Temizliği","E. Çamaşır","F. Yolculuk","G. İlaçlarını Kullanabilme Sorumluluğu","H. Mali İşler"],"full":"EGYA: 8 sorunun tam ifadeleri","options":[[[0,"Telefonu rahatlıkla kullanabilir"],[1,"Birkaç iyi bilinen numarayı çevirebilir"],[2,"Telefona cevap verir fakat arayamaz"],[3,"Telefonu hiç kullanamaz"]],[[0,"Tüm alış-verişlerini bağımsız olarak kendisi yapar"],[1,"Küçük alış-verişlerini kendisi yapar"],[2,"Tüm alış-verişlerinde yardıma ihtiyaç duyar"],[3,"Alış-veriş yapamaz"]],[[0,"Yeteri kadar yemeği planlar, hazırlar ve servis edebilir"],[1,"Kullanılacak malzeme sağlanırsa yeteri kadar yemek hazırlayabilir"],[2,"Hazır yemeği ısıtır ve servis eder veya yemek hazırlar ancak yeterli diyeti sağlayamaz"],[3,"Yemeğin hazırlanma ve servis edilmesine ihtiyacı vardır"]],[[0,"Yalnız başına veya nadir destekle evin üstesinden gelir"],[1,"Bulaşık yıkama, yatak yapma gibi günlük hafif işleri yapabilir"],[2,"Günlük hafif işleri yapar ancak yeterli temizliği sağlayamaz"],[3,"Tüm ev idame işlerinde yardıma ihtiyaç duyar"]],[[0,"Kişisel çamaşırını tamamen kendisi yıkar"],[1,"Çorap, mendil gibi küçük malzemelerini yıkayabilir"],[2,"Tüm çamaşır işi başkaları tarafından halledilmek zorundadır"]],[[0,"Toplu taşıma araçlarından bağımsız olarak faydalanır veya kendi arabasını kullanır"],[1,"Taksiye biner, toplu taşıma araçlarını kullanamaz"],[2,"Başkalarının yardımı ile toplu taşımadan faydalanabilir"],[3,"Yolculuğu başkalarının yardımı ile taksi/otomobille sınırlıdır"],[4,"Yolculuk yapamaz"]],[[0,"İlaçlarını zamanında ve belirtilen dozda alabilir"],[1,"İlaçları önceden dozlarına ayrılmış olarak hazırlanırsa düzenli kullanabilir"],[2,"İlaçlarını kendi başına düzenli kullanamaz"]],[[0,"Bağımsız olarak tüm mali işlerinin üstesinden gelebilir"],[1,"Günlük mali işlerini halleder ancak büyük mali işlerde ve banka işlerinde yardıma ihtiyaç duyar"],[2,"Mali işlerini takip edemez"]]],"scoreOptions":[[1,1,1,0],[1,0,0,0],[1,0,0,0],[1,1,1,0],[1,1,0],[1,1,1,1,0],[1,0,0],[1,1,0]]},{"id":"frail","tr":"FRAIL Kırılganlık Anketi","max":5,"choices":[[0,"Hayır"],[1,"Evet"]],"items":["Yorgunluk: Son 4 haftanın tamamında veya çoğunda kendinizi yorgun, bitkin, halsiz hissettiniz mi ?","Dayanıklılık: 10 basamak merdiveni dinlenmeden, tek başınıza ve yardımsız yürümekte herhangi bir zorluk çekiyor musunuz ?","Ambulasyon: ~200m.’yi tek başınıza, yardımsız ve güçlük çekmeden yürümekte bir zorluk çekiyor musunuz ?","Hastalıklar: Şu 11 hastalıktan 5 veya daha fazlasının teşhisi var mı ?","Kilo Kaybı: Son 1 yıl içinde vücut ağırlığınızın %5’ini kaybettiniz mi ?"],"full":"0 normal · 1–2 kırılganlık öncesi · 3–5 kırılgan"},{"id":"sarcf","tr":"SARC-F (Sarkopeni Tarama Anketi)","max":10,"choices":[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yapamaz"]],"items":["Kuvvet: ~5kg. kaldırma ve taşıma","Yürüme: odada yürüme","Sandalye: sandalye, yataktan transfer","Merdiven: 10 basamak çıkma","Düşme: 1 yıl içinde kaç kez düştü"],"full":"4 ve üzeri puan sarkopeniyi düşündürür.","options":[[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır, yardımla yapar veya yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yardımsız yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır, yardımla yapar veya yapamaz"]],[[0,"hiç"],[1,"1-3 kez düştü"],[2,"4 veya daha fazla düştü"]]]},{"id":"sof","tr":"SOF Kırılganlık Ölçütleri","max":3,"choices":[[0,"Hayır"],[1,"Evet"]],"items":["3 yıldan beri ≥ %5 kilo kaybı (3 yıl önceki ağırlık – bugünkü ağırlık = Ağırlıktaki değişim) (Ağırlıktaki değişim / 3 yıl önceki ağırlık = % kayıp)","5 tekrarlı otur-kalk yapamama (Sandalyede otur, kolları kullanmadan 5 tekrar kalk-otur)","“Enerji dolu hissediyor musunuz?” (cevap evet ya da hayır olmalı)"],"full":"0 normal · 1 kırılganlık öncesi · 2–3 kırılgan","options":[[[0,"Kilo kaybı yok / < %5"],[1,"Kilo kaybı ≥ %5"]],[[0,"Yapabiliyor"],[1,"Yapamıyor"]],[[0,"Evet"],[1,"Hayır"]]]},{"id":"mna","tr":"MNA-SF — Mini Nütrisyonel Değerlendirme (1. Kısım)","max":14,"choices":null,"items":["Son üç ayda iştahsızlığa, sindirim sorunlarına, çiğneme ya da yutma zorluklarına bağlı olarak besin alımında bir azalma oldu mu?","Son üç ay içinde kilo kaybı","Mobilite","Son 3 ayda psikolojik stres ya da akut hastalıktan şikayetçi oldunuz mu?","Nöro-psikolojik problemler","Beden Kitle İndeksi (BKİ) (kg/m²) veya baldır çevresi"],"options":[[[0,"Ciddi iştah kaybı"],[1,"Orta düzeyde iştah kaybı"],[2,"İştah kaybı yok"]],[[0,"3 kg’dan fazla kilo kaybı"],[1,"Bilinmiyor"],[2,"1 ve 3 kg arasında kayıp"],[3,"Kilo kaybı yok"]],[[0,"Yatak ya da sandalyeye bağımlı"],[1,"Yataktan, sandalyeden kalkabiliyor ama dışarıya çıkamıyor"],[2,"Dışarı çıkabiliyor"]],[[0,"Evet"],[2,"Hayır"]],[[0,"Ciddi bunama ve depresyon"],[1,"Hafif düzeyde bunama ve depresyon"],[2,"Hiçbir psikolojik problem yok"]],[[0,"BKİ <19 veya baldır çevresi <31 cm"],[1,"BKİ ≥19 – <21"],[2,"BKİ ≥21 – <23"],[3,"BKİ ≥23 veya baldır çevresi ≥31 cm"]]],"full":"0–7 malnütrisyon · 8–11 malnütrisyon riski · 12–14 normal"}],texts={"tr":{"title":"Kapsamlı Geriatrik Değerlendirme","sub":"İTF KGD formu · Dijital çalışma prototipi","home":"← Ana sayfa","warning":"Yalnızca eğitim / demo amaçlıdır. GitHub Pages güvenli hasta kayıt sistemi değildir: ad, TC kimlik numarası, telefon veya tanımlanabilir klinik veri girmeyiniz. Girdi sunucuya gönderilmez; sayfa yenilenince silinir.","intro":"Bu ilk sürüm formun seçilmiş puanlanan alanlarını dijitalleştirir: GYA, EGYA, FRAIL, SARC-F, SOF ve MNA-SF. Diğer alanlar için özet girişleri vardır. Tam 8 sayfalık KGD formunun yerini henüz almaz.","details":"Anonim değerlendirme notları","measure":"Diğer ölçümler ve klinik değerlendirme","print":"Hasta için özet hazırla / Yazdır","clear":"Sıfırla","summary":"Kapsamlı Geriatrik Değerlendirme Özeti","date":"Tarih","completed":"Tamamlanan testler","missing":"Eksik testler","domains":"Ölçekte zorlanılan alanlar","meaning":"Yorum","none":"Belirtilen alanlarda puan kaybı yok.","incomplete":"Eksik — sonuç hesaplanmadı","general":"Bu özet tanı koymaz ve hekim değerlendirmesinin yerini almaz. Hasta ile paylaşılmadan önce tüm veriler ve yorumlar klinisyen tarafından kontrol edilmelidir.","pnote":"Hastanın adı veya kimlik numarası bu taslak sistemde istenmez. Rapor yazdırılırken tarayıcı yazdırma penceresinden yerel PDF seçilebilir.","labels":["Boy (cm)","Kilo (kg)","El kavrama (kg)","Yürüme hızı (m/sn)","TUG (sn)","SPPB (/12)","Chair stand (sn)","MMSE (/30)","GDS (/30)","Saat çizme (/5)","İlaç sayısı","Kısa klinik not (tanımlayıcı bilgi kullanmayın)"]}};const $=id=>document.getElementById(id);
@@ -1355,6 +1430,7 @@ function syncMNAVisibility(){
  const show=moreText.mnaLFManualPreference==="Evet"||(
   moreText.mnaLFManualPreference!=="Hayır"&&category==="risk");
  switcher.checked=show;
+ container.dataset.lfOpen=String(show);
  lf.hidden=!show;
  const status=$("mnaLFStatus");
  if(status)status.textContent=category==="risk"?
@@ -1366,9 +1442,12 @@ function initMNAControls(){
  if(!form||!lf||$("mnaLFTogglePanel"))return;
  const panel=document.createElement("div");
  panel.id="mnaLFTogglePanel";panel.className="mna-lf-toggle";
- panel.innerHTML='<label class="mna-lf-switch" for="mnaLFShowSwitch">'+
-  '<input type="checkbox" id="mnaLFShowSwitch" role="switch" aria-controls="mnaLFPanel">'+
-  '<span>MNA-LF (7–18. sorular) bölümünü aç</span></label>'+
+ panel.innerHTML='<div class="mna-lf-switch-row" role="group" aria-label="MNA-LF bölümünü göster veya gizle">'+
+  '<span class="mna-lf-mode-label" data-mna-lf-label="closed">MNA-LF kapalı</span>'+
+  '<label class="mna-lf-switch-control" for="mnaLFShowSwitch">'+
+  '<input type="checkbox" id="mnaLFShowSwitch" role="switch" aria-controls="mnaLFPanel" aria-label="MNA-LF bölümünü aç veya kapat">'+
+  '<span class="mna-lf-switch-track" aria-hidden="true"></span></label>'+
+  '<span class="mna-lf-mode-label" data-mna-lf-label="open">MNA-LF açık</span></div>'+
   '<p id="mnaLFStatus" class="muted">MNA-SF normal ise MNA-LF yapılması gerekli değildir.</p>';
  form.appendChild(panel);
  lf.id="mnaLFPanel";
@@ -1571,6 +1650,22 @@ function formatNutritionFields(){
  old.forEach(field=>field.remove());
  const anchor=sec.querySelector(".section-bar")||sec.querySelector("h2");
  if(anchor)anchor.after(grouped);else sec.prepend(grouped);
+ const sgaField=$("clinical_4_15")?.closest(".extra-field");
+ if(sgaField&&!sgaField.querySelector(".sga-muscle-guidance")){
+  const note=document.createElement("aside");
+  note.className="sga-muscle-guidance";
+  note.setAttribute("aria-label","Uygulayıcı notu: SGA ile kas kaybının değerlendirilmesi");
+  note.innerHTML=
+   '<strong>Uygulayıcı notu — SGA ile kas kütlesi nasıl değerlendirilir?</strong>'+
+   '<p><b>Gözlem ve hafif palpasyonla</b> her iki tarafta kas hacmi ve konturları değerlendiriniz. Özellikle şu bölgeleri inceleyiniz:</p>'+
+   '<ul><li><b>Şakak (temporalis):</b> temporal çöküklük.</li>'+
+   '<li><b>Klavikula ve omuz (pektoral/deltoid):</b> klavikulanın belirginleşmesi, yuvarlak omuz konturunun kaybı.</li>'+
+   '<li><b>Skapula çevresi:</b> kemik çıkıntılarının belirginleşmesi, skapula çevresindeki kasların azalması.</li>'+
+   '<li><b>El sırtı (interosseöz kaslar):</b> başparmak–işaret parmağı arası ve metakarp aralarındaki çöküklük.</li>'+
+   '<li><b>Uyluk (kuadriseps) ve baldır (gastroknemius):</b> kas dolgunluğunun azalması ve kemik/tendon konturlarının belirginleşmesi.</li></ul>'+
+   '<p><b>Kaydedilecek izlenim:</b> kas kaybı yok / hafif / orta / belirgin; değerlendirmeyi engelleyen ödem, obezite veya hareketsizlik varsa not ediniz. Bu <b>öznel fizik muayene bulgusu</b> ölçülmüş kas kütlesi ya da tek başına malnütrisyon tanısı değildir; beslenme öyküsü ve diğer bulgularla birlikte yorumlanır.</p>';
+  sgaField.appendChild(note);
+ }
  grouped.addEventListener("click",event=>{
   const button=event.target.closest("[data-nutrition-choice]");if(!button)return;
   const key=button.dataset.nutritionKey,value=button.dataset.nutritionChoice;
