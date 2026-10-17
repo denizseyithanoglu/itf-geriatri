@@ -787,6 +787,7 @@ function enhanceChoices(){
     sel.value=opt.value;
     grid.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));
     host.classList.add("complete");summarize();
+    if(sel.id.startsWith("mna_"))syncMNAVisibility();
    };
    grid.appendChild(btn);
   }
@@ -1448,29 +1449,48 @@ function syncMNAAnthropometry(){
   (scores.calf?"Baldır çevresi: "+scores.calf.value.toFixed(1)+" cm → "+scores.calf.score+" puan.":"");
  return scores;
 }
-function mnaSFStatus(){
+function mnaSFScore(){
  const form=forms.find(f=>f.id==="mna");if(!form)return null;
  const values=form.items.map((_,i)=>$("mna_"+i)?.value??"");
  if(values.some(v=>v===""))return null;
- return scaleTotal(form,values)<=11?"risk":"normal";
+ const score=scaleTotal(form,values);
+ return Number.isFinite(score)?score:null;
+}
+function mnaSFStatus(){
+ const score=mnaSFScore();
+ return score===null?null:score<=11?"risk":"normal";
+}
+function mnaTotalCategory(score){
+ return score<17?"malnütrisyon":score<=23.5?"malnütrisyon riski":"normal";
 }
 let lastMNARiskClass=null;
 function syncMNAVisibility(){
  const container=$("mnaLFTogglePanel"),switcher=$("mnaLFShowSwitch");
- const lf=document.querySelector("#extraScales > section:nth-child(1)");
+ const lf=$("mnaLFPanel")||document.querySelector("#extraScales > section:nth-child(1)");
  if(!container||!switcher||!lf)return;
- const category=mnaSFStatus();
- if(lastMNARiskClass!==null&&category!==lastMNARiskClass)delete moreText.mnaLFManualPreference;
+ const score=mnaSFScore(),category=score===null?null:score<=11?"risk":"normal";
+ /* New 0–11 scores must actually open the long form. Old 'Hayır' choices
+    from a previous draft must not suppress the automatic first opening. */
+ if((category==="risk"&&lastMNARiskClass===null&&moreText.mnaLFManualPreference==="Hayır")||
+    (lastMNARiskClass!==null&&category!==lastMNARiskClass))
+   delete moreText.mnaLFManualPreference;
  lastMNARiskClass=category;
- const show=moreText.mnaLFManualPreference==="Evet"||(
-  moreText.mnaLFManualPreference!=="Hayır"&&category==="risk");
+ const show=moreText.mnaLFManualPreference==="Evet"||
+  (category==="risk"&&moreText.mnaLFManualPreference!=="Hayır");
  switcher.checked=show;
+ switcher.setAttribute("aria-expanded",String(show));
  container.dataset.lfOpen=String(show);
  lf.hidden=!show;
+ /* The wizard independently hides inactive tabs. Reapply its visibility
+    without leaving LF hidden when the current tab is MNA. */
+ if(typeof wizardStep==="number"&&wizardStep===3&&show)
+   lf.classList.remove("wizard-hidden");
  const status=$("mnaLFStatus");
  if(status)status.textContent=category==="risk"?
-  (show?"MNA-SF sonucu malnütrisyon veya malnütrisyon riski: MNA-LF otomatik açıldı.":"MNA-SF sonucu riskli; MNA-LF elle kapatıldı. Düğmeden yeniden açabilirsiniz."):
-  (category==="normal"?"MNA-SF normal ise MNA-LF yapılması gerekli değildir; gerektiğinde bu düğmeden açabilirsiniz.":"MNA-SF tamamlanınca riskli sonuçta MNA-LF otomatik açılır. MNA-SF normal ise MNA-LF yapılması gerekli değildir.");
+  (show?"MNA-SF: "+score+"/14 (malnütrisyon veya malnütrisyon riski). MNA-LF otomatik açıldı.":
+   "MNA-SF: "+score+"/14; MNA-LF elle kapatıldı. Yeniden açabilirsiniz."):
+  (category==="normal"?"MNA-SF: "+score+"/14 (normal). MNA-LF yapılması gerekli değildir; isterseniz açabilirsiniz.":
+   "MNA-SF tamamlanınca 0–11 puanda MNA-LF otomatik açılır. MNA-SF normal ise MNA-LF gerekli değildir.");
 }
 function initMNAControls(){
  const form=$("form_mna"),lf=document.querySelector("#extraScales > section:nth-child(1)");
@@ -1497,6 +1517,7 @@ function initMNAControls(){
   syncMNAVisibility();writeKGDDraft();
  };
  form.querySelectorAll(".choice-grid button").forEach(button=>button.addEventListener("click",()=>syncMNAVisibility()));
+ form.addEventListener("change",()=>syncMNAVisibility());
  syncMNAAnthropometry();
  lastMNARiskClass=mnaSFStatus();
  syncMNAVisibility();
@@ -1663,38 +1684,7 @@ function nutritionVisibility(){
  if(type)type.hidden=moreText.clinical_4_9!=="Evet";
 }
 /* Inline SVG: front/back examination landmarks; no external assets or patient data. */
-function sgaAnatomyFigure(){
- return '<svg class="sga-anatomy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 520" role="img" aria-labelledby="sgaDiagramTitle sgaDiagramDesc">'+
- '<title id="sgaDiagramTitle">SGA kas değerlendirme bölgeleri — önden ve arkadan</title>'+
- '<desc id="sgaDiagramDesc">1 şakak, 2 klavikula ve omuz, 3 skapula, 4 el sırtı, 5 uyluk, 6 baldır.</desc>'+
- '<defs><g id="sgaBody">'+
- '<path d="M70 123 Q60 108 48 126 L29 217 L26 271 Q26 292 35 296 Q46 297 47 282 L53 244 L69 189Z"/>'+
- '<path d="M117 123 Q128 108 140 126 L158 217 L162 271 Q162 292 152 296 Q141 297 141 282 L134 244 L118 189Z"/>'+
- '<path d="M72 277 Q67 317 70 353 L72 422 L68 451 Q65 467 76 471 L90 468 L90 419 L98 329 L101 280Z"/>'+
- '<path d="M103 277 L102 329 L110 421 L110 468 L124 471 Q136 467 131 451 L127 423 L128 353 Q131 314 120 277Z"/>'+
- '<path d="M70 124 L80 116 L80 98 L108 98 L108 116 L119 124 Q134 135 131 155 L119 217 L123 283 Q95 302 67 283 L71 216 L56 155 Q54 135 70 124Z"/>'+
- '<ellipse cx="94" cy="67" rx="29" ry="38"/>'+
- '</g></defs>'+
- '<rect x="0.5" y="0.5" width="379" height="519" rx="12" fill="#f8fcf9" stroke="#c8dfcf"/>'+
- '<text x="95" y="24" text-anchor="middle" font-size="14" font-weight="800" fill="#285b4d">ÖNDEN</text>'+
- '<text x="282" y="24" text-anchor="middle" font-size="14" font-weight="800" fill="#285b4d">ARKADAN</text>'+
- '<g transform="translate(0,18)" fill="#e5bea3" stroke="#ae8c77" stroke-width="1.7"><use href="#sgaBody"/></g>'+
- '<g transform="translate(186,18)" fill="#e5bea3" stroke="#ae8c77" stroke-width="1.7"><use href="#sgaBody"/></g>'+
- '<g transform="translate(0,18)" fill="none" stroke="#9b7669" stroke-width="1.6" opacity=".75">'+
- '<path d="M67 141 Q93 150 120 141 M93 146 L93 235 M77 169 Q92 185 108 169 M80 319 L83 365 M109 319 L108 365"/></g>'+
- '<g transform="translate(186,18)" fill="none" stroke="#9b7669" stroke-width="1.6" opacity=".75">'+
- '<path d="M73 148 L65 185 L86 200 L93 146 M115 148 L123 185 L103 200 L96 146 M95 149 L95 279"/>'+
- '<path d="M75 369 Q78 398 78 430 M111 369 Q109 398 112 430"/></g>'+
- '<g font-family="system-ui,sans-serif" font-weight="800" font-size="13" text-anchor="middle" fill="#fff">'+
- '<circle cx="75" cy="84" r="14" fill="#285b4d"/><text x="75" y="89">1</text>'+
- '<circle cx="83" cy="153" r="14" fill="#285b4d"/><text x="83" y="158">2</text>'+
- '<circle cx="289" cy="194" r="14" fill="#285b4d"/><text x="289" y="199">3</text>'+
- '<circle cx="33" cy="296" r="14" fill="#285b4d"/><text x="33" y="301">4</text>'+
- '<circle cx="84" cy="367" r="14" fill="#285b4d"/><text x="84" y="372">5</text>'+
- '<circle cx="296" cy="446" r="14" fill="#285b4d"/><text x="296" y="451">6</text>'+
- '</g></svg>';
-}
-
+function sgaAnatomyFigure(){return '<img class="sga-anatomy" src="data:image/webp;base64,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" alt="Önden ve arkadan anatomik kas muayenesi: 1 şakak, 2 klavikula ve omuz, 3 skapula çevresi, 4 el sırtı, 5 uyluk, 6 baldır." width="300" height="384" loading="lazy" decoding="async">';}
 function formatNutritionFields(){
  const sec=document.querySelector('#fullFields [data-clinical-index="4"]');
  if(!sec||sec.querySelector(".nutrition-entry-grid"))return;
@@ -1835,7 +1825,7 @@ function renderA4(){
 }
 function emailOnly(){const scores=[];for(const q of forms){let values=q.items.map((_,i)=>$(q.id+"_"+i)?.value||"");if(values.every(x=>x!==""))scores.push(q.tr+": "+scaleTotal(q,values)+"/"+q.max)}const gd=gdsScore();if(gd!==null)scores.push("GDS-30: "+gd+"/30");if(!confirm("Sadece anonim toplam puanlarla e-posta uygulaması açılsın mı? Hasta kimliği, notları ve cevaplar eklenmez."))return;const href="mailto:itfgeriatri2000@gmail.com?subject="+encodeURIComponent("Anonim KGD puan özeti")+"&body="+encodeURIComponent(scores.join("\n")||"Tamamlanan ölçek bulunmuyor");location.href=href}
 function gdsScore(){const arr=Array.from({length:30},(_,i)=>moreAnswers["gds30_"+i]);if(arr.some(x=>x===undefined))return null;const reverse=new Set([0,4,6,10,12,15,21,26,28,29]);return arr.reduce((n,v,i)=>n+(reverse.has(i)?(v==="0"?1:0):(v==="1"?1:0)),0)}
-function meaning(s,score){if(s.id==="frail")return score===0?"Normal":score<3?"pre-frail":"frail";if(s.id==="mna")return score<=7?"Malnütrisyon / Malnutrition":score<=11?"Risk / At risk":"Normal";if(s.id==="sarcf")return score>=4?"Pozitif tarama":"Negatif tarama";if(s.id==="sof")return score===0?"Normal":score===1?"pre-frail":"frail";if(s.id==="adl"||s.id==="iadl")return score===s.max?"Bağımsız / Independent":"Bazı alanlarda yardım ihtiyacı / Assistance in some domains";return""}
+function meaning(s,score){if(s.id==="frail")return score===0?"Normal":score<3?"pre-frail":"frail";if(s.id==="mna")return score<=7?"malnütrisyon":score<=11?"malnütrisyon riski":"normal";if(s.id==="sarcf")return score>=4?"Pozitif tarama":"Negatif tarama";if(s.id==="sof")return score===0?"Normal":score===1?"pre-frail":"frail";if(s.id==="adl"||s.id==="iadl")return score===s.max?"Bağımsız / Independent":"Bazı alanlarda yardım ihtiyacı / Assistance in some domains";return""}
 function fullKGDOverview(){
 const field=(value)=>value===undefined||value===null||String(value).trim()===""?"__":String(value);
 const lookup=(j,i)=>moreText["clinical_"+j+"_"+i];
@@ -1897,7 +1887,12 @@ item("14. Fiziksel Ölçümler ve Performans",[...phys,["SMM / Boy²",sarco.smmi
 return '<header class="summary-full-header"><h2>KGD Özeti — Tüm Bölümler</h2><p>__ = Henüz girilmedi. Önceki sekmelere dönerek tüm bilgileri düzenleyebilirsiniz.</p></header>'+rows.join("");
 }
 function summarize(){syncHistoryCounts();const t=texts.tr,lost=[];let complete=0;let out='<h2>'+safe(t.summary)+'</h2><p class="muted">'+safe(t.date)+': '+new Date().toLocaleDateString("tr-TR")+'</p>';for(const s of forms){const vals=s.items.map((_,i)=>$(s.id+"_"+i).value);const ready=vals.every(v=>v!=="");if(ready)complete++;const score=ready?scaleTotal(s,vals):null;out+='<div class="result"><strong>'+safe(s.tr)+': '+(ready?score+" / "+s.max+" ("+(meaning(s,score)||"Klinik yorum gerekli")+")":safe(t.incomplete))+'</strong>';if(ready){out+='<div>'+safe(t.meaning)+': '+safe(meaning(s,score))+'</div>';const lostHere=[];s.items.forEach((it,i)=>{let val=scaleItemScore(s,i,vals[i]);const deficit=(s.id==="adl"||s.id==="iadl"||s.id==="mna")?val<(s.id==="mna"?[2,3,2,2,2,3][i]:1):val>0;if(deficit)lostHere.push(it)});out+='<p class="muted">'+safe(t.domains)+': '+safe(lostHere.length?lostHere.join("; "):t.none)+'</p>'}out+='</div>';}
-out+='<p><strong>'+safe(t.completed)+': '+complete+'/'+forms.length+'</strong></p>';out+='<p class="muted">'+safe(t.general)+'</p>';addInlineScores();syncMNAVisibility();document.querySelectorAll("#extraScales > section,#fullGds > section").forEach(sec=>{let output=sec.querySelector(".inline-score");if(!output){output=document.createElement("div");output.className="inline-score";sec.appendChild(output)}let keys=[];if(sec===document.querySelector("#extraScales > section:nth-child(3)")){const k=miniCogMemoryScore([0,1,2]),h=miniCogMemoryScore([4,5,6]);output.textContent="Kayıt: "+(k??"eksik")+" · Saat Çizme: "+(moreAnswers.clock===undefined?"eksik":moreAnswers.clock+"/5")+" · Hatırlama: "+(h??"eksik");return}if(sec.id==="mmse-assessment"){output.textContent="MMSE ("+(mmseVariant==="standard"?"Standart":"Eğitimsizler için")+"): "+mmseScoreSummary();return}else if(sec.parentElement.id==="fullGds"){keys=Array.from({length:30},(_,i)=>"gds30_"+i)}else{const j=[...sec.parentElement.children].indexOf(sec);keys=additional[j]?.[1].map((_,i)=>"additional_"+j+"_"+i)||[]}const done=keys.filter(k=>moreAnswers[k]!==undefined).length;output.textContent="Bölüm: "+(done===keys.length?sec.parentElement.id==="fullGds"?gdsScore()+"/30 ("+(gdsScore()<=10?"normal":gdsScore()<=13?"olası depresyon":"pozitif tarama")+")":sec.id==="mmse-assessment"?(()=>{const v=keys.reduce((a,k)=>a+Number(moreAnswers[k]),0);return v+"/30 ("+(v>=24?"normal":"normalin altında")+")"})():keys.reduce((a,k)=>a+Number(moreAnswers[k]),0).toFixed(1)+" (klinik yorum gerekli)":"Eksik "+done+"/"+keys.length)});const c=moreAnswers.clock;out+='<div class="result"><strong>Saat Çizme Testi: '+(c===undefined?"Eksik":c+"/5")+'</strong></div>';const mm=Array.from({length:30},(_,i)=>moreAnswers["mmse_"+mmseVariant+"_"+i]);out+='<div class="result"><strong>MMSE ('+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+ '): '+(mm.some(v=>v===undefined)?"Eksik":mm.reduce((a,b)=>a+Number(b),0)+"/30")+'</strong></div>';const gd=gdsScore();out+='<div class="result"><strong>GDS-30: '+(gd===null?"Eksik — sonuç hesaplanmadı":gd+"/30")+'</strong></div>';$("summary").innerHTML=fullKGDOverview();}
+out+='<p><strong>'+safe(t.completed)+': '+complete+'/'+forms.length+'</strong></p>';out+='<p class="muted">'+safe(t.general)+'</p>';addInlineScores();syncMNAVisibility();document.querySelectorAll("#extraScales > section,#fullGds > section").forEach(sec=>{let output=sec.querySelector(".inline-score");if(!output){output=document.createElement("div");output.className="inline-score";sec.appendChild(output)}let keys=[];if(sec===document.querySelector("#extraScales > section:nth-child(3)")){const k=miniCogMemoryScore([0,1,2]),h=miniCogMemoryScore([4,5,6]);output.textContent="Kayıt: "+(k??"eksik")+" · Saat Çizme: "+(moreAnswers.clock===undefined?"eksik":moreAnswers.clock+"/5")+" · Hatırlama: "+(h??"eksik");return}if(sec.id==="mmse-assessment"){output.textContent="MMSE ("+(mmseVariant==="standard"?"Standart":"Eğitimsizler için")+"): "+mmseScoreSummary();return}else if(sec.parentElement.id==="fullGds"){keys=Array.from({length:30},(_,i)=>"gds30_"+i)}else{const j=[...sec.parentElement.children].indexOf(sec);keys=additional[j]?.[1].map((_,i)=>"additional_"+j+"_"+i)||[]}const done=keys.filter(k=>moreAnswers[k]!==undefined).length;if(sec.id==="mnaLFPanel"){
+ const total=kgdMNATotalScore();
+ const lfPart=moreScore("additional_0_",12);
+ output.textContent=total?"MNA toplam: "+total:(lfPart===null?"MNA-LF: Eksik "+done+"/12 yanıt; 30 üzerinden sonuç için MNA-SF ve MNA-LF tamamlanmalıdır.":"MNA-LF ek puanı: "+lfPart+"/16; MNA-SF tamamlanınca toplam /30 hesaplanır.");
+ return;
+}output.textContent="Bölüm: "+(done===keys.length?sec.parentElement.id==="fullGds"?gdsScore()+"/30 ("+(gdsScore()<=10?"normal":gdsScore()<=13?"olası depresyon":"pozitif tarama")+")":sec.id==="mmse-assessment"?(()=>{const v=keys.reduce((a,k)=>a+Number(moreAnswers[k]),0);return v+"/30 ("+(v>=24?"normal":"normalin altında")+")"})():keys.reduce((a,k)=>a+Number(moreAnswers[k]),0).toFixed(1)+" (klinik yorum gerekli)":"Eksik "+done+"/"+keys.length)});const c=moreAnswers.clock;out+='<div class="result"><strong>Saat Çizme Testi: '+(c===undefined?"Eksik":c+"/5")+'</strong></div>';const mm=Array.from({length:30},(_,i)=>moreAnswers["mmse_"+mmseVariant+"_"+i]);out+='<div class="result"><strong>MMSE ('+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+ '): '+(mm.some(v=>v===undefined)?"Eksik":mm.reduce((a,b)=>a+Number(b),0)+"/30")+'</strong></div>';const gd=gdsScore();out+='<div class="result"><strong>GDS-30: '+(gd===null?"Eksik — sonuç hesaplanmadı":gd+"/30")+'</strong></div>';$("summary").innerHTML=fullKGDOverview();}
 
 /* Temporary draft: scoped to this tab, never sent to any remote service. */
 const KGD_DRAFT_KEY="itf_kgd_session_draft_v1";
@@ -2013,7 +2008,7 @@ function compactKGDStep(i,inline=false){
    const sf=forms.find(x=>x.id==="mna");
    const vals=sf.items.map((_,j)=>$("mna_"+j)?.value??"");
    const complete=vals.every(x=>x!=="");
-   const total=n!==null&&complete?"MNA toplam: "+(n+scaleTotal(sf,vals))+"/30":null;
+   const total=n!==null&&complete?"MNA toplam: "+kgdMNATotalScore():null;
    return simple("Beslenme Değerlendirmesi (MNA)",[...clinicalLines(4,[0,1,2,3,4,5,6,7,8,9,10,15]),["MNA-SF",s?s.replace(/^MNA-SF: /,""):null],["MNA-LF",lf?lf.replace(/^MNA-LF ek: /,""):null],["MNA toplam",total?total.replace(/^MNA toplam: /,""):null]]);
  }
  if(i===4)return simple("Uyku, Boşaltım ve Yakınmalar",[...clinicalLines(4,[16,17,18]),...comprehensive[5][1].map((lab,j)=>[lab,field(5,j)])]);
@@ -2127,7 +2122,7 @@ function kgdMNATotalScore(){
  const lf=moreScore("additional_0_",12);
  if(lf===null||vals.some(x=>x===""))return null;
  const sum=scaleTotal(forms.find(x=>x.id==="mna"),vals)+lf;
- return sum+"/30 ("+(sum<17?"malnütrisyon":sum<=23.5?"malnütrisyon riski":"normal")+")";
+ return sum+"/30 ("+mnaTotalCategory(sum)+")";
 }
 function kgdEQScore(){
  const v=additional[1][1].map((_,j)=>moreAnswers["additional_1_"+j]);
