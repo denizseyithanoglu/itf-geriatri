@@ -1663,13 +1663,14 @@ function kgdDetailedPrintStep(step){
     if(kgdPrintPresent(score)||kgdPrintPresent(written))mmseEntries.push([(i+1)+". "+q,(kgdPrintPresent(score)?score+" puan":"puan girilmedi")+(kgdPrintPresent(written)?" — Yanıt: "+written:"")]);
   });
   const img=clockDrawingObjectURL?'<section class="kgd-detail-section"><h3>Hastanın Saat Çizimi</h3><img class="uploaded-clock-report" src="'+safe(clockDrawingObjectURL)+'" alt="Hastanın saat çizimi"></section>':"";
+  const copyPhoto=mmseCopyImages[mmseVariant]?'<section class="kgd-detail-section"><h3>Hastanın Kopya Çizimi — '+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+' MMSE</h3><img class="mmse-copy-patient-image" src="'+safe(mmseCopyImages[mmseVariant])+'" alt="Hastanın kopyaladığı şekil"></section>':"";
   return kgdDetailedBlock("Mini-COG",[
     ["Kayıt (3 tekrar)",miniCogMemoryScore([0,1,2])],
     ["Saat Çizme",kgdPrintPresent(moreAnswers.clock)?moreAnswers.clock+"/5":null],
     ["Hatırlama",miniCogMemoryScore([4,5,6])],...words,
     ["Mini-COG’a Göre Kognitif Bozukluk",moreAnswers.miniCogImpairment],
     ["Saat notları",moreText["clock-notes"]],["Mini-COG ek notları",moreText["minicog-notes"]]
-   ])+kgdDetailedBlock("MMSE — "+(mmseVariant==="standard"?"Standart":"Eğitimsizler İçin"),mmseEntries.concat([["MMSE ek notlar",moreText["mmse-notes"]]]))+img;
+   ])+kgdDetailedBlock("MMSE — "+(mmseVariant==="standard"?"Standart":"Eğitimsizler İçin"),mmseEntries.concat([["MMSE ek notlar",moreText["mmse-notes"]]]))+img+copyPhoto;
  }
  if(step===8){
   const responses=gds30.map((q,i)=>{
