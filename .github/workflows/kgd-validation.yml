@@ -584,6 +584,39 @@ jobs:
           assert.ok(src.includes('if(sel.id==="mna_5"&&mnaAnthropometricScores().sf)'),'Manual MNA-SF score cannot conflict with measured anthropometry');
           assert.ok(src.includes('if(k==="additional_0_10"||k==="additional_0_11")syncMNAAnthropometry()'),'Manual MNA-LF scores cannot conflict with measured anthropometry');
           assert.ok(src.includes('if(sec.id==="form_mna")')&&src.includes('if(sec.id==="mnaLFPanel")'),'Section resets must reapply measured scores');
+          // Regression: a textarea in the 4th tab triggers the generic supplement
+          // 4-column grid; nutrition must explicitly override the entire section,
+          // not just its nested three-column question rows.
+          const overrideSelector='#fullFields > section.supplement[data-clinical-index="4"]';
+          assert.ok(src.includes('.supplement:has(.extra-field > textarea){display:grid;grid-template-columns:repeat(4'),
+            'Legacy generic grid expected for regression test');
+          assert.ok(src.includes(overrideSelector+'{')&&
+            src.includes('display:block!important;width:100%;max-width:100%;min-width:0;box-sizing:border-box'),
+            'The nutrition section must override the generic four-column grid and span full width');
+          assert.ok(src.includes(overrideSelector+' > :not(.section-bar)'),
+            'Nutrition children must span their section rather than narrow grid cells');
+          assert.ok(src.includes('.nutrition-entry-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))'),
+            'Three weight-loss cards must share one complete row');
+          assert.ok(src.includes('@media(max-width:790px){#fullFields [data-clinical-index="4"] .nutrition-entry-row{grid-template-columns:repeat(2'),
+            'Keep nutrition rows responsive for tablets');
+          assert.ok(src.includes('@media(max-width:530px){#fullFields [data-clinical-index="4"] .nutrition-entry-row{grid-template-columns:1fr}'),
+            'Keep nutrition rows responsive for small screens');
+          // Match MMSE track proportions, not a native checkbox shown as a switch.
+          for(const fragment of [
+            'class="mna-lf-switch-row"',
+            'class="mna-lf-switch-control"',
+            'class="mna-lf-switch-track"',
+            'data-mna-lf-label="closed"',
+            'data-mna-lf-label="open"',
+            'container.dataset.lfOpen=String(show)',
+            'input:checked + .mna-lf-switch-track:before{transform:translateX(30px)',
+            'width:70px;height:40px;flex:0 0 auto;cursor:pointer',
+            'input:focus-visible + .mna-lf-switch-track'
+          ])assert.ok(src.includes(fragment),'Missing MMSE-like MNA-LF switch detail: '+fragment);
+          assert.equal(mnaCtx.mnaSFStatus(),'risk');
+          mnaCtx.syncMNAVisibility();
+          assert.equal(switchControl.checked,true);
+          console.log('Nutrition screenshot regression: full-width 3-card rows and accessible MMSE-size MNA-LF switch: OK');
           console.log('MNA Turkish scales, nutrition rows, BMI/calves/arms cross-tab authority, LF risk toggle and reset: OK');
 
           console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
