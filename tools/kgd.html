@@ -578,7 +578,12 @@
    three-row nutrition grid becomes a single narrow grid cell. */
 @media screen{
  #fullFields > section.supplement[data-clinical-index="4"]{
-  display:block!important;width:100%;max-width:100%;min-width:0;box-sizing:border-box
+  display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box
+ }
+ /* Wizard navigation must hide this entire panel on every non-nutrition tab.
+    The previous display:block!important overrode .wizard-hidden's display:none!important. */
+ #fullFields > section.supplement[data-clinical-index="4"].wizard-hidden{
+  display:none!important
  }
  #fullFields > section.supplement[data-clinical-index="4"] > :not(.section-bar){
   width:100%;max-width:100%;min-width:0;box-sizing:border-box
