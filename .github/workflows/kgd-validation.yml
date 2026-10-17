@@ -255,6 +255,67 @@ jobs:
           ctx.clearMMSECopyImage('standard');
           assert.equal(revoked,'blob:local-copy-test');
           assert.ok(!ctx.mmseCopyUploadPanel('standard').includes('blob:local-copy-test'));
+          // Type into each attention question; update the corresponding 0/1 buttons and total.
+          ctx.mmseVariant='standard';
+          ctx.mmseAttentionMode='subtract';
+          const attended={
+            buttons:[{dataset:{v:'0'},setAttribute(name,value){this[name]=value}},
+                     {dataset:{v:'1'},setAttribute(name,value){this[name]=value}}],
+            star:{style:{display:''}}
+          };
+          const attQuestion={
+            querySelectorAll:()=>attended.buttons,
+            querySelector:()=>attended.star
+          };
+          const input={id:'response_mmse_standard_13',value:'93',closest:()=>attQuestion};
+          assert.equal(ctx.mmseAttentionExpected(13),93);
+          assert.equal(ctx.mmseAttentionAutoGrade(input),true);
+          assert.equal(ctx.moreAnswers.mmse_standard_13,'1');
+          assert.equal(attended.buttons[1]['aria-pressed'],'true');
+          assert.equal(attended.star.style.display,'none');
+          input.value='94';
+          ctx.mmseAttentionAutoGrade(input);
+          assert.equal(ctx.moreAnswers.mmse_standard_13,'0');
+          assert.equal(attended.buttons[0]['aria-pressed'],'true');
+          input.value=' ';
+          ctx.mmseAttentionAutoGrade(input);
+          assert.equal(ctx.moreAnswers.mmse_standard_13,undefined);
+          assert.equal(attended.star.style.display,'');
+          const numbers=[93,86,79,72,65];
+          numbers.forEach((value,j)=>{
+            input.id='response_mmse_standard_'+(13+j);
+            input.value=String(value);
+            ctx.mmseAttentionAutoGrade(input);
+            assert.equal(ctx.moreAnswers['mmse_standard_'+(13+j)],'1');
+          });
+          ctx.mmseVariant='uneducated';
+          for(const [j,answer] of ['CUMA','PerŞembe','Çarşamba','sali','PAZARTESİ'].entries()){
+            input.id='response_mmse_uneducated_'+(13+j);
+            input.value=answer;
+            assert.equal(ctx.mmseAttentionAutoGrade(input),true);
+            assert.equal(ctx.moreAnswers['mmse_uneducated_'+(13+j)],'1','Day '+answer);
+          }
+          input.id='response_mmse_uneducated_15';
+          input.value='Cumartesi';
+          ctx.mmseAttentionAutoGrade(input);
+          assert.equal(ctx.moreAnswers.mmse_uneducated_15,'0');
+          input.value='Çarşamba günü';
+          ctx.mmseAttentionAutoGrade(input);
+          assert.equal(ctx.moreAnswers.mmse_uneducated_15,'1');
+          ctx.mmseVariant='standard';
+          ctx.mmseAttentionMode='world';
+          input.id='response_mmse_standard_13';
+          input.value='93';
+          assert.equal(ctx.mmseAttentionAutoGrade(input),false,'DÜNYA has independent manual scoring');
+          assert.equal(ctx.mmseAttentionExpected(13),null);
+          assert.ok(src.includes('moreText[el.id]=el.value;mmseAttentionAutoGrade(el);summarize();writeKGDDraft()'),'Input handler must actually grade responses');
+          // Patient-facing scripts in clinician notes should be bold, not merely their headings.
+          for(const group of [10,13,18,21,23,24,27,28,29])
+            assert.ok(ctx.mmseClinicianNote(group).includes('<strong class="mmse-spoken">'),'Patient prompt not bold for '+group);
+          ctx.mmseVariant='uneducated';
+          for(const group of [10,13,27,28])
+            assert.ok(ctx.mmseClinicianNote(group).includes('<strong class="mmse-spoken">'),'Uneducated prompt not bold for '+group);
+          console.log('Automatic MMSE attention grading: 93–65, Turkish weekdays, blank/wrong, oral fallback, bold clinician scripts: OK');
           console.log('MMSE 7-subtraction answers, oral DÜNYA, timers, local drawing preview & report: OK');
           console.log('Mini-COG Yok/Var: above notes, selects/toggles, persists and prints: OK');
           console.log('MMSE recall: 9 interactive options, small notes, wider fields, isolated and scored click handlers: OK');
