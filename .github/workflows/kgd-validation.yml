@@ -27,7 +27,7 @@ jobs:
             assert.ok(src.includes('id="'+id+'"'),'Missing button/print element: '+id);
           for(const method of ['kgdMMSEPrintScore','kgdScalePrintScore','kgdDetailedPrintStep','kgdShortPrintStep','printKGD'])
             assert.ok(src.includes('function '+method),'Missing print function: '+method);
-          assert.ok(src.includes('n>5?"1":"0"'),'FRAIL illness threshold must match attached KGD PDF');
+          assert.ok(src.includes('sel.value=n>=5?"1":"0"'),'Illness threshold must use 5 or more as in original FRAIL validation study; departmental PDF differs');
           const fjson=src.match(/const forms=(\[[\s\S]*?\]),texts=/);
           assert.ok(fjson,'Forms schema must be readable');
           const forms=JSON.parse(fjson[1]);
@@ -319,5 +319,72 @@ jobs:
           console.log('MMSE 7-subtraction answers, oral DÜNYA, timers, local drawing preview & report: OK');
           console.log('Mini-COG Yok/Var: above notes, selects/toggles, persists and prints: OK');
           console.log('MMSE recall: 9 interactive options, small notes, wider fields, isolated and scored click handlers: OK');
+
+          // Departmental PDF wording: the illness cutoff deliberately follows original Morley ≥5.
+          const titles=['Kırılganlık ve Sarkopeni (FRAIL, SARC-F, SOF)',
+            'Bilişsel Değerlendirme (Mini-COG, MMSE)','Duygudurum (GDS)'];
+          for(const title of titles)assert.ok(src.includes('{tr:"'+title+'"'),'Wizard tab: '+title);
+          for(const id of ['frail','sarcf','sof']){
+            const scale=forms.find(f=>f.id===id);
+            assert.ok(scale.items.every(x=>!/\/ (Fatigue|Resistance|Ambulation|Strength|Walking|Falls|Loss)/.test(x)),
+              id+' questions should not contain English help');
+            assert.ok(!/No|Yes|Some|Severe|Robust|prefrail/i.test(scale.full),
+              id+' interpretation should be Turkish');
+          }
+          const frailForm=forms.find(f=>f.id==='frail'),sarcfForm=forms.find(f=>f.id==='sarcf'),
+                sofForm=forms.find(f=>f.id==='sof');
+          assert.ok(frailForm.items[0].includes('Son 4 haftanın tamamında veya çoğunda'));
+          assert.ok(frailForm.items[3].includes('5 veya daha fazlasının'));
+          assert.ok(sarcfForm.options[4][1][1].includes('1-3 kez düştü'));
+          assert.ok(sarcfForm.options[4][2][1].includes('4 veya daha fazla düştü'));
+          assert.equal(sofForm.options[2][0][1],'Evet');
+          assert.equal(sofForm.options[2][1][1],'Hayır');
+          const wordingStart=src.indexOf('function kgdFrailtyPrompt(id,item,index){');
+          const wordingEnd=src.indexOf('const frailDiseases=',wordingStart);
+          assert.ok(wordingStart>=0&&wordingEnd>wordingStart);
+          const wordCtx={safe:x=>String(x)};
+          vm.runInNewContext(src.slice(wordingStart,wordingEnd),wordCtx);
+          const label=wordCtx.kgdFrailtyPrompt('frail',frailForm.items[0],0);
+          assert.ok(label.includes('<strong>Yorgunluk:</strong>'));
+          assert.ok(label.includes('<strong>tamamında veya çoğunda</strong>'));
+          assert.ok(src.includes('grid-template-columns:repeat(4,minmax(0,1fr))'),
+            '4+4+3 illness boxes on desktop');
+          // The actual illness checkbox event handler must recalculate 0/1 correctly.
+          const sourceStart=src.indexOf('function renderFrailDiseases(){');
+          const sourceEnd=src.indexOf('function enhanceChoices(){',sourceStart);
+          assert.ok(sourceStart>=0&&sourceEnd>sourceStart);
+          const checkboxes=Array.from({length:11},(_,i)=>({dataset:{disease:String(i)},checked:false,onchange:null}));
+          const count={textContent:''},grid={hidden:false};
+          const host={classList:{add(){}},querySelector(selector){
+            return selector==='.choice-grid'?grid:null;
+          },appendChild(){}};
+          const sel={value:'',hidden:false,tabIndex:0,closest:()=>host};
+          const box={innerHTML:'',querySelectorAll:()=>checkboxes};
+          let summaries=0;
+          const frailCtx={
+            $:id=>id==='frail_3'?sel:id==='frailCount'?count:null,
+            document:{createElement:()=>box},
+            frailSelected:new Set(),
+            frailNone:false,
+            frailDiseases:Array.from({length:11},(_,i)=>'Hastalık '+i),
+            safe:x=>String(x),summarize:()=>summaries++
+          };
+          vm.runInNewContext(src.slice(sourceStart,sourceEnd),frailCtx);
+          frailCtx.renderFrailDiseases();
+          assert.ok(!box.innerHTML.includes('Listelenen hastalıkların hiçbiri'));
+          assert.equal(sel.value,'0','Unselected list starts at 0 points');
+          for(let i=0;i<4;i++){checkboxes[i].checked=true;checkboxes[i].onchange()}
+          assert.equal(sel.value,'0','4 illnesses give 0 points');
+          checkboxes[4].checked=true;checkboxes[4].onchange();
+          assert.equal(sel.value,'1','5 illnesses give 1 point');
+          assert.ok(count.textContent.includes('5 / 11'));
+          checkboxes[5].checked=true;checkboxes[5].onchange();
+          assert.equal(sel.value,'1','6 illnesses also give 1 point');
+          checkboxes[5].checked=false;checkboxes[5].onchange();
+          checkboxes[4].checked=false;checkboxes[4].onchange();
+          assert.equal(sel.value,'0','4 illnesses again give 0 points');
+          assert.ok(summaries>=7,'Score summary must refresh when a disease changes');
+          console.log('KGD frailty tab titles, PDF questions, inline buttons and 4×3 illness grid with ≥5-point rule: OK');
+
           console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
           NODE
