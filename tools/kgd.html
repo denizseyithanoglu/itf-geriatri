@@ -580,7 +580,7 @@ function initClockAttachments(){
 }
 /* MMSE attention test: choose one 5-point method, never add both.
    Primary subtraction answers keep their legacy draft keys. The alternate
-   DÜNYA reverse-letter answers have independent keys, so switching methods
+   DÜNYA spoken reverse-letter answers have independent keys, so switching methods
    does not silently reuse or erase the other method's scores. */
 const mmseWorldLetters=["A","Y","N","Ü","D"];
 function mmseAnswerKey(i,variant=mmseVariant){
@@ -602,7 +602,7 @@ function mmseClinicianNote(start){
  let note="";
  if(start===10)note="Hastaya üç kelimeyi söyleyiniz. Üçünü de söyledikten sonra hemen tekrarlamasını isteyiniz ve birazdan tekrar soracağınızı belirtiniz.";
  if(start===13)note=standard?(mmseAttentionMode==="world"?
-  "Alternatif dikkat testi: DÜNYA kelimesini tersten yazmasını isteyiniz. Beklenen harf sırası: A – Y – N – Ü – D. Her doğru harfe 1 puan veriniz. İki dikkat testinin puanları birleştirilmez.":
+  "Alternatif dikkat testi: DÜNYA kelimesinin harflerini sondan başa doğru sesli olarak söylemesini isteyiniz. Beklenen harf sırası: A – Y – N – Ü – D. Her doğru harfe 1 puan veriniz. İki dikkat testinin puanları birleştirilmez.":
   "100’den geriye doğru yedi çıkararak devam etmesini isteyiniz. Her doğru işlem için 1 puan veriniz. Bu görev yapılamazsa alternatif DÜNYA testine geçebilirsiniz."):
   "Haftanın günlerini geriye doğru saymasını isteyiniz. Hastanın beş günü sayması gerekir. Örnek: Pazar’dan önce Cumartesi gelir; ondan önce hangi gün gelir?";
  if(start===18)note="Biraz önce söylenen üç kelimeyi sorunuz. Önce serbest hatırlamayı puanlayınız; gerekirse alttaki ipucu ve çoktan seçmeli seçenekleri kullanınız.";
@@ -651,14 +651,16 @@ function mmseAttentionSwitch(){
  return '<div class="mmse-attention-switch" role="group" aria-label="Standart MMSE dikkat testi yöntemi">'+
   '<span class="mmse-attention-label" data-attention-label="subtract">100’den 7 çıkarma</span>'+
   '<label class="mmse-switch-control" for="mmseAttentionSwitch">'+
-  '<input type="checkbox" role="switch" id="mmseAttentionSwitch" aria-label="DÜNYA alternatif dikkat testini seç" '+(mmseAttentionMode==="world"?"checked":"")+'>'+
+  '<input type="checkbox" role="switch" id="mmseAttentionSwitch" aria-label="DÜNYA harflerini tersten sözlü söyleme testini seç" '+(mmseAttentionMode==="world"?"checked":"")+'>'+
   '<span class="mmse-switch-track" aria-hidden="true"></span></label>'+
-  '<span class="mmse-attention-label" data-attention-label="world">DÜNYA — tersten yazma</span>'+
+  '<span class="mmse-attention-label" data-attention-label="world">DÜNYA — tersten söyleme</span>'+
   '</div>';
 }
 function mmseQuestionLabel(q,i){
  if(mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18)return mmseWorldLetters[i-13];
- return q.replace(/^(?:ORYANTASYON|KAYIT|DİKKAT|HATIRLAMA|ADLANDIRMA|TEKRARLAMA|ANLAMA|YAZI|OKUMA|KOPYA):\s*/u,"");
+ const label=q.replace(/^(?:ORYANTASYON|KAYIT|DİKKAT|HATIRLAMA|ADLANDIRMA|TEKRARLAMA|ANLAMA|YAZI|OKUMA|KOPYA):\s*/u,"");
+ if(mmseVariant==="standard"&&mmseAttentionMode==="subtract"&&i>=13&&i<18)return label+" ("+[93,86,79,72,65][i-13]+")";
+ return label;
 }
 function renderMMSEGroups(){
  const list=additional[mmseVariant==="standard"?3:4][1];
@@ -682,7 +684,7 @@ function renderMMSEGroups(){
    const i=start+offset,key=mmseAnswerKey(i),observation="response_"+key;
    const wordMode=mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18;
    const showObservation=!wordMode&&!((i>=10&&i<=12)||(i>=18&&i<=22)||(i>=24&&i<=26)||i===28||i===29);
-   const isLongResponse=i===23||(i===27&&mmseVariant==="standard");
+   const isLongResponse=i===23||i===27;
    const label=(i+1)+'. '+safe(mmseQuestionLabel(q,i));
    return '<div class="mmse-question">'+
     '<label '+(showObservation?'for="'+observation+'"':'')+'>'+label+
@@ -1185,7 +1187,7 @@ item("11. Mini-COG ve Saat Çizme",[["Kayıt (3 tekrar)",miniCogMemoryScore([0,1
 const qlist=(mmseVariant==="uneducated"?additional[4][1]:additional[3][1]).map((label,i)=>mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18?mmseWorldLetters[i-13]:label);
 const mvals=mmseActiveValues();
 const mtotal=mvals.some(v=>v===undefined)?null:mvals.reduce((n,v)=>n+Number(v),0);
-item("12. MMSE — "+(mmseVariant==="uneducated"?"Eğitimsizler İçin":"Standart"),[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA (tersten yazma)":"100’den 7 çıkarma"):"Haftanın günlerini tersten sayma"],["MMSE Puanı",mtotal===null?"__":mtotal+"/30"+(mtotal>=24?" (normal)":" (normalin altında)")],...qlist.map((label,i)=>{const answerKey=mmseAnswerKey(i);return [(i+1)+". "+label,mvals[i]===undefined?"__":mvals[i]+" puan"+(moreText["response_"+answerKey]?" — "+moreText["response_"+answerKey]:"")]}),["Hatırlama — Ek Notlar",moreText["mmse-recall-notes-"+mmseVariant]],["MMSE Ek Notlar",moreText["mmse-notes"]]]);
+item("12. MMSE — "+(mmseVariant==="uneducated"?"Eğitimsizler İçin":"Standart"),[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA (tersten söyleme)":"100’den 7 çıkarma"):"Haftanın günlerini tersten sayma"],["MMSE Puanı",mtotal===null?"__":mtotal+"/30"+(mtotal>=24?" (normal)":" (normalin altında)")],...qlist.map((label,i)=>{const answerKey=mmseAnswerKey(i);return [(i+1)+". "+label,mvals[i]===undefined?"__":mvals[i]+" puan"+(moreText["response_"+answerKey]?" — "+moreText["response_"+answerKey]:"")]}),["Hatırlama — Ek Notlar",moreText["mmse-recall-notes-"+mmseVariant]],["MMSE Ek Notlar",moreText["mmse-notes"]]]);
 const gd=gdsScore();
 item("13. GDS-30 — Duygudurum",[["GDS-30 Puanı",gd===null?"__":gd+"/30"+(gd<=10?" (normal)":gd<=13?" (olası depresyon)":" (pozitif tarama)")],...gds30.map((q,i)=>[(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?"__":moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"])]);
 const phys=clinical(1).map(([label,value],i)=>[label,i===5?document.getElementById("bmiOut")?.textContent:value]);
@@ -1519,7 +1521,7 @@ function kgdDetailedPrintStep(step){
   const wordIndices=[0,1,2,4,5,6];
   const words=wordIndices.map(i=>[additional[2][1][i],kgdPrintPresent(moreAnswers["additional_2_"+i])?moreAnswers["additional_2_"+i]+" puan":null]);
   const questions=additional[mmseVariant==="standard"?3:4][1];
-  const mmseEntries=[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA — tersten yazma":"100’den 7 çıkarma"):"Haftanın günlerini geriye sayma"],["MMSE toplam",kgdMMSEPrintScore()]];
+  const mmseEntries=[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA — tersten söyleme":"100’den 7 çıkarma"):"Haftanın günlerini geriye sayma"],["MMSE toplam",kgdMMSEPrintScore()]];
   const recallNames=mmseVariant==="standard"?["Mavi","Şahin","Lale"]:["Masa","Bayrak","Elbise"];
   const recallLabels={free:"Kendiliğinden",hint:"İpucu ile",multiple:"Çoktan seçmeli"};
   recallNames.forEach((name,index)=>{
