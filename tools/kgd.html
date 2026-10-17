@@ -504,7 +504,7 @@ function sectionResets(){document.querySelectorAll("#fullFields>section,#section
   const box=$("clinical_3_1")?.closest(".extra-field");if(box)box.hidden=true;
   if(alcoholField)alcoholField.closest(".extra-field").hidden=true;
   syncHistoryCounts();
-}if(sec.id==="form_frail"){frailSelected.clear();frailNone=false;sec.querySelectorAll(".frail-disease-box input").forEach(ch=>ch.checked=false);const count=sec.querySelector("#frailCount");if(count)count.textContent="0 / 11 hastalık · Yanıt bekleniyor"}if(sec.id==="physicalSection"||sec.querySelector("#sarcoState")){syncSarco()}if(sec.querySelector("#eq5dHealthVAS")){delete moreAnswers.eq5dHealthVAS;const slider=$("eq5dHealthVAS");slider.value="50";$("eq5dHealthValue").textContent="— %";sec.querySelector("#eq5dLegacyNote")?.remove()}if(sec.querySelector("#minicogImpairment"))delete moreAnswers.miniCogImpairment;if(sec.id==="clock-assessment"||sec.querySelector("#clock-assessment")){delete moreAnswers.clock;clearClockDrawing();updateMiniClockScore()}if(sec.id==="mmse-assessment"){Object.keys(moreAnswers).filter(k=>k.startsWith("mmse_")).forEach(k=>delete moreAnswers[k]);mmseAttentionMode="subtract";const mode=$("mmseVariantSwitch");if(mode)mode.checked=mmseVariant==="uneducated";const notes=sec.querySelector(":scope > .assessment-notes");sec.querySelectorAll(":scope > .mmse-domain-heading, :scope > .mmse-group").forEach(el=>el.remove());const draft=document.createElement("div");draft.innerHTML=renderMMSEGroups();while(draft.firstChild)sec.insertBefore(draft.firstChild,notes);attachMMSE();};sec.querySelectorAll("[aria-pressed]").forEach(el=>el.setAttribute("aria-pressed","false"));sec.querySelectorAll(".redstar").forEach(el=>el.style.display="");summarize()};bar.appendChild(b)})}
+}if(sec.id==="form_frail"){frailSelected.clear();frailNone=false;sec.querySelectorAll(".frail-disease-box input").forEach(ch=>ch.checked=false);const count=sec.querySelector("#frailCount");if(count)count.textContent="0 / 11 hastalık · Yanıt bekleniyor"}if(sec.id==="physicalSection"||sec.querySelector("#sarcoState")){syncSarco()}if(sec.querySelector("#eq5dHealthVAS")){delete moreAnswers.eq5dHealthVAS;const slider=$("eq5dHealthVAS");slider.value="50";$("eq5dHealthValue").textContent="— %";sec.querySelector("#eq5dLegacyNote")?.remove()}if(sec.querySelector("#minicogImpairment"))delete moreAnswers.miniCogImpairment;if(sec.id==="clock-assessment"||sec.querySelector("#clock-assessment")){delete moreAnswers.clock;clearClockDrawing();updateMiniClockScore()}if(sec.id==="mmse-assessment"){resetMMSEWidgets();Object.keys(moreAnswers).filter(k=>k.startsWith("mmse_")).forEach(k=>delete moreAnswers[k]);mmseAttentionMode="subtract";const mode=$("mmseVariantSwitch");if(mode)mode.checked=mmseVariant==="uneducated";const notes=sec.querySelector(":scope > .assessment-notes");sec.querySelectorAll(":scope > .mmse-domain-heading, :scope > .mmse-group").forEach(el=>el.remove());const draft=document.createElement("div");draft.innerHTML=renderMMSEGroups();while(draft.firstChild)sec.insertBefore(draft.firstChild,notes);attachMMSE();};sec.querySelectorAll("[aria-pressed]").forEach(el=>el.setAttribute("aria-pressed","false"));sec.querySelectorAll(".redstar").forEach(el=>el.style.display="");summarize()};bar.appendChild(b)})}
 
 /* The two MMSE copy tasks are redrawn as vector outlines from the official
    departmental KGD PDF pages 6 (uneducated) and 8 (standard).
@@ -583,6 +583,108 @@ function initClockAttachments(){
    DÜNYA spoken reverse-letter answers have independent keys, so switching methods
    does not silently reuse or erase the other method's scores. */
 const mmseWorldLetters=["A","Y","N","Ü","D"];
+
+/* Browser-local copy images, never included in sessionStorage. */
+const mmseCopyImages={standard:null,uneducated:null};
+function mmseCopyUploadPanel(variant){
+ const url=mmseCopyImages[variant];
+ return '<div class="mmse-copy-upload" data-copy-upload="'+variant+'">'+
+ '<label for="mmseCopyFile-'+variant+'">Hastanın kopyaladığı şekli yükle (isteğe bağlı)</label>'+
+ '<p class="optional-note">JPG, PNG veya WebP; en fazla 8 MB. Görsel yalnızca bu sayfada tutulur, taslağa ya da sunucuya kaydedilmez. Kimlik bilgisi içermemelidir.</p>'+
+ '<input type="file" id="mmseCopyFile-'+variant+'" accept="image/jpeg,image/png,image/webp" aria-label="Hastanın kopya çizimi">'+
+ '<img class="mmse-copy-preview" alt="Hastanın kopyaladığı şekil"'+(url?' src="'+safe(url)+'"':"")+(url?"":" hidden")+'>'+
+ '<button type="button" class="mmse-copy-remove" data-remove-copy="'+variant+'"'+(url?"":" hidden")+' >Görseli kaldır</button>'+
+ '<p class="optional-note" data-copy-status="'+variant+'" role="status">'+(url?"Görsel bu sayfada tutuluyor.":"Henüz görsel eklenmedi.")+'</p></div>';
+}
+function updateMMSECopyPreview(variant){
+ const url=mmseCopyImages[variant],input=$("mmseCopyFile-"+variant);
+ const img=document.querySelector('[data-copy-upload="'+variant+'"] .mmse-copy-preview');
+ const remove=document.querySelector('[data-remove-copy="'+variant+'"]');
+ const status=document.querySelector('[data-copy-status="'+variant+'"]');
+ if(input&&!url)input.value="";
+ if(img){if(url)img.src=url;else img.removeAttribute("src");img.hidden=!url;}
+ if(remove)remove.hidden=!url;
+ if(status)status.textContent=url?"Görsel taslağa veya sunucuya kaydedilmez.":"Henüz görsel eklenmedi.";
+}
+function clearMMSECopyImage(variant){
+ if(!Object.hasOwn(mmseCopyImages,variant))return;
+ if(mmseCopyImages[variant])URL.revokeObjectURL(mmseCopyImages[variant]);
+ mmseCopyImages[variant]=null;
+ updateMMSECopyPreview(variant);
+}
+function handleMMSECopyImage(variant,file){
+ if(!file||!Object.hasOwn(mmseCopyImages,variant))return;
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)||!file.size||file.size>8*1024*1024){
+  alert("En fazla 8 MB boyutunda JPG, PNG veya WebP dosyası seçiniz.");
+  const input=$("mmseCopyFile-"+variant);if(input)input.value="";
+  return;
+ }
+ clearMMSECopyImage(variant);
+ mmseCopyImages[variant]=URL.createObjectURL(file);
+ updateMMSECopyPreview(variant);
+}
+/* Timer state lives in RAM, not in clinical results or PDF outputs. */
+const mmseTimers=Object.create(null);
+function mmseRemaining(key){
+ const t=mmseTimers[key];
+ return t?(t.running?Math.max(0,t.until-Date.now()):t.left):0;
+}
+function mmseTimerMarkup(key,seconds){
+ const t=mmseTimers[key],n=t?Math.ceil(mmseRemaining(key)/1000):seconds;
+ const time=String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");
+ return '<div class="mmse-timer" data-mmse-timer="'+key+'" role="group" aria-label="'+seconds+' saniye geri sayım">'+
+ '<output data-mmse-time aria-live="off">'+time+'</output>'+
+ '<button type="button" data-mmse-timer-action="toggle" data-mmse-timer-key="'+key+'">'+(t?.running?"Duraklat":n===0?"Yeniden başlat":"Başlat")+'</button>'+
+ '<button type="button" data-mmse-timer-action="reset" data-mmse-timer-key="'+key+'">Sıfırla</button>'+
+ '<small data-mmse-timer-status></small></div>';
+}
+function refreshMMSETimer(key){
+ const t=mmseTimers[key];if(!t)return;
+ let n=Math.ceil(mmseRemaining(key)/1000);
+ if(t.running&&n<=0){clearInterval(t.tick);t.tick=null;t.running=false;t.left=0;n=0;}
+ const root=document.querySelector('[data-mmse-timer="'+key+'"]');if(!root)return;
+ const output=root.querySelector("[data-mmse-time]");
+ if(output)output.textContent=String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0");
+ const toggle=root.querySelector('[data-mmse-timer-action="toggle"]');
+ if(toggle)toggle.textContent=t.running?"Duraklat":n===0?"Yeniden başlat":"Başlat";
+ const status=root.querySelector("[data-mmse-timer-status]");
+ if(status)status.textContent=n===0?"Süre doldu":"";
+}
+function actMMSETimer(key,action){
+ const seconds={"writing-standard":30,"copy-standard":60,"copy-uneducated":60}[key];if(!seconds)return;
+ const t=mmseTimers[key]||(mmseTimers[key]={seconds,left:seconds*1000,running:false,until:0,tick:null});
+ if(action==="reset"){if(t.tick)clearInterval(t.tick);t.tick=null;t.running=false;t.left=seconds*1000;}
+ if(action==="toggle"){
+  if(t.running){t.left=mmseRemaining(key);clearInterval(t.tick);t.tick=null;t.running=false;}
+  else{if(t.left<=0)t.left=seconds*1000;t.until=Date.now()+t.left;t.running=true;t.tick=setInterval(()=>refreshMMSETimer(key),200);}
+ }
+ refreshMMSETimer(key);
+}
+function bindMMSEWidgets(){
+ document.querySelectorAll("[data-mmse-timer-action]").forEach(button=>{
+  button.onclick=()=>actMMSETimer(button.dataset.mmseTimerKey,button.dataset.mmseTimerAction);
+ });
+ document.querySelectorAll("[data-mmse-timer]").forEach(node=>{
+  const key=node.dataset.mmseTimer,seconds=key.startsWith("writing")?30:60;
+  if(!mmseTimers[key])mmseTimers[key]={seconds,left:seconds*1000,running:false,until:0,tick:null};
+  refreshMMSETimer(key);
+ });
+ for(const variant of ["standard","uneducated"]){
+  const input=$("mmseCopyFile-"+variant);
+  if(input)input.onchange=()=>handleMMSECopyImage(variant,input.files?.[0]);
+  const remove=document.querySelector('[data-remove-copy="'+variant+'"]');
+  if(remove)remove.onclick=()=>clearMMSECopyImage(variant);
+  updateMMSECopyPreview(variant);
+ }
+}
+function resetMMSEWidgets(){
+ for(const variant of ["standard","uneducated"])clearMMSECopyImage(variant);
+ for(const [key,t] of Object.entries(mmseTimers)){
+  if(t.tick)clearInterval(t.tick);t.tick=null;t.running=false;t.left=t.seconds*1000;
+  refreshMMSETimer(key);
+ }
+}
+
 function mmseAnswerKey(i,variant=mmseVariant){
  if(variant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18)return "mmse_world_"+(i-13);
  return "mmse_"+variant+"_"+i;
@@ -692,11 +794,12 @@ function renderMMSEGroups(){
     (showObservation?(isLongResponse?'<textarea class="mmse-long-answer" id="'+observation+'" rows="2" placeholder="Hastanın yanıtı / Patient response">'+safe(moreText[observation]||"")+'</textarea>':'<input type="text" id="'+observation+'" placeholder="Hastanın yanıtı / Patient response" value="'+safe(moreText[observation]||"")+'">'):"")+
     '<div class="simple-choice"><button type="button" data-mmse="'+key+'" data-v="0" aria-pressed="'+(moreAnswers[key]==="0")+'">0</button>'+
     '<button type="button" data-mmse="'+key+'" data-v="1" aria-pressed="'+(moreAnswers[key]==="1")+'">1</button></div>'+
-    (i===29?mmseCopyPrompt(mmseVariant):i===28&&mmseVariant==="standard"?mmseReadPrompt():"")+
+    (i===29?mmseCopyPrompt(mmseVariant)+mmseCopyUploadPanel(mmseVariant):i===28&&mmseVariant==="standard"?mmseReadPrompt():"")+
    '</div>';
   }).join("");
+  const timer=start===29?mmseTimerMarkup("copy-"+mmseVariant,60):start===27&&mmseVariant==="standard"?mmseTimerMarkup("writing-standard",30):"";
   return (language?'<h3 class="mmse-domain-heading">DİL</h3>':"")+
-   '<div class="mmse-group'+gridClass+'"'+ident+'><h3>'+name+'</h3>'+
+   '<div class="mmse-group'+gridClass+'"'+ident+'><div class="mmse-group-heading"><h3>'+name+'</h3>'+timer+'</div>'+
    (start===13?mmseAttentionSwitch():"")+mmseClinicianNote(start)+
    '<div class="mmse-items">'+questions+'</div>'+
    (start===18?mmseRecallAids():"")+'</div>';
@@ -863,6 +966,7 @@ function attachMMSE(){
  document.querySelectorAll("#mmse-assessment .mmse-question input,#mmse-assessment .mmse-question textarea,#mmse-assessment textarea,#clock-notes,#minicog-notes").forEach(el=>el.oninput=()=>{
   moreText[el.id]=el.value;summarize();writeKGDDraft();
  });
+ bindMMSEWidgets();
 }
 const demographics={0:{type:"text",label:"Hastanın Adı Soyadı"},1:{type:"text",label:"TC No"},2:{type:"date",label:"Tarih"},3:{type:"date",label:"Doğum Tarihi",age:true},4:{type:"buttons",options:["Kadın","Erkek"]},5:{type:"tel"},6:{type:"select",options:["Okur-yazar değil","Okur-yazar","İlkokul","Ortaokul","Lise","Ön lisans","Üniversite","Yüksek lisans","Doktora","Diğer"]},7:{type:"select",options:["Evli","Bekâr","Boşanmış","Dul"]},8:{type:"text"},9:{type:"number"},10:{type:"buttons",options:["Ev","Huzurevi","Bakımevi","Diğer"]},11:{type:"buttons",options:["Yok","Var"]},12:{type:"buttons",options:["Yok","Var"]},13:{type:"number"}};
 function structuredField(j,i,label,key){const setting=j===0?demographics[i]:null;const basic=(type,extra="")=>'<input class="structured-input" type="'+type+'" id="'+key+'" value="'+safe(moreText[key]||"")+'" '+extra+'>';if(j===0){if(i===2||i===3)return '<input class="structured-input date-text" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="gg.aa.yyyy" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===5)return '<input class="structured-input tel-text" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="0 (___) ___ ____" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===4)return '<div class="simple-choice gender-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+o+'" aria-pressed="'+(moreText[key]===o)+'">'+(o==="Kadın"?"♀ ":"♂ ")+o+'</button>').join("")+'</div>';if(setting?.type==="buttons")return '<div class="simple-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+safe(o)+'" aria-pressed="'+(moreText[key]===o)+'">'+safe(o)+'</button>').join("")+'</div>';if(setting?.type==="select")return '<select class="structured-input" id="'+key+'"><option value="">Seçiniz…</option>'+setting.options.map(o=>'<option '+(moreText[key]===o?"selected":"")+'>'+safe(o)+'</option>').join("")+'</select>';if(setting?.age)return basic("date",'max="'+new Date().toISOString().slice(0,10)+'"')+'<output class="calculated" id="ageOut"></output>';return basic(setting?.type||"text")}
