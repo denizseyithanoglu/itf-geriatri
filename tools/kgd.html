@@ -671,12 +671,33 @@
   display:block;margin-bottom:7px;font-size:.92rem;color:#234d40
  }
  #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance p{margin:7px 0}
- #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance ul{
-  margin:5px 0 9px;padding-left:22px;display:grid;gap:4px;
-  grid-template-columns:repeat(2,minmax(0,1fr))
+ /* Six anatomically numbered SGA explanations: 1–2–3 / 4–5–6.
+    Scope to the guidance text so the adjacent high-resolution figure is unchanged. */
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-guidance-copy .sga-sites-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;margin:10px 0 12px;padding:0;list-style:none;
  }
- @media(max-width:700px){
-  #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance ul{
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-sites-grid li{
+  display:flex;flex-direction:column;align-items:flex-start;
+  min-width:0;gap:5px;margin:0;padding:10px;
+  border:1px solid #cadfd1;border-radius:9px;background:#fbfefd;
+  overflow-wrap:anywhere;font-size:.8rem;line-height:1.42;
+ }
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-sites-grid .sga-site-number{
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  width:28px;height:28px;border-radius:50%;background:#285b4d;color:#fff;
+  font-size:.85rem;font-weight:800;
+ }
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-sites-grid b{
+  font-weight:750;color:#234d40;line-height:1.28;
+ }
+ @media(max-width:570px){
+  #fullFields > section.supplement[data-clinical-index="4"] .sga-guidance-copy .sga-sites-grid{
+   grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+ }
+ @media(max-width:410px){
+  #fullFields > section.supplement[data-clinical-index="4"] .sga-guidance-copy .sga-sites-grid{
    grid-template-columns:1fr
   }
  }
@@ -1782,11 +1803,13 @@ function formatNutritionFields(){
   note.innerHTML='<div class="sga-guidance-copy">'+
    '<strong>Uygulayıcı notu — SGA ile kas kütlesi nasıl değerlendirilir?</strong>'+
    '<p><b>Gözlem ve hafif palpasyonla</b> her iki tarafta kas hacmi ve konturları değerlendiriniz. Özellikle şu bölgeleri inceleyiniz:</p>'+
-   '<ul><li><b>Şakak (temporalis):</b> temporal çöküklük.</li>'+
-   '<li><b>Klavikula ve omuz (pektoral/deltoid):</b> klavikulanın belirginleşmesi, yuvarlak omuz konturunun kaybı.</li>'+
-   '<li><b>Skapula çevresi:</b> kemik çıkıntılarının belirginleşmesi, skapula çevresindeki kasların azalması.</li>'+
-   '<li><b>El sırtı (interosseöz kaslar):</b> başparmak–işaret parmağı arası ve metakarp aralarındaki çöküklük.</li>'+
-   '<li><b>Uyluk (kuadriseps) ve baldır (gastroknemius):</b> kas dolgunluğunun azalması ve kemik/tendon konturlarının belirginleşmesi.</li></ul>'+
+   '<ol class="sga-sites-grid" aria-label="SGA kas muayenesi — 1’den 6’ya anatomik bölgeler">'+
+   '<li><span class="sga-site-number" aria-hidden="true">1</span><b>Şakak (temporalis)</b><span>Temporal çöküklük.</span></li>'+
+   '<li><span class="sga-site-number" aria-hidden="true">2</span><b>Klavikula ve omuz (pektoral/deltoid)</b><span>Klavikulanın belirginleşmesi, yuvarlak omuz konturunun kaybı.</span></li>'+
+   '<li><span class="sga-site-number" aria-hidden="true">3</span><b>Skapula çevresi</b><span>Kemik çıkıntılarının belirginleşmesi, skapula çevresindeki kasların azalması.</span></li>'+
+   '<li><span class="sga-site-number" aria-hidden="true">4</span><b>El sırtı (interosseöz kaslar)</b><span>Başparmak–işaret parmağı arası ve metakarp aralarındaki çöküklük.</span></li>'+
+   '<li><span class="sga-site-number" aria-hidden="true">5</span><b>Uyluk (kuadriseps)</b><span>Kas dolgunluğunun azalması; kemik ve tendon konturlarının belirginleşmesi.</span></li>'+
+   '<li><span class="sga-site-number" aria-hidden="true">6</span><b>Baldır (gastroknemius)</b><span>Kas dolgunluğunun azalması; kemik ve tendon konturlarının belirginleşmesi.</span></li></ol>'+
    '<p><b>Kaydedilecek izlenim:</b> normal / hafif / orta / ciddi kas kaybı; değerlendirmeyi engelleyen ödem, obezite veya hareketsizlik varsa not ediniz. Bu <b>öznel fizik muayene bulgusu</b> ölçülmüş kas kütlesi ya da tek başına malnütrisyon tanısı değildir; beslenme öyküsü ve diğer bulgularla birlikte yorumlanır.</p></div>'+
    '<figure class="sga-guidance-figure">'+sgaAnatomyFigure()+
    '<figcaption>Şekilde numaralanan anatomik muayene bölgeleri</figcaption></figure>';
