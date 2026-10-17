@@ -396,5 +396,80 @@ jobs:
           console.log('FRAIL inline scoring labels 0 Normal, 1–2 pre-frail, 3–5 frail: OK');
           console.log('KGD frailty tab titles, PDF questions, inline buttons and 4×3 illness grid with ≥5-point rule: OK');
 
+          // Probel-friendly text is for single-tab short summaries only.
+          const inlineStart=src.indexOf('function kgdProbelInlineSummary(title,rows){');
+          const inlineEnd=src.indexOf('function kgdDetailedBlock(title,rows){',inlineStart);
+          assert.ok(inlineStart>=0&&inlineEnd>inlineStart,'Inline summary helper must be available');
+          const pctx={
+            safe:x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
+            kgdPrintPresent:v=>v!==undefined&&v!==null&&String(v).trim()!==''&&String(v)!=='__'
+          };
+          vm.runInNewContext(src.slice(inlineStart,inlineEnd),pctx);
+          const scoreRows=[
+            ['FRAIL','2/5 (pre-frail)'],
+            ['SARC-F','3/10 (sarkopeni taraması negatif)'],
+            ['SOF','1/3 (pre-frail)'],
+            ['Cevapsız',null]
+          ];
+          const inline=pctx.kgdPrintable('Kırılganlık ve Sarkopeni',scoreRows,true);
+          assert.ok(inline.includes('<p class="compact-inline-text">'),'Inline report must be a paragraph');
+          assert.ok(inline.includes('2/5 (pre-frail)</span>, <span'),'Values must be comma-separated');
+          assert.ok(inline.includes('3/10 (sarkopeni taraması negatif)'));
+          assert.ok(!inline.includes('compact-lines')&&!inline.includes('compact-detail-grid'));
+          assert.ok(!inline.includes('Cevapsız'));
+          const legacy=pctx.kgdPrintable('Kırılganlık ve Sarkopeni',scoreRows);
+          assert.ok(legacy.includes('class="compact-lines"')&&legacy.includes('class="compact-line"'),
+            'Full KGD short summary default must keep its old structure');
+          assert.ok(!legacy.includes('compact-inline-text'));
+          assert.ok(pctx.kgdProbelInlineSummary('Özel',[['<Risk>','1 & 2']]).includes('&lt;Risk&gt;:'));
+          assert.ok(pctx.kgdProbelInlineSummary('Boş',[['FRAIL',null]])==='');
+          const shortStart=src.indexOf('function kgdShortPrintStep(step,inline=false){');
+          const shortEnd=src.indexOf('function kgdDetailedScale(id){',shortStart);
+          assert.ok(shortStart>=0&&shortEnd>shortStart,'Short summary dispatcher must exist');
+          const pshort={
+            ...pctx,
+            forms,moreAnswers:{},mmseVariant:'standard',
+            $:()=>null,
+            compactKGDStep:()=>'<section>Other short info</section>',
+            moreScore:()=>null,kgdScalePrintScore:id=>id==='frail'?'2/5 (pre-frail)':id==='sarcf'?'3/10 (negatif)':'1/3 (pre-frail)',
+            kgdMNATotalScore:()=>null,kgdEQScore:()=>null,kgdMMSEPrintScore:()=>null,
+            miniCogMemoryScore:()=>null,kgdGDSPrintScore:()=>null
+          };
+          vm.runInNewContext(src.slice(shortStart,shortEnd),pshort);
+          const frailInline=pshort.kgdShortPrintStep(6,true);
+          assert.ok(frailInline.includes('<p class="compact-inline-text">'));
+          assert.ok(frailInline.includes('FRAIL:')&&frailInline.includes('SARC-F:')&&frailInline.includes('SOF:'));
+          const frailRegular=pshort.kgdShortPrintStep(6);
+          assert.ok(frailRegular.includes('class="compact-lines"'));
+          assert.ok(src.includes('kgdShortPrintStep(i,!all)'),
+            'Full KGD summary must use the original two-column mode');
+          assert.ok(src.includes('detailed?kgdDetailedPrintStep(i):'),
+            'Detailed KGD report path must remain untouched');
+          assert.ok(src.includes('id="wizardCopySectionSummary"'),
+            'Provide a one-click copy button for a short tab summary');
+          assert.ok(src.includes('$("wizardCopySectionSummary").hidden=wizardStep===wizardGroups.length-1'),
+            'Copy button should be hidden on the KGD overview tab');
+          const clipboardStart=src.indexOf('function kgdSectionSummaryPlainText(step){');
+          const clipboardEnd=src.indexOf('function printKGD(step,style){',clipboardStart);
+          assert.ok(clipboardStart>=0&&clipboardEnd>clipboardStart);
+          let copied='';
+          const button={textContent:''};
+          const cpctx={
+            kgdShortPrintStep:()=>frailInline,
+            wizardGroups:Array.from({length:11},()=>({})),
+            document:{createElement:()=>({
+              innerHTML:'',
+              querySelectorAll:()=>[{textContent:'FRAIL: 2/5 (pre-frail), SARC-F: 3/10 (negatif), SOF: 1/3 (pre-frail)'}]
+            })},
+            navigator:{clipboard:{writeText:async value=>{copied=value}}},
+            $:()=>button,
+            alert:()=>{throw Error('Unexpected empty-summary warning')}
+          };
+          vm.runInNewContext(src.slice(clipboardStart,clipboardEnd),cpctx);
+          assert.equal(cpctx.kgdSectionSummaryPlainText(10),'','Do not copy the full-KGD summary');
+          await cpctx.copyKGDSectionSummary(6);
+          assert.equal(copied,'FRAIL: 2/5 (pre-frail), SARC-F: 3/10 (negatif), SOF: 1/3 (pre-frail)');
+          assert.ok(button.textContent.includes('kopyalandı'));
+          console.log('Probel: comma-separated per-tab short scores, copy button, unchanged full/detailed layouts: OK');
           console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
           NODE
