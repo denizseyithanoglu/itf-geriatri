@@ -636,11 +636,48 @@ jobs:
             'SGA clinician instructions must be placed under the pre-existing nutrition field, not before the weight-loss cards');
           for(const anatomy of ['temporalis','Klavikula','Skapula','interosseöz','kuadriseps','gastroknemius'])
             assert.ok(src.includes(anatomy),'SGA physical examination note must mention '+anatomy);
-          assert.ok(src.includes('sga-muscle-guidance')&&src.includes('kas kaybı yok / hafif / orta / belirgin'),
+          assert.ok(src.includes('sga-muscle-guidance')&&src.includes('normal / hafif / orta / ciddi kas kaybı'),
             'SGA needs subjective wasting category guidance');
           assert.ok(src.includes('ölçülmüş kas kütlesi ya da tek başına malnütrisyon tanısı değildir'),
             'SGA note must distinguish clinical impression from quantified muscle mass or malnutrition diagnosis');
           assert.ok(src.includes('sgaField.appendChild(note)'),'SGA note must be inserted in the UI');
+          // Interactive SGA severity choices replace the previous free-text field but
+          // preserve its exact clinical_4_15 key for the draft and all existing reports.
+          const sgaStart=src.indexOf('function sgaAnatomyFigure(){');
+          const sgaEnd=src.indexOf('function formatNutritionFields(){',sgaStart);
+          assert.ok(sgaStart>=0&&sgaEnd>sgaStart);
+          const figureContext={};
+          vm.runInNewContext(src.slice(sgaStart,sgaEnd),figureContext);
+          const diagram=figureContext.sgaAnatomyFigure();
+          assert.ok(diagram.includes('role="img"')&&diagram.includes('sgaDiagramDesc'));
+          for(const number of [1,2,3,4,5,6])
+            assert.ok(diagram.includes('>'+number+'</text>'),'Numbered anatomical landmark '+number);
+          assert.ok(diagram.includes('ÖNDEN')&&diagram.includes('ARKADAN'));
+          assert.ok(src.includes('const grades=["Normal","Hafif","Orta","Ciddi"]'),
+            'Four clinical SGA assessment buttons must be present in the existing nutrition section');
+          assert.ok(src.includes('hidden.type="hidden";hidden.id="clinical_4_15"'),
+            'The SGA score must keep the previous saved/printed field key');
+          assert.ok(src.includes('aria-pressed="'+(normalized===grade)'),
+            'Restored SGA grade must display as selected');
+          assert.ok(src.includes('choices.addEventListener("click",event=>'),
+            'SGA grade buttons must be wired to click handlers');
+          assert.ok(src.includes('moreText.clinical_4_15=selected')&&src.includes('summarize();writeKGDDraft()'),
+            'SGA grade must change live score/summary and persist into session draft');
+          assert.ok(src.includes('moreText.sgaPreviousFreeText=moreText.sgaPreviousFreeText||previous'),
+            'Older free-form SGA assessments must not silently disappear');
+          assert.ok(src.includes('sec.querySelectorAll("[data-nutrition-choice],[data-sga-grade]")'),
+            'Reset of nutrition tab must deselect SGA and intake choices');
+          assert.ok(src.includes('delete moreText.sgaPreviousFreeText'),
+            'Reset must remove any previous unstructured SGA record');
+          assert.ok(src.includes('<div class="sga-guidance-copy">')&&
+            src.includes('<figure class="sga-guidance-figure">')&&
+            src.includes('grid-template-columns:minmax(0,1.35fr) minmax(260px,.95fr)'),
+            'Clinician notes on the left and anatomical figure on the right');
+          assert.ok(src.includes('@media(max-width:780px)')&&src.includes('sga-muscle-guidance{grid-template-columns:1fr}'),
+            'SGA illustration must stack under the note on mobile');
+          assert.ok(src.includes('#fullFields > section.supplement[data-clinical-index="4"].wizard-hidden'),
+            'SGA visualization remains visible only on the nutrition wizard tab');
+          console.log('SGA four saved categories, reset, legacy text, and front/back anatomical UI: OK');
           console.log('Nutrition screenshot regression: full-width 3-card rows and accessible MMSE-size MNA-LF switch: OK');
           console.log('MNA Turkish scales, nutrition rows, BMI/calves/arms cross-tab authority, LF risk toggle and reset: OK');
 
