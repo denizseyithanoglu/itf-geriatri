@@ -427,7 +427,7 @@ function clockScoreSvg(score){
  const v=Number(score);
  const chosen=Number.isInteger(v)&&v>=0&&v<=5?v:null;
  const title=chosen===null?"Henüz puan verilmedi":"Puan "+chosen+" — temsili saat görünümü";
- const count=chosen===null?12:chosen===0?0:chosen===1?4:12;
+ const count=chosen===null?0:chosen===0?0:chosen===1?4:12;
  const shown=chosen===1?[12,3,6,9]:Array.from({length:12},(_,k)=>k+1);
  const texts=[];
  if(count){
@@ -512,7 +512,7 @@ function organizeMiniCog(){
  const options=clock.querySelector(".clock-options");
  if(options){
   const gallery=document.createElement("div");gallery.className="clock-figure-grid";
-  gallery.innerHTML='<figure class="clock-example"><div id="clockScorePreview"></div><figcaption>Seçilen puana göre hazırlanmış temsili saat çizimi. Hastanın gerçek çizimini göstermez.</figcaption></figure>'+
+  gallery.innerHTML='<figure class="clock-example"><div id="clockScorePreview"></div><figcaption>Temsili saat çizimi; hastaya değerlendirme öncesinde gösterilmemelidir. Gerçek hasta çizimi değildir.</figcaption></figure>'+
   '<div class="clock-upload"><strong>Hastanın çizdiği saati ekle (isteğe bağlı)</strong>'+
   '<p class="optional-note">JPG, PNG veya WebP (en fazla 8 MB). Resim yalnızca bu tarayıcıda açılır; taslağa kaydedilmez. Resim üzerinde kimlik bilgisi bulunmamalıdır.</p>'+
   '<input id="clockDrawingFile" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Hastanın saat çizimi resmi">'+
