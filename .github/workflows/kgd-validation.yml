@@ -103,5 +103,75 @@ jobs:
           assert.equal(ctx.kgdMMSEPrintScore(),null,'No scores in uneducated MMSE remains incomplete');
           assert.ok(src.includes('mmseAttentionMode=data.mmseAttentionMode==="world"?"world":"subtract"'));
           assert.ok(src.includes('noDiseases:frailNone,mmseVariant,mmseAttentionMode'));
+          // Recall aid buttons are per-word and per-MMSE-version, not additional MMSE items.
+          ctx.mmseVariant='standard';
+          const recall=ctx.mmseRecallAids();
+          assert.equal((recall.match(/class="mmse-recall-choice"/g)||[]).length,9);
+          assert.equal((recall.match(/data-recall-method="hint"/g)||[]).length,3);
+          assert.equal((recall.match(/data-recall-method="multiple"/g)||[]).length,3);
+          assert.equal((recall.match(/data-recall-method="free"/g)||[]).length,3);
+          assert.ok(recall.includes('data-recall-index="1"'));
+          assert.ok(recall.includes('Bir kuş')&&recall.includes('Kartal, Şahin, Şahıs'));
+          assert.ok(recall.includes('id="mmse-recall-notes-standard"'));
+          assert.equal((ctx.renderMMSEGroups().match(/class="mmse-long-answer"/g)||[]).length,2);
+          assert.ok(src.includes('mmse-recall-notes-"+mmseVariant'));
+          assert.ok(src.includes('mmseEntries.push(["Hatırlama — "+name,recallLabels[method]])'));
+          ctx.mmseVariant='uneducated';
+          assert.ok(ctx.mmseRecallAids().includes('id="mmse-recall-notes-uneducated"'));
+          assert.equal((ctx.renderMMSEGroups().match(/class="mmse-long-answer"/g)||[]).length,1);
+          ctx.mmseVariant='standard';
+          // Exercise the actual click handler against a minimal DOM stub.
+          const makeButton=(method,index)=>({
+            dataset:{recallMethod:method,recallIndex:String(index)},
+            setAttribute(key,value){if(key==='aria-pressed')this.pressed=value},
+            onclick:null
+          });
+          const cue=makeButton('hint',1),free=makeButton('free',1),multi=makeButton('multiple',1);
+          const scoreButton=(score)=>({
+            dataset:{mmse:'mmse_standard_19',v:score},
+            parentElement:{querySelectorAll:()=>[]},
+            closest:()=>({querySelector:()=>({style:{}})}),
+            setAttribute(){},onclick:null
+          });
+          const zero=scoreButton('0'),one=scoreButton('1');
+          const scoreItems=[zero,one];
+          zero.parentElement.querySelectorAll=()=>scoreItems;
+          one.parentElement.querySelectorAll=()=>scoreItems;
+          const question={querySelectorAll:()=>scoreItems,querySelector:()=>({style:{}})};
+          ctx.document={
+            querySelectorAll(sel){
+              if(sel==='#mmse-assessment [data-recall-method]')return [cue,free,multi];
+              if(sel==='#mmse-assessment [data-recall-index="1"]')return [cue,free,multi];
+              if(sel==='[data-mmse]')return [zero,one];
+              return [];
+            },
+            querySelector(sel){
+              if(sel==='#mmse-assessment [data-mmse="mmse_standard_19"]')return {closest:()=>question};
+              return null;
+            }
+          };
+          ctx.$=()=>null;
+          ctx.summarize=()=>{};
+          ctx.writeKGDDraft=()=>{};
+          const hStart=src.indexOf('function attachMMSE(){');
+          const hEnd=src.indexOf('const demographics=',hStart);
+          vm.runInNewContext(src.slice(hStart,hEnd),ctx);
+          ctx.attachMMSE();
+          ctx.moreAnswers.mmse_standard_19='1';
+          cue.onclick();
+          assert.equal(ctx.moreAnswers.mmse_recall_standard_1,'hint');
+          assert.equal(ctx.moreAnswers.mmse_standard_19,'0','Prompted recall must not add an MMSE point');
+          assert.equal(cue.pressed,'true');
+          multi.onclick();
+          assert.equal(ctx.moreAnswers.mmse_recall_standard_1,'multiple');
+          assert.equal(ctx.moreAnswers.mmse_standard_19,'0');
+          free.onclick();
+          assert.equal(ctx.moreAnswers.mmse_recall_standard_1,'free');
+          assert.equal(ctx.moreAnswers.mmse_standard_19,'1');
+          zero.onclick();
+          assert.equal(ctx.moreAnswers.mmse_standard_19,'0');
+          assert.equal(ctx.moreAnswers.mmse_recall_standard_1,undefined,'Zero after free recall clears unsupported free mode');
+          assert.equal(ctx.moreAnswers.mmse_recall_uneducated_1,undefined,'MMSE versions remain separate');
+          console.log('MMSE recall: 9 interactive options, small notes, wider fields, isolated and scored click handlers: OK');
           console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
           NODE
