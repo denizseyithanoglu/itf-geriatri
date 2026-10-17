@@ -700,7 +700,7 @@
   min-width:0;margin:0;text-align:center;align-self:start
  }
  #fullFields > section.supplement[data-clinical-index="4"] .sga-anatomy{
-  display:block;width:100%;max-height:450px;height:auto;margin:auto
+  display:block;width:100%;max-width:755px;max-height:none;height:auto;margin:auto
  }
  #fullFields > section.supplement[data-clinical-index="4"] .sga-guidance-figure figcaption{color:#52675c;font-size:.74rem;margin-top:4px}
  #fullFields > section.supplement[data-clinical-index="4"] .sga-previous-note{
@@ -709,6 +709,34 @@
  @media(max-width:780px){
   #fullFields > section.supplement[data-clinical-index="4"] .sga-muscle-guidance{grid-template-columns:1fr}
   #fullFields > section.supplement[data-clinical-index="4"] .sga-anatomy{max-width:420px}
+ }
+}
+
+/* Reordered tab 4: pain/VAS must span the full panel, with sleep symptoms
+   in their own responsive grid. Keep the original clinical data indexes. */
+@media screen{
+ #fullFields > section.supplement[data-clinical-index="5"]{
+  display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box
+ }
+ #fullFields > section.supplement[data-clinical-index="5"].wizard-hidden{display:none!important}
+ #fullFields > section.supplement[data-clinical-index="5"] > .section-bar{width:100%}
+ #fullFields > section.supplement[data-clinical-index="5"] > .merged-clinical-fields{
+  display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;min-width:0
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-fields{margin:5px 0 16px;padding:12px 0;border-top:0;border-bottom:1px solid #d6e4da}
+ #fullFields > section.supplement[data-clinical-index="5"] .sleep-fields{margin:0 0 16px}
+ #fullFields > section.supplement[data-clinical-index="5"] .sleep-symptoms-grid{
+  display:grid;width:100%;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .sleep-symptoms-grid > .extra-field{min-width:0;margin:0}
+ #fullFields > section.supplement[data-clinical-index="4"].wizard-hidden{display:none!important}
+ #fullFields > section.supplement[data-clinical-index="4"] .sga-anatomy-link{display:block;max-width:755px;margin:0 auto;cursor:zoom-in}
+ @media(max-width:920px){
+  #fullFields > section.supplement[data-clinical-index="5"] .sleep-symptoms-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ }
+ @media(max-width:640px){
+  #fullFields > section.supplement[data-clinical-index="5"] .sleep-symptoms-grid,
+  #fullFields > section.supplement[data-clinical-index="5"] > .merged-clinical-fields{grid-template-columns:1fr}
  }
 }
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><section class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite">Geçici taslak hazırlanıyor…</div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><p class="wizard-privacy"><strong>Önemli:</strong> Geçici taslak yalnızca bu tarayıcı sekmesinde saklanır; sayfa yenilense de korunur. Bu bir klinik kayıt sistemi değildir. Gerçek hasta kimlik veya sağlık verilerini girmeyiniz.</p></section><div id="fullFields"></div><div id="sections"></div><div id="extraScales"></div><div id="fullGds"></div><section class="panel summary result-summary" id="summary"></section><article id="printSheet" aria-label="A4 KGD özeti"></article><div id="wizardFooter" class="wizard-footer no-print" aria-label="Bölüm gezinme ve kayıt işlemleri"><button class="btn alt" id="wizardBack" type="button">← Önceki</button><button class="btn alt" id="wizardSave" type="button">Taslağı Kaydet</button><button class="btn alt" id="wizardPrintSection" type="button">Bu Sekmenin Özetini Yazdır / PDF</button><button class="btn alt" id="wizardCopySectionSummary" type="button">Özet Metnini Kopyala</button><button class="btn alt" id="wizardPrintSectionDetailed" type="button">Bu Sekmeyi Detaylı Yazdır / PDF</button><button class="btn" id="wizardNext" type="button">Kaydet ve Devam Et →</button><button class="wizard-delete" id="wizardClear" type="button">Geçici Taslağı Sil</button></div><div class="actions no-print" id="finalActions"><button class="btn" id="printFinal">Tüm KGD — Özet Yazdır / PDF</button><button class="btn alt" id="printFinalDetailed" type="button">Tüm KGD — Detaylı Yazdır / PDF</button><button class="btn alt" id="emailFinal">E-posta ile anonim puan özeti</button></div><p class="optional-note">E-posta sadece tamamlanan ölçeklerin anonim toplamlarını içerir. Kimlik veya klinik notlar e-postaya eklenmez.</p></main><script>
@@ -1483,7 +1511,7 @@ function syncMNAVisibility(){
  lf.hidden=!show;
  /* The wizard independently hides inactive tabs. Reapply its visibility
     without leaving LF hidden when the current tab is MNA. */
- if(typeof wizardStep==="number"&&wizardStep===3&&show)
+ if(typeof wizardStep==="number"&&wizardStep===4&&show)
    lf.classList.remove("wizard-hidden");
  const status=$("mnaLFStatus");
  if(status)status.textContent=category==="risk"?
@@ -1644,17 +1672,21 @@ const fracture=historyBox("extra-field");
    visibleHabits();syncHistoryCounts();summarize();
  });
  const nutritionItems=[...nutrition.querySelectorAll(":scope > .extra-field")];
- const pain=historyBox("merged-clinical-fields pain-fields");pain.innerHTML="<h3>Kronik Ağrı</h3>";
- nutritionItems.slice(11,15).forEach(el=>pain.appendChild(el));activity.appendChild(pain);
+ const pain=historyBox("merged-clinical-fields pain-fields");pain.innerHTML="<h3>Kronik Ağrı ve Verbal Analog Skalası (VAS)</h3>";
+ nutritionItems.slice(11,15).forEach(el=>pain.appendChild(el));
  const transferredSleep=historyBox("merged-clinical-fields sleep-fields");
  nutritionItems.slice(16,19).forEach(el=>transferredSleep.appendChild(el));
- (sleep.querySelector(".section-bar")||sleep.querySelector("h2")).after(transferredSleep);
+ /* Move original fields, not their data: pain, VAS and all clinical_4_11–14 keys stay intact. */
+ (sleep.querySelector(".section-bar")||sleep.querySelector("h2")).after(pain,transferredSleep);
+ const sleepSymptoms=historyBox("sleep-symptoms-grid");
+ [...sleep.querySelectorAll(":scope > .extra-field")].forEach(el=>sleepSymptoms.appendChild(el));
+ sleep.appendChild(sleepSymptoms);
  vision.remove();
  history.querySelector("h2").textContent="2. Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar";
  activity.querySelector("h2").textContent="3. Fiziksel Aktivite, Düşme ve Kırık";
- nutrition.querySelector("h2").textContent="4. Beslenme";
- sleep.querySelector("h2").textContent="5. Uyku, Boşaltım ve Yakınmalar";
- [0,6,2,4,5].forEach(i=>host.appendChild(parts[i]));
+ nutrition.querySelector("h2").textContent="5. Beslenme";
+ sleep.querySelector("h2").textContent="4. Ağrı, Uyku Kalitesi ve Boşaltım";
+ [0,6,2,5,4].forEach(i=>host.appendChild(parts[i]));
  parts[1].id="physicalSection";document.getElementById("fullGds").after(parts[1]);
  renderMedicationRows();visibleHabits();syncHistoryCounts();formatNutritionFields();
  if(typeof wizardReady!=="undefined"&&wizardReady)showWizardStep(wizardStep);
@@ -1684,7 +1716,11 @@ function nutritionVisibility(){
  if(type)type.hidden=moreText.clinical_4_9!=="Evet";
 }
 /* Inline SVG: front/back examination landmarks; no external assets or patient data. */
-function sgaAnatomyFigure(){return '<img class="sga-anatomy" src="data:image/webp;base64,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" alt="Önden ve arkadan anatomik kas muayenesi: 1 şakak, 2 klavikula ve omuz, 3 skapula çevresi, 4 el sırtı, 5 uyluk, 6 baldır." width="300" height="384" loading="lazy" decoding="async">';}
+function sgaAnatomyFigure(){
+ const url="images/sga-anatomy-755.webp";
+ return '<a class="sga-anatomy-link" href="'+url+'" target="_blank" rel="noopener" title="Anatomik çizimi yüksek çözünürlükte aç">'+
+ '<img class="sga-anatomy" src="'+url+'" alt="SGA muayene bölgeleri: 1 şakak, 2 klavikula ve omuz, 3 skapula çevresi, 4 el sırtı, 5 kuadriseps, 6 baldır; önden ve arkadan anatomik çizim" width="755" height="863" loading="lazy" decoding="async"></a>';
+}
 function formatNutritionFields(){
  const sec=document.querySelector('#fullFields [data-clinical-index="4"]');
  if(!sec||sec.querySelector(".nutrition-entry-grid"))return;
@@ -1849,9 +1885,9 @@ item("2. Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar",[
 ["Alkol Kullanımı",lookup(3,2)],["Alkol Kullanım Miktarı",moreText.alcoholQuantity],
 ...comprehensive[3][1].slice(3).map((label,i)=>[label,lookup(3,i+3)])
 ]);
-item("3. Fiziksel Aktivite, Düşme ve Kırık",[...clinical(2),...comprehensive[4][1].slice(11,15).map((label,k)=>[label,lookup(4,k+11)])]);
-item("4. Beslenme",[...comprehensive[4][1].slice(0,11).map((label,i)=>[label,lookup(4,i)]),[comprehensive[4][1][15],lookup(4,15)]]);
-item("5. Uyku, Boşaltım ve Yakınmalar",[...comprehensive[4][1].slice(16,19).map((label,k)=>[label,lookup(4,k+16)]),...clinical(5)]);
+item("3. Fiziksel Aktivite, Düşme ve Kırık",clinical(2));
+item("4. Ağrı, Uyku Kalitesi ve Boşaltım",[...comprehensive[4][1].slice(11,15).map((label,k)=>[label,lookup(4,k+11)]),...comprehensive[4][1].slice(16,19).map((label,k)=>[label,lookup(4,k+16)]),...clinical(5)]);
+item("5. Beslenme",[...comprehensive[4][1].slice(0,11).map((label,i)=>[label,lookup(4,i)]),[comprehensive[4][1][15],lookup(4,15)]]);
 const scaleGroup=(title,ids)=>{
   const pairs=[];
   for(const id of ids){const f=forms.find(f=>f.id===id);if(!f)continue;
@@ -1863,27 +1899,27 @@ const scaleGroup=(title,ids)=>{
   }
   item(title,pairs);
 };
-scaleGroup("6. GYA ve EGYA",["adl","iadl"]);
-scaleGroup("7. Kırılganlık ve Sarkopeni",["frail","sarcf","sof"]);
-scaleGroup("8. Beslenme Ölçekleri — MNA-SF",["mna"]);
+scaleGroup("5.1 MNA-SF",["mna"]);
 const auxiliary=(j)=>additional[j][1].map((label,i)=>[label,moreAnswers["additional_"+j+"_"+i]??"__"]);
 const mnaLF=moreScore("additional_0_",additional[0][1].length);
 const mnaShort=forms.find(f=>f.id==="mna");
 const shortVals=mnaShort.items.map((_,i)=>document.getElementById("mna_"+i)?.value??"");
 const shortTotal=shortVals.every(v=>v!=="")?scaleTotal(mnaShort,shortVals):null;
-item("9. MNA-LF — Uzun Beslenme Değerlendirmesi",[["MNA-LF Ek Puanı",mnaLF===null?"__":mnaLF],["MNA Toplam Puanı",mnaLF===null||shortTotal===null?"__":(shortTotal+mnaLF)+"/30"],...auxiliary(0)]);
+item("5.2 MNA-LF — Uzun Beslenme Değerlendirmesi",[["MNA-LF Ek Puanı",mnaLF===null?"__":mnaLF],["MNA Toplam Puanı",mnaLF===null||shortTotal===null?"__":(shortTotal+mnaLF)+"/30"],...auxiliary(0)]);
+scaleGroup("6. GYA ve EGYA",["adl","iadl"]);
 const eq=moreScore("additional_1_",additional[1][1].length);
-item("10. EQ-5D — Yaşam Kalitesi",[["EQ-5D Durum Puanları",eq===null?"__":eq+"/15"+(eq===5?" (tüm alanlarda sorun yok)":"")],["EQ5D Skala",moreAnswers.eq5dHealthVAS===undefined?"__":moreAnswers.eq5dHealthVAS+"/100 ("+moreAnswers.eq5dHealthVAS+"%)"],...auxiliary(1)]);
-item("11. Mini-COG ve Saat Çizme",[["Kayıt (3 tekrar)",miniCogMemoryScore([0,1,2])??"__"],["Saat Çizme",moreAnswers.clock===undefined?"__":moreAnswers.clock+"/5"],["Hatırlama",miniCogMemoryScore([4,5,6])??"__"],["Mini-COG’a Göre Kognitif Bozukluk",moreAnswers.miniCogImpairment??"__"],["Saat Notları",moreText["clock-notes"]],["Mini-COG Ek Notlar",moreText["minicog-notes"]],...[0,1,2,4,5,6].map(i=>[additional[2][1][i],moreAnswers["additional_2_"+i]??"__"])]);
+item("6.1 EQ-5D — Yaşam Kalitesi",[["EQ-5D Durum Puanları",eq===null?"__":eq+"/15"+(eq===5?" (tüm alanlarda sorun yok)":"")],["EQ5D Skala",moreAnswers.eq5dHealthVAS===undefined?"__":moreAnswers.eq5dHealthVAS+"/100 ("+moreAnswers.eq5dHealthVAS+"%)"],...auxiliary(1)]);
+scaleGroup("7. Kırılganlık ve Sarkopeni",["frail","sarcf","sof"]);
+item("8. Mini-COG ve Saat Çizme",[["Kayıt (3 tekrar)",miniCogMemoryScore([0,1,2])??"__"],["Saat Çizme",moreAnswers.clock===undefined?"__":moreAnswers.clock+"/5"],["Hatırlama",miniCogMemoryScore([4,5,6])??"__"],["Mini-COG’a Göre Kognitif Bozukluk",moreAnswers.miniCogImpairment??"__"],["Saat Notları",moreText["clock-notes"]],["Mini-COG Ek Notlar",moreText["minicog-notes"]],...[0,1,2,4,5,6].map(i=>[additional[2][1][i],moreAnswers["additional_2_"+i]??"__"])]);
 const qlist=(mmseVariant==="uneducated"?additional[4][1]:additional[3][1]).map((label,i)=>mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18?mmseWorldLetters[i-13]:label);
 const mvals=mmseActiveValues();
 const mtotal=mvals.some(v=>v===undefined)?null:mvals.reduce((n,v)=>n+Number(v),0);
-item("12. MMSE — "+(mmseVariant==="uneducated"?"Eğitimsizler İçin":"Standart"),[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA (tersten söyleme)":"100’den 7 çıkarma"):"Haftanın günlerini tersten sayma"],["MMSE Puanı",mtotal===null?"__":mtotal+"/30"+(mtotal>=24?" (normal)":" (normalin altında)")],...qlist.map((label,i)=>{const answerKey=mmseAnswerKey(i);return [(i+1)+". "+label,mvals[i]===undefined?"__":mvals[i]+" puan"+(moreText["response_"+answerKey]?" — "+moreText["response_"+answerKey]:"")]}),["Hatırlama — Ek Notlar",moreText["mmse-recall-notes-"+mmseVariant]],["MMSE Ek Notlar",moreText["mmse-notes"]]]);
+item("8.1 MMSE — "+(mmseVariant==="uneducated"?"Eğitimsizler İçin":"Standart"),[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA (tersten söyleme)":"100’den 7 çıkarma"):"Haftanın günlerini tersten sayma"],["MMSE Puanı",mtotal===null?"__":mtotal+"/30"+(mtotal>=24?" (normal)":" (normalin altında)")],...qlist.map((label,i)=>{const answerKey=mmseAnswerKey(i);return [(i+1)+". "+label,mvals[i]===undefined?"__":mvals[i]+" puan"+(moreText["response_"+answerKey]?" — "+moreText["response_"+answerKey]:"")]}),["Hatırlama — Ek Notlar",moreText["mmse-recall-notes-"+mmseVariant]],["MMSE Ek Notlar",moreText["mmse-notes"]]]);
 const gd=gdsScore();
-item("13. GDS-30 — Duygudurum",[["GDS-30 Puanı",gd===null?"__":gd+"/30"+(gd<=10?" (normal)":gd<=13?" (olası depresyon)":" (pozitif tarama)")],...gds30.map((q,i)=>[(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?"__":moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"])]);
+item("9. GDS-30 — Duygudurum",[["GDS-30 Puanı",gd===null?"__":gd+"/30"+(gd<=10?" (normal)":gd<=13?" (olası depresyon)":" (pozitif tarama)")],...gds30.map((q,i)=>[(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?"__":moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"])]);
 const phys=clinical(1).map(([label,value],i)=>[label,i===5?document.getElementById("bmiOut")?.textContent:value]);
 const sarco=sarcoStatus();
-item("14. Fiziksel Ölçümler ve Performans",[...phys,["SMM / Boy²",sarco.smmi===null?"__":sarco.smmi.toFixed(2)+" kg/m²"+(sarco.mass===null?"":sarco.mass?" (düşük)":" (normal)")]]);
+item("10. Fiziksel Ölçümler ve Performans",[...phys,["SMM / Boy²",sarco.smmi===null?"__":sarco.smmi.toFixed(2)+" kg/m²"+(sarco.mass===null?"":sarco.mass?" (düşük)":" (normal)")]]);
 return '<header class="summary-full-header"><h2>KGD Özeti — Tüm Bölümler</h2><p>__ = Henüz girilmedi. Önceki sekmelere dönerek tüm bilgileri düzenleyebilirsiniz.</p></header>'+rows.join("");
 }
 function summarize(){syncHistoryCounts();const t=texts.tr,lost=[];let complete=0;let out='<h2>'+safe(t.summary)+'</h2><p class="muted">'+safe(t.date)+': '+new Date().toLocaleDateString("tr-TR")+'</p>';for(const s of forms){const vals=s.items.map((_,i)=>$(s.id+"_"+i).value);const ready=vals.every(v=>v!=="");if(ready)complete++;const score=ready?scaleTotal(s,vals):null;out+='<div class="result"><strong>'+safe(s.tr)+': '+(ready?score+" / "+s.max+" ("+(meaning(s,score)||"Klinik yorum gerekli")+")":safe(t.incomplete))+'</strong>';if(ready){out+='<div>'+safe(t.meaning)+': '+safe(meaning(s,score))+'</div>';const lostHere=[];s.items.forEach((it,i)=>{let val=scaleItemScore(s,i,vals[i]);const deficit=(s.id==="adl"||s.id==="iadl"||s.id==="mna")?val<(s.id==="mna"?[2,3,2,2,2,3][i]:1):val>0;if(deficit)lostHere.push(it)});out+='<p class="muted">'+safe(t.domains)+': '+safe(lostHere.length?lostHere.join("; "):t.none)+'</p>'}out+='</div>';}
@@ -1901,10 +1937,10 @@ const wizardGroups=[
 {tr:"Sosyal Öykü",q:['#fullFields > [data-clinical-index="0"]'],report:[0]},
 {tr:"Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar",q:['#fullFields > [data-clinical-index="6"]'],report:[1]},
 {tr:"Aktivite, Düşme ve Kırık",q:['#fullFields > [data-clinical-index="2"]'],report:[2]},
-{tr:"Beslenme Değerlendirmesi (MNA)",q:['#fullFields > [data-clinical-index="4"]','#form_mna','#extraScales > section:nth-child(1)'],report:[3,7,8]},
-{tr:"Uyku, Boşaltım ve Yakınmalar",q:['#fullFields > [data-clinical-index="5"]'],report:[4]},
-{tr:"Yaşam Aktiviteleri ve Kalitesi (GYA, EGYA, EQ5D)",q:['#form_adl','#form_iadl','#extraScales > section:nth-child(2)'],report:[5,9]},
-{tr:"Kırılganlık ve Sarkopeni (FRAIL, SARC-F, SOF)",q:['#form_frail','#form_sarcf','#form_sof'],report:[6]},
+{tr:"Ağrı, Uyku Kalitesi ve Boşaltım",q:['#fullFields > [data-clinical-index="5"]'],report:[3]},
+{tr:"Beslenme Değerlendirmesi (MNA)",q:['#fullFields > [data-clinical-index="4"]','#form_mna','#extraScales > section:nth-child(1)'],report:[4,5,6]},
+{tr:"Yaşam Aktiviteleri ve Kalitesi (GYA, EGYA, EQ5D)",q:['#form_adl','#form_iadl','#extraScales > section:nth-child(2)'],report:[7,8]},
+{tr:"Kırılganlık ve Sarkopeni (FRAIL, SARC-F, SOF)",q:['#form_frail','#form_sarcf','#form_sof'],report:[9]},
 {tr:"Bilişsel Değerlendirme (Mini-COG, MMSE)",q:['#extraScales > section:nth-child(3)','#clock-assessment','#mmse-assessment'],report:[10,11]},
 {tr:"Duygudurum (GDS)",q:['#fullGds > section'],report:[12]},
 {tr:"Fiziksel Performans",q:['#physicalSection'],report:[13]},
@@ -2001,7 +2037,7 @@ function compactKGDStep(i,inline=false){
    ];
    return detailed("Özgeçmiş, İlaçlar ve Görme-İşitme",pairs);
  }
- if(i===2)return simple("Aktivite, Düşme ve Kırık",[...clinicalLines(2,[0,1,2,4,5,6,7,8,9,10,11,12,14,15,16,17]),...clinicalLines(4,[11,12,13,14])]);
+ if(i===2)return simple("Aktivite, Düşme ve Kırık",clinicalLines(2,[0,1,2,4,5,6,7,8,9,10,11,12,14,15,16,17]));
  if(i===3){
    const s=scale("mna",mna),lf=aux(0,"MNA-LF ek");
    const n=moreScore("additional_0_",additional[0][1].length);
@@ -2011,7 +2047,7 @@ function compactKGDStep(i,inline=false){
    const total=n!==null&&complete?"MNA toplam: "+kgdMNATotalScore():null;
    return simple("Beslenme Değerlendirmesi (MNA)",[...clinicalLines(4,[0,1,2,3,4,5,6,7,8,9,10,15]),["MNA-SF",s?s.replace(/^MNA-SF: /,""):null],["MNA-LF",lf?lf.replace(/^MNA-LF ek: /,""):null],["MNA toplam",total?total.replace(/^MNA toplam: /,""):null]]);
  }
- if(i===4)return simple("Uyku, Boşaltım ve Yakınmalar",[...clinicalLines(4,[16,17,18]),...comprehensive[5][1].map((lab,j)=>[lab,field(5,j)])]);
+ if(i===4)return simple("Ağrı, Uyku Kalitesi ve Boşaltım",[...clinicalLines(4,[11,12,13,14,16,17,18]),...comprehensive[5][1].map((lab,j)=>[lab,field(5,j)])]);
  if(i===5)return simple("Yaşam Aktiviteleri ve Kalitesi",[
      ["GYA",scale("adl",adl)?.replace(/^GYA: /,"")],
      ["EGYA",scale("iadl",iadl)?.replace(/^EGYA: /,"")],
@@ -2140,8 +2176,9 @@ function kgdGDSPrintScore(){
  return score+"/30 ("+(score<=10?"normal":score<=13?"olası depresyon":"form sınıflaması: kesin depresyon")+")";
 }
 function kgdShortPrintStep(step,inline=false){
- if([0,1,2,4,9].includes(step))return compactKGDStep(step,inline);
- if(step===3){
+ if([0,1,2,9].includes(step))return compactKGDStep(step,inline);
+ if(step===3)return compactKGDStep(4,inline);
+ if(step===4){
   const l=moreScore("additional_0_",12);
   return kgdPrintable("Beslenme Değerlendirmesi",[
    ["MNA-SF",kgdScalePrintScore("mna")],
@@ -2211,17 +2248,17 @@ function kgdDetailedPrintStep(step){
  if(step===1)return kgdDetailedClinical(6,null,"Özgeçmiş ve İlaçlar")+
     kgdDetailedClinical(3,null,"Alışkanlıklar, Görme ve İşitme")+
     kgdDetailedBlock("Ek Özgeçmiş",[["Kırık öyküsü",moreText.historyFracture],["Alkol miktarı",moreText.alcoholQuantity]]);
- if(step===2)return kgdDetailedClinical(2,null,"Aktivite, Düşme ve Kırık")+
-    kgdDetailedClinical(4,[11,12,13,14],"İlgili yakınmalar");
- if(step===3){
+ if(step===2)return kgdDetailedClinical(2,null,"Aktivite, Düşme ve Kırık");
+ if(step===3)return kgdDetailedClinical(4,[11,12,13,14],"Kronik Ağrı ve Verbal Analog Skalası (VAS)")+
+   kgdDetailedClinical(4,[16,17,18],"Uyku Yakınmaları")+
+   kgdDetailedClinical(5,null,"Ağrı, Uyku Kalitesi ve Boşaltım");
+ if(step===4){
   const mnaLF=moreScore("additional_0_",12);
   return kgdDetailedClinical(4,[0,1,2,3,4,5,6,7,8,9,10,15],"Beslenme Soruları")+
    kgdDetailedScale("mna")+
    kgdDetailedBlock("MNA toplam",[["MNA-LF ek puanı",mnaLF===null?null:mnaLF+"/16"],["MNA toplam",kgdMNATotalScore()]])+
    kgdDetailedExtra(0,"MNA-LF (7–18. maddeler)",additional[0][1].map((_,i)=>i));
  }
- if(step===4)return kgdDetailedClinical(4,[16,17,18],"Uyku Yakınmaları")+
-   kgdDetailedClinical(5,null,"Uyku, Boşaltım ve Yakınmalar");
  if(step===5)return kgdDetailedScale("adl")+kgdDetailedScale("iadl")+
    kgdDetailedBlock("EQ-5D Sonucu",[["EQ-5D",kgdEQScore()],["EQ5D Skala",kgdPrintPresent(moreAnswers.eq5dHealthVAS)?moreAnswers.eq5dHealthVAS+"/100":null]])+
    kgdDetailedExtra(1,"EQ-5D: Yanıtlar",[0,1,2,3,4]);
@@ -2310,7 +2347,7 @@ function printKGD(step,style){
 function renderWizardStepPrint(step){
  const group=wizardGroups[step];
  if(!group||step===wizardGroups.length-1)return;
- const contents=compactKGDStep(step);
+ const contents=kgdShortPrintStep(step,false);
  const holder=$("printSheet");
  holder.dataset.mode="section";
  holder.innerHTML='<header class="print-head"><strong>İTF Geriatri — '+safe(group.tr)+'</strong><span>'+new Date().toLocaleDateString("tr-TR")+'</span></header>'+
@@ -2319,15 +2356,15 @@ function renderWizardStepPrint(step){
 }
 function selectedScaleValues(){const picked={};for(const f of forms){picked[f.id]=f.items.map((_,i)=>$(f.id+"_"+i)?.value??"")}return picked}
 function applyScaleValues(picked){if(!picked||typeof picked!=="object")return;for(const f of forms){const values=picked[f.id];if(!Array.isArray(values))continue;f.items.forEach((_,i)=>{const sel=$(f.id+"_"+i);if(!sel||(f.id==="frail"&&i===3))return;const v=String(values[i]??"");if([...sel.options].some(o=>o.value===v))sel.value=v})}enhanceChoices();const frailGrid=$("frail_3")?.closest(".item")?.querySelector(".choice-grid");if(frailGrid)frailGrid.hidden=true;document.querySelectorAll("#sections .choice-grid button").forEach(btn=>{const sel=btn.closest(".item")?.querySelector("select");if(sel)btn.setAttribute("aria-pressed",String(sel.value!==""&&sel.value===btn.dataset.value))})}
-function readKGDDraft(){try{const raw=sessionStorage.getItem(KGD_DRAFT_KEY);if(!raw)return null;const data=JSON.parse(raw);return data&&[1,2,3].includes(data.version)&&data.text&&data.answers?data:null}catch(e){return null}}
-function restoreKGDDraft(data){if(!data)return;moreText=Object.assign({},data.text);moreAnswers=Object.assign({},data.answers);frailSelected.clear();for(const n of data.diseases||[])if(Number.isInteger(n)&&n>=0&&n<11)frailSelected.add(n);frailNone=data.noDiseases===true;mmseVariant=data.mmseVariant==="uneducated"?"uneducated":"standard";mmseAttentionMode=data.mmseAttentionMode==="world"?"world":"subtract";draftScales=data.scales||{};const oldStep=Number.isInteger(data.step)?data.step:0;const legacyStep=data.version===1?(oldStep>2?oldStep-1:oldStep===2?1:oldStep):oldStep;const oldToNew=[0,1,2,3,4,5,6,3,5,7,8,9,10];const nextStep=data.version===3?oldStep:(oldToNew[legacyStep]??0);wizardStep=Math.min(wizardGroups.length-1,Math.max(0,nextStep));draftSavedAt=data.savedAt||""}
+function readKGDDraft(){try{const raw=sessionStorage.getItem(KGD_DRAFT_KEY);if(!raw)return null;const data=JSON.parse(raw);return data&&[1,2,3,4].includes(data.version)&&data.text&&data.answers?data:null}catch(e){return null}}
+function restoreKGDDraft(data){if(!data)return;moreText=Object.assign({},data.text);moreAnswers=Object.assign({},data.answers);frailSelected.clear();for(const n of data.diseases||[])if(Number.isInteger(n)&&n>=0&&n<11)frailSelected.add(n);frailNone=data.noDiseases===true;mmseVariant=data.mmseVariant==="uneducated"?"uneducated":"standard";mmseAttentionMode=data.mmseAttentionMode==="world"?"world":"subtract";draftScales=data.scales||{};const oldStep=Number.isInteger(data.step)?data.step:0;const legacyStep=data.version===1?(oldStep>2?oldStep-1:oldStep===2?1:oldStep):oldStep;const oldToNew=[0,1,2,3,4,5,6,3,5,7,8,9,10];const priorStep=data.version===3?oldStep:data.version===4?oldStep:(oldToNew[legacyStep]??0);const nextStep=data.version===4?priorStep:priorStep===3?4:priorStep===4?3:priorStep;wizardStep=Math.min(wizardGroups.length-1,Math.max(0,nextStep));draftSavedAt=data.savedAt||""}
 function stepElements(i){return wizardGroups[i].q.flatMap(q=>Array.from(document.querySelectorAll(q)))}
 function everyWizardElement(){const nodes=[...document.querySelectorAll("#fullFields > section,#sections > section,#extraScales > section,#fullGds > section"),document.getElementById("physicalSection"),$("summary"),$("finalActions")];return [...new Set(nodes.filter(Boolean))]}
 function stepHasData(i){return stepElements(i).some(el=>{if(el.id==="summary"||el.id==="finalActions")return false;return [...el.querySelectorAll("input,textarea,select")].some(x=>x.type==="checkbox"?x.checked:x.value&&String(x.value).trim()!=="")||!!el.querySelector('button[aria-pressed="true"]')})}
 function renderWizardTabs(){if(!wizardReady)return;const bar=$("wizardTabs");bar.innerHTML=wizardGroups.map((g,i)=>'<button type="button" data-wizard-step="'+i+'" aria-current="'+(i===wizardStep?"step":"false")+'"><span class="wizard-count">'+(i+1)+'</span>'+safe(g.tr)+(stepHasData(i)&&i!==wizardStep?' <span aria-label="Yanıt var">✓</span>':"")+'</button>').join("");$("wizardStepTitle").textContent=(wizardStep+1)+" / "+wizardGroups.length+" — "+(wizardGroups[wizardStep].tr);$("wizardStepHint").textContent="Sekmelerden bölümleri açabilir, önceki yanıtları düzenleyebilirsiniz.";const back=$("wizardBack"),next=$("wizardNext");back.disabled=wizardStep===0;next.disabled=wizardStep===wizardGroups.length-1;back.textContent="← Önceki";next.textContent="Kaydet ve Devam Et →";$("wizardSave").textContent="Taslağı Kaydet";$("wizardCopySectionSummary").textContent="Özet Metnini Kopyala";$("wizardPrintSection").hidden=wizardStep===wizardGroups.length-1;$("wizardCopySectionSummary").hidden=wizardStep===wizardGroups.length-1;$("wizardPrintSectionDetailed").hidden=wizardStep===wizardGroups.length-1;$("wizardClear").textContent="Geçici Taslağı Sil"}
 function showWizardStep(i,scroll=false){if(!wizardReady)return;wizardStep=Math.min(wizardGroups.length-1,Math.max(0,i));const visible=new Set(stepElements(wizardStep));for(const el of everyWizardElement())el.classList.toggle("wizard-hidden",!visible.has(el));renderWizardTabs();const current=$("wizardTabs")?.querySelector('[aria-current="step"]');if(current)current.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});if(scroll)$("wizardStepTitle").scrollIntoView({block:"start",behavior:"smooth"})}
 function displayDraftStatus(ok){const target=$("wizardSaveStatus");if(!target)return;target.dataset.error=String(!ok);target.textContent=ok?("Bu sekmede kaydedildi · ")+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):("Kaydedilemedi! Yenilerseniz veriler kaybolabilir.")}
-function writeKGDDraft(){if(!draftEnabled)return false;const payload={version:3,savedAt:new Date().toISOString(),step:wizardStep,text:moreText,answers:moreAnswers,scales:selectedScaleValues(),diseases:[...frailSelected],noDiseases:frailNone,mmseVariant,mmseAttentionMode};try{sessionStorage.setItem(KGD_DRAFT_KEY,JSON.stringify(payload));draftSavedAt=payload.savedAt;displayDraftStatus(true);renderWizardTabs();return true}catch(e){displayDraftStatus(false);return false}}
+function writeKGDDraft(){if(!draftEnabled)return false;const payload={version:4,savedAt:new Date().toISOString(),step:wizardStep,text:moreText,answers:moreAnswers,scales:selectedScaleValues(),diseases:[...frailSelected],noDiseases:frailNone,mmseVariant,mmseAttentionMode};try{sessionStorage.setItem(KGD_DRAFT_KEY,JSON.stringify(payload));draftSavedAt=payload.savedAt;displayDraftStatus(true);renderWizardTabs();return true}catch(e){displayDraftStatus(false);return false}}
 function navigateKGD(i){writeKGDDraft();showWizardStep(i,true);writeKGDDraft()}
 function initKGDWizard(){wizardReady=true;const tabs=$("wizardTabs");tabs.onclick=e=>{const button=e.target.closest("[data-wizard-step]");if(button)navigateKGD(Number(button.dataset.wizardStep))};$("wizardBack").onclick=()=>navigateKGD(wizardStep-1);$("wizardNext").onclick=()=>navigateKGD(wizardStep+1);$("wizardSave").onclick=()=>writeKGDDraft();$("wizardPrintSection").onclick=()=>printKGD(wizardStep,"summary");$("wizardCopySectionSummary").onclick=()=>copyKGDSectionSummary(wizardStep);$("wizardPrintSectionDetailed").onclick=()=>printKGD(wizardStep,"detailed");$("wizardClear").onclick=()=>{if(!confirm("Bu sekmedeki geçici taslağın tamamı silinsin mi? Bu işlem geri alınamaz."))return;try{sessionStorage.removeItem(KGD_DRAFT_KEY)}catch(e){}draftEnabled=false;location.reload()};document.addEventListener("input",e=>{if(!e.target.closest(".wizard-shell,.wizard-footer"))writeKGDDraft()});document.addEventListener("change",e=>{if(!e.target.closest(".wizard-shell,.wizard-footer"))writeKGDDraft()});document.addEventListener("click",e=>{if(e.target.closest("#fullFields button,#sections button,#extraScales button,#fullGds button,#physicalSection button"))writeKGDDraft()});window.addEventListener("pagehide",()=>writeKGDDraft());showWizardStep(wizardStep);draftEnabled=true;writeKGDDraft()}
 $("printFinal").onclick=()=>printKGD(null,"summary");$("printFinalDetailed").onclick=()=>printKGD(null,"detailed");$("emailFinal").onclick=emailOnly;
