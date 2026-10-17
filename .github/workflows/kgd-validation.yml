@@ -506,7 +506,7 @@ jobs:
           const sfSelect={value:'',parentElement:{querySelector:()=>({querySelectorAll:()=>scoreButtons})},closest:()=>({classList:itemClass})};
           const switchControl={checked:false},lfPanel={hidden:false};
           const notice={textContent:''};
-          const elements={mna_5:sfSelect,mnaLFTogglePanel:{},mnaLFShowSwitch:switchControl,mnaLFStatus:notice,mnaMeasurementHint:{textContent:''},mnaLFMeasurementHint:{textContent:''}};
+          const elements={mna_5:sfSelect,mnaLFTogglePanel:{dataset:{}},mnaLFShowSwitch:switchControl,mnaLFStatus:notice,mnaMeasurementHint:{textContent:''},mnaLFMeasurementHint:{textContent:''}};
           for(let i=0;i<5;i++)elements['mna_'+i]={value:''};
           const mnaCtx={
             moreText:mnaVals,moreAnswers:{},
@@ -616,6 +616,15 @@ jobs:
           assert.equal(mnaCtx.mnaSFStatus(),'risk');
           mnaCtx.syncMNAVisibility();
           assert.equal(switchControl.checked,true);
+          assert.ok(src.includes('const sgaField=$("clinical_4_15")?.closest(".extra-field")'),
+            'SGA clinician instructions must be placed under the pre-existing nutrition field, not before the weight-loss cards');
+          for(const anatomy of ['temporalis','Klavikula','Skapula','interosseöz','kuadriseps','gastroknemius'])
+            assert.ok(src.includes(anatomy),'SGA physical examination note must mention '+anatomy);
+          assert.ok(src.includes('sga-muscle-guidance')&&src.includes('kas kaybı yok / hafif / orta / belirgin'),
+            'SGA needs subjective wasting category guidance');
+          assert.ok(src.includes('ölçülmüş kas kütlesi ya da tek başına malnütrisyon tanısı değildir'),
+            'SGA note must distinguish clinical impression from quantified muscle mass or malnutrition diagnosis');
+          assert.ok(src.includes('sgaField.appendChild(note)'),'SGA note must be inserted in the UI');
           console.log('Nutrition screenshot regression: full-width 3-card rows and accessible MMSE-size MNA-LF switch: OK');
           console.log('MNA Turkish scales, nutrition rows, BMI/calves/arms cross-tab authority, LF risk toggle and reset: OK');
 
