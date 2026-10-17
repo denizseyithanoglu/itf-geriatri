@@ -781,6 +781,44 @@ jobs:
           assert.ok(src.includes('const contents=kgdShortPrintStep(step,false)'),
             'Legacy single-tab print must respect new tab mapping');
           console.log('Tab order Pain/Sleep #4, Nutrition MNA #5, old drafts, short/full/detail prints, SGA HQ asset: OK');
+          // SGA explanatory notes must correspond 1:1 to the unchanged six
+          // anatomical locations in the front/back illustration (row-major 1-2-3 / 4-5-6).
+          const noteStart=src.indexOf('note.innerHTML=\'<div class="sga-guidance-copy">\'');
+          const noteEnd=src.indexOf('sgaField.appendChild(note);',noteStart);
+          assert.ok(noteStart>=0&&noteEnd>noteStart,'SGA clinician note markup is present');
+          const noteHTML=src.slice(noteStart,noteEnd);
+          assert.ok(noteHTML.includes('<ol class="sga-sites-grid"'));
+          assert.equal((noteHTML.match(/'<li><span class="sga-site-number"/g)||[]).length,6,
+            'Each of the six SGA locations should have one numbered card');
+          const anatomicalLabels=[
+            'Şakak (temporalis)',
+            'Klavikula ve omuz (pektoral/deltoid)',
+            'Skapula çevresi',
+            'El sırtı (interosseöz kaslar)',
+            'Uyluk (kuadriseps)',
+            'Baldır (gastroknemius)'
+          ];
+          for(let n=1;n<=6;n++){
+            assert.ok(noteHTML.includes('aria-hidden="true">'+n+'</span><b>'+anatomicalLabels[n-1]+'</b>'),
+              'SGA number '+n+' must precede exactly its corresponding anatomical description');
+          }
+          assert.ok(noteHTML.indexOf('Şakak (temporalis)')<
+            noteHTML.indexOf('Skapula çevresi')&&noteHTML.indexOf('Skapula çevresi')<
+            noteHTML.indexOf('El sırtı (interosseöz kaslar)')&&noteHTML.indexOf('Uyluk (kuadriseps)')<
+            noteHTML.indexOf('Baldır (gastroknemius)'),'SGA numbers are in row-major order');
+          assert.ok(src.includes('.sga-guidance-copy .sga-sites-grid{\n  display:grid;grid-template-columns:repeat(3,minmax(0,1fr))'),
+            'SGA sites must form exactly three columns on regular screens, two rows for six items');
+          assert.ok(src.includes('grid-template-columns:repeat(2,minmax(0,1fr))')&&
+            src.includes('.sga-sites-grid{\n   grid-template-columns:1fr'),
+            'SGA grid must remain usable on narrow screens');
+          assert.ok(src.includes('class="sga-guidance-figure"')&&
+            src.includes("'<figure class=\"sga-guidance-figure\">'+sgaAnatomyFigure()"),
+            'The high-resolution anatomical image should remain beside the explanations');
+          assert.ok(diagram.includes('images/sga-anatomy-755.webp')&&
+            diagram.includes('width="755" height="863"'),
+            'The existing SGA illustration source and native dimensions must not change');
+          console.log('SGA six numbered explanations in 1–2–3 / 4–5–6 cards; original image unchanged: OK');
+
           console.log('SGA four saved categories, reset, legacy text, and front/back anatomical UI: OK');
           console.log('Nutrition screenshot regression: full-width 3-card rows and accessible MMSE-size MNA-LF switch: OK');
           console.log('MNA Turkish scales, nutrition rows, BMI/calves/arms cross-tab authority, LF risk toggle and reset: OK');
