@@ -391,7 +391,8 @@ jobs:
           vm.runInNewContext(src.slice(meaningFrom,meaningEnd),scoreLabels);
           for(const [score,expected] of [[0,'Normal'],[1,'pre-frail'],[2,'pre-frail'],[3,'frail'],[4,'frail'],[5,'frail']])
             assert.equal(scoreLabels.meaning({id:'frail'},score),expected,'FRAIL ('+score+'/5) label');
-          assert.equal(scoreLabels.meaning({id:'sof'},1),'Kırılganlık öncesi','Unrelated SOF wording must remain unchanged');
+          for(const [score,expected] of [[0,'Normal'],[1,'pre-frail'],[2,'frail'],[3,'frail']])
+            assert.equal(scoreLabels.meaning({id:'sof'},score),expected,'SOF ('+score+'/3) label');
           console.log('FRAIL inline scoring labels 0 Normal, 1–2 pre-frail, 3–5 frail: OK');
           console.log('KGD frailty tab titles, PDF questions, inline buttons and 4×3 illness grid with ≥5-point rule: OK');
 
