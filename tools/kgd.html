@@ -586,7 +586,7 @@ function render(){
  }).join("");
  enhanceChoices();renderFrailDiseases();summarize();
 }
-const frailDiseases=["Hipertansiyon (HT)","Diyabet (DM)","Astım","Kronik Obstrüktif Akciğer Hastalığı (KOAH)","Kalp Krizi (MI)","Angina","İnme (SVO)","Artrit","Konjestif Kalp Yetmezliği (KKY)","Kronik Böbrek Hastalığı (KBH)","Kanserler (küçük deri kanserleri hariç)"];const frailSelected=new Set();let frailNone=false;
+const frailDiseases=["HT","DM","Astım","KOAH","MI","Angina","İnme","Artrit","KKY","Böbrek Hastalığı","Kanser (küçük deri kanserleri dışında)"];const frailSelected=new Set();let frailNone=false;
 function renderFrailDiseases(){
  const host=$("frail_3")?.closest(".item");if(!host)return;
  const choice=host.querySelector(".choice-grid");if(choice)choice.hidden=true;
@@ -594,7 +594,7 @@ function renderFrailDiseases(){
  host.querySelector(".frail-disease-box")?.remove();
  const box=document.createElement("div");box.className="frail-disease-box";
  box.innerHTML='<div class="frail-disease-list">'+
-  frailDiseases.map((name,i)=>'<label><input type="checkbox" data-disease="'+i+'" '+(frailSelected.has(i)?"checked":"")+'> '+safe(name)+'</label>').join("")+
+  [0,1,3,4,8,5,2,7,6,9,10].map(i=>'<label><input type="checkbox" data-disease="'+i+'" '+(frailSelected.has(i)?"checked":"")+'> '+safe(frailDiseases[i])+'</label>').join("")+
   '</div><p class="muted" id="frailCount"></p>';
  host.appendChild(box);
  const sync=()=>{
