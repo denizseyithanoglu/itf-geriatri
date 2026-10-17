@@ -328,7 +328,7 @@ jobs:
             const scale=forms.find(f=>f.id===id);
             assert.ok(scale.items.every(x=>!/\/ (Fatigue|Resistance|Ambulation|Strength|Walking|Falls|Loss)/.test(x)),
               id+' questions should not contain English help');
-            assert.ok(!/No|Yes|Some|Severe|Robust|prefrail/i.test(scale.full),
+            assert.ok(!/\b(?:No|Yes|Some|Severe|Robust|prefrail)\b/i.test(scale.full),
               id+' interpretation should be Turkish');
           }
           const frailForm=forms.find(f=>f.id==='frail'),sarcfForm=forms.find(f=>f.id==='sarcf'),
