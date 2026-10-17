@@ -593,7 +593,7 @@ const shortVals=mnaShort.items.map((_,i)=>document.getElementById("mna_"+i)?.val
 const shortTotal=shortVals.every(v=>v!=="")?scaleTotal(mnaShort,shortVals):null;
 item("9. MNA-LF — Uzun Beslenme Değerlendirmesi",[["MNA-LF Ek Puanı",mnaLF===null?"__":mnaLF],["MNA Toplam Puanı",mnaLF===null||shortTotal===null?"__":(shortTotal+mnaLF)+"/30"],...auxiliary(0)]);
 const eq=moreScore("additional_1_",additional[1][1].length);
-item("10. EQ-5D — Yaşam Kalitesi",[["EQ-5D Durum Puanları",eq===null?"__":eq+"/15"+(eq===5?" (tüm alanlarda sorun yok)":"")],...auxiliary(1)]);
+item("10. EQ-5D — Yaşam Kalitesi",[["EQ-5D Durum Puanları",eq===null?"__":eq+"/15"+(eq===5?" (tüm alanlarda sorun yok)":"")],["Bugünkü Sağlık (VAS)",moreAnswers.eq5dHealthVAS===undefined?"__":moreAnswers.eq5dHealthVAS+"/100 ("+moreAnswers.eq5dHealthVAS+"%)"],...auxiliary(1)]);
 item("11. Mini-COG ve Saat Çizme",[["Saat Çizme",moreAnswers.clock===undefined?"__":moreAnswers.clock+"/5"],["Saat Notları",moreText["clock-notes"]],...auxiliary(2)]);
 const qlist=mmseVariant==="uneducated"?additional[4][1]:additional[3][1];
 const mvals=qlist.map((_,i)=>moreAnswers["mmse_"+mmseVariant+"_"+i]);
