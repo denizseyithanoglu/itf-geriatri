@@ -118,7 +118,7 @@ jobs:
           assert.ok(src.includes('mmseEntries.push(["Hatırlama — "+name,recallLabels[method]])'));
           ctx.mmseVariant='uneducated';
           assert.ok(ctx.mmseRecallAids().includes('id="mmse-recall-notes-uneducated"'));
-          assert.equal((ctx.renderMMSEGroups().match(/class="mmse-long-answer"/g)||[]).length,1);
+          assert.equal((ctx.renderMMSEGroups().match(/class="mmse-long-answer"/g)||[]).length,2);
           ctx.mmseVariant='standard';
           // Exercise the actual click handler against a minimal DOM stub.
           const makeButton=(method,index)=>({
@@ -206,6 +206,56 @@ jobs:
           minicogContext.setMiniCogImpairment('invalid');
           assert.equal(saves,3);
           assert.equal(updates,3);
+          // MMSE subtraction reference numbers and spoken DÜNYA are user-visible, not new score slots.
+          ctx.mmseVariant='standard';
+          ctx.mmseAttentionMode='subtract';
+          const expectedSubtractions=[93,86,79,72,65];
+          expectedSubtractions.forEach((answer,i)=>{
+            assert.ok(ctx.mmseQuestionLabel(ctx.additional[3][1][13+i],13+i).endsWith('('+answer+')'));
+          });
+          assert.ok(ctx.renderMMSEGroups().includes('data-mmse-timer="writing-standard"'));
+          assert.ok(ctx.renderMMSEGroups().includes('data-mmse-timer="copy-standard"'));
+          assert.ok(ctx.renderMMSEGroups().includes('id="mmseCopyFile-standard"'));
+          ctx.mmseAttentionMode='world';
+          assert.ok(ctx.mmseClinicianNote(13).includes('sesli olarak söylemesini'));
+          assert.ok(!ctx.mmseClinicianNote(13).includes('yazmasını'));
+          assert.ok(ctx.renderMMSEGroups().includes('tersten söyleme'));
+          ctx.mmseVariant='uneducated';
+          assert.ok(ctx.renderMMSEGroups().includes('id="mmseCopyFile-uneducated"'));
+          assert.ok(ctx.renderMMSEGroups().includes('data-mmse-timer="copy-uneducated"'));
+          assert.ok(!ctx.renderMMSEGroups().includes('data-mmse-timer="writing-standard"'));
+          assert.ok(src.includes('Hastanın Kopya Çizimi')&&src.includes('+img+copyPhoto;'));
+          assert.ok(src.includes('input[type="text"]'),'File input paths must not be saved in draft');
+          // Timers use wall-clock deadlines so they remain accurate across throttled tabs.
+          let now=200000,ticks=0;
+          ctx.Date={now:()=>now};
+          ctx.setInterval=()=>++ticks;
+          ctx.clearInterval=()=>{};
+          ctx.actMMSETimer('writing-standard','toggle');
+          now+=11000;
+          assert.equal(Math.ceil(ctx.mmseRemaining('writing-standard')/1000),19);
+          ctx.actMMSETimer('writing-standard','toggle'); // pause
+          now+=5000;
+          assert.equal(Math.ceil(ctx.mmseRemaining('writing-standard')/1000),19);
+          ctx.actMMSETimer('writing-standard','reset');
+          assert.ok(ctx.mmseTimerMarkup('writing-standard',30).includes('00:30'));
+          ctx.actMMSETimer('copy-standard','toggle');
+          now+=60001;
+          ctx.refreshMMSETimer('copy-standard');
+          assert.ok(ctx.mmseTimerMarkup('copy-standard',60).includes('00:00'));
+          ctx.actMMSETimer('copy-standard','toggle');
+          assert.equal(Math.ceil(ctx.mmseRemaining('copy-standard')/1000),60);
+          // A drawing remains local and is isolated by MMSE variant.
+          let revoked=null;
+          ctx.URL={createObjectURL:()=> 'blob:local-copy-test',revokeObjectURL:x=>{revoked=x}};
+          ctx.alert=()=>{throw Error('Valid image unexpectedly rejected')};
+          ctx.handleMMSECopyImage('standard',{type:'image/png',size:2000});
+          assert.ok(ctx.mmseCopyUploadPanel('standard').includes('blob:local-copy-test'));
+          assert.ok(!ctx.mmseCopyUploadPanel('uneducated').includes('blob:local-copy-test'));
+          ctx.clearMMSECopyImage('standard');
+          assert.equal(revoked,'blob:local-copy-test');
+          assert.ok(!ctx.mmseCopyUploadPanel('standard').includes('blob:local-copy-test'));
+          console.log('MMSE 7-subtraction answers, oral DÜNYA, timers, local drawing preview & report: OK');
           console.log('Mini-COG Yok/Var: above notes, selects/toggles, persists and prints: OK');
           console.log('MMSE recall: 9 interactive options, small notes, wider fields, isolated and scored click handlers: OK');
           console.log('KGD syntax + scoring examples + 3/2-column MMSE + switches + independent attention keys: OK');
