@@ -787,6 +787,7 @@ function enhanceChoices(){
     sel.value=opt.value;
     grid.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));
     host.classList.add("complete");summarize();
+    if(sel.id.startsWith("mna_"))syncMNAVisibility();
    };
    grid.appendChild(btn);
   }
@@ -1448,29 +1449,48 @@ function syncMNAAnthropometry(){
   (scores.calf?"Baldır çevresi: "+scores.calf.value.toFixed(1)+" cm → "+scores.calf.score+" puan.":"");
  return scores;
 }
-function mnaSFStatus(){
+function mnaSFScore(){
  const form=forms.find(f=>f.id==="mna");if(!form)return null;
  const values=form.items.map((_,i)=>$("mna_"+i)?.value??"");
  if(values.some(v=>v===""))return null;
- return scaleTotal(form,values)<=11?"risk":"normal";
+ const score=scaleTotal(form,values);
+ return Number.isFinite(score)?score:null;
+}
+function mnaSFStatus(){
+ const score=mnaSFScore();
+ return score===null?null:score<=11?"risk":"normal";
+}
+function mnaTotalCategory(score){
+ return score<17?"malnütrisyon":score<=23.5?"malnütrisyon riski":"normal";
 }
 let lastMNARiskClass=null;
 function syncMNAVisibility(){
  const container=$("mnaLFTogglePanel"),switcher=$("mnaLFShowSwitch");
- const lf=document.querySelector("#extraScales > section:nth-child(1)");
+ const lf=$("mnaLFPanel")||document.querySelector("#extraScales > section:nth-child(1)");
  if(!container||!switcher||!lf)return;
- const category=mnaSFStatus();
- if(lastMNARiskClass!==null&&category!==lastMNARiskClass)delete moreText.mnaLFManualPreference;
+ const score=mnaSFScore(),category=score===null?null:score<=11?"risk":"normal";
+ /* New 0–11 scores must actually open the long form. Old 'Hayır' choices
+    from a previous draft must not suppress the automatic first opening. */
+ if((category==="risk"&&lastMNARiskClass===null&&moreText.mnaLFManualPreference==="Hayır")||
+    (lastMNARiskClass!==null&&category!==lastMNARiskClass))
+   delete moreText.mnaLFManualPreference;
  lastMNARiskClass=category;
- const show=moreText.mnaLFManualPreference==="Evet"||(
-  moreText.mnaLFManualPreference!=="Hayır"&&category==="risk");
+ const show=moreText.mnaLFManualPreference==="Evet"||
+  (category==="risk"&&moreText.mnaLFManualPreference!=="Hayır");
  switcher.checked=show;
+ switcher.setAttribute("aria-expanded",String(show));
  container.dataset.lfOpen=String(show);
  lf.hidden=!show;
+ /* The wizard independently hides inactive tabs. Reapply its visibility
+    without leaving LF hidden when the current tab is MNA. */
+ if(typeof wizardStep==="number"&&wizardStep===3&&show)
+   lf.classList.remove("wizard-hidden");
  const status=$("mnaLFStatus");
  if(status)status.textContent=category==="risk"?
-  (show?"MNA-SF sonucu malnütrisyon veya malnütrisyon riski: MNA-LF otomatik açıldı.":"MNA-SF sonucu riskli; MNA-LF elle kapatıldı. Düğmeden yeniden açabilirsiniz."):
-  (category==="normal"?"MNA-SF normal ise MNA-LF yapılması gerekli değildir; gerektiğinde bu düğmeden açabilirsiniz.":"MNA-SF tamamlanınca riskli sonuçta MNA-LF otomatik açılır. MNA-SF normal ise MNA-LF yapılması gerekli değildir.");
+  (show?"MNA-SF: "+score+"/14 (malnütrisyon veya malnütrisyon riski). MNA-LF otomatik açıldı.":
+   "MNA-SF: "+score+"/14; MNA-LF elle kapatıldı. Yeniden açabilirsiniz."):
+  (category==="normal"?"MNA-SF: "+score+"/14 (normal). MNA-LF yapılması gerekli değildir; isterseniz açabilirsiniz.":
+   "MNA-SF tamamlanınca 0–11 puanda MNA-LF otomatik açılır. MNA-SF normal ise MNA-LF gerekli değildir.");
 }
 function initMNAControls(){
  const form=$("form_mna"),lf=document.querySelector("#extraScales > section:nth-child(1)");
@@ -1497,6 +1517,7 @@ function initMNAControls(){
   syncMNAVisibility();writeKGDDraft();
  };
  form.querySelectorAll(".choice-grid button").forEach(button=>button.addEventListener("click",()=>syncMNAVisibility()));
+ form.addEventListener("change",()=>syncMNAVisibility());
  syncMNAAnthropometry();
  lastMNARiskClass=mnaSFStatus();
  syncMNAVisibility();
@@ -1835,7 +1856,7 @@ function renderA4(){
 }
 function emailOnly(){const scores=[];for(const q of forms){let values=q.items.map((_,i)=>$(q.id+"_"+i)?.value||"");if(values.every(x=>x!==""))scores.push(q.tr+": "+scaleTotal(q,values)+"/"+q.max)}const gd=gdsScore();if(gd!==null)scores.push("GDS-30: "+gd+"/30");if(!confirm("Sadece anonim toplam puanlarla e-posta uygulaması açılsın mı? Hasta kimliği, notları ve cevaplar eklenmez."))return;const href="mailto:itfgeriatri2000@gmail.com?subject="+encodeURIComponent("Anonim KGD puan özeti")+"&body="+encodeURIComponent(scores.join("\n")||"Tamamlanan ölçek bulunmuyor");location.href=href}
 function gdsScore(){const arr=Array.from({length:30},(_,i)=>moreAnswers["gds30_"+i]);if(arr.some(x=>x===undefined))return null;const reverse=new Set([0,4,6,10,12,15,21,26,28,29]);return arr.reduce((n,v,i)=>n+(reverse.has(i)?(v==="0"?1:0):(v==="1"?1:0)),0)}
-function meaning(s,score){if(s.id==="frail")return score===0?"Normal":score<3?"pre-frail":"frail";if(s.id==="mna")return score<=7?"Malnütrisyon / Malnutrition":score<=11?"Risk / At risk":"Normal";if(s.id==="sarcf")return score>=4?"Pozitif tarama":"Negatif tarama";if(s.id==="sof")return score===0?"Normal":score===1?"pre-frail":"frail";if(s.id==="adl"||s.id==="iadl")return score===s.max?"Bağımsız / Independent":"Bazı alanlarda yardım ihtiyacı / Assistance in some domains";return""}
+function meaning(s,score){if(s.id==="frail")return score===0?"Normal":score<3?"pre-frail":"frail";if(s.id==="mna")return score<=7?"malnütrisyon":score<=11?"malnütrisyon riski":"normal";if(s.id==="sarcf")return score>=4?"Pozitif tarama":"Negatif tarama";if(s.id==="sof")return score===0?"Normal":score===1?"pre-frail":"frail";if(s.id==="adl"||s.id==="iadl")return score===s.max?"Bağımsız / Independent":"Bazı alanlarda yardım ihtiyacı / Assistance in some domains";return""}
 function fullKGDOverview(){
 const field=(value)=>value===undefined||value===null||String(value).trim()===""?"__":String(value);
 const lookup=(j,i)=>moreText["clinical_"+j+"_"+i];
@@ -1897,7 +1918,12 @@ item("14. Fiziksel Ölçümler ve Performans",[...phys,["SMM / Boy²",sarco.smmi
 return '<header class="summary-full-header"><h2>KGD Özeti — Tüm Bölümler</h2><p>__ = Henüz girilmedi. Önceki sekmelere dönerek tüm bilgileri düzenleyebilirsiniz.</p></header>'+rows.join("");
 }
 function summarize(){syncHistoryCounts();const t=texts.tr,lost=[];let complete=0;let out='<h2>'+safe(t.summary)+'</h2><p class="muted">'+safe(t.date)+': '+new Date().toLocaleDateString("tr-TR")+'</p>';for(const s of forms){const vals=s.items.map((_,i)=>$(s.id+"_"+i).value);const ready=vals.every(v=>v!=="");if(ready)complete++;const score=ready?scaleTotal(s,vals):null;out+='<div class="result"><strong>'+safe(s.tr)+': '+(ready?score+" / "+s.max+" ("+(meaning(s,score)||"Klinik yorum gerekli")+")":safe(t.incomplete))+'</strong>';if(ready){out+='<div>'+safe(t.meaning)+': '+safe(meaning(s,score))+'</div>';const lostHere=[];s.items.forEach((it,i)=>{let val=scaleItemScore(s,i,vals[i]);const deficit=(s.id==="adl"||s.id==="iadl"||s.id==="mna")?val<(s.id==="mna"?[2,3,2,2,2,3][i]:1):val>0;if(deficit)lostHere.push(it)});out+='<p class="muted">'+safe(t.domains)+': '+safe(lostHere.length?lostHere.join("; "):t.none)+'</p>'}out+='</div>';}
-out+='<p><strong>'+safe(t.completed)+': '+complete+'/'+forms.length+'</strong></p>';out+='<p class="muted">'+safe(t.general)+'</p>';addInlineScores();syncMNAVisibility();document.querySelectorAll("#extraScales > section,#fullGds > section").forEach(sec=>{let output=sec.querySelector(".inline-score");if(!output){output=document.createElement("div");output.className="inline-score";sec.appendChild(output)}let keys=[];if(sec===document.querySelector("#extraScales > section:nth-child(3)")){const k=miniCogMemoryScore([0,1,2]),h=miniCogMemoryScore([4,5,6]);output.textContent="Kayıt: "+(k??"eksik")+" · Saat Çizme: "+(moreAnswers.clock===undefined?"eksik":moreAnswers.clock+"/5")+" · Hatırlama: "+(h??"eksik");return}if(sec.id==="mmse-assessment"){output.textContent="MMSE ("+(mmseVariant==="standard"?"Standart":"Eğitimsizler için")+"): "+mmseScoreSummary();return}else if(sec.parentElement.id==="fullGds"){keys=Array.from({length:30},(_,i)=>"gds30_"+i)}else{const j=[...sec.parentElement.children].indexOf(sec);keys=additional[j]?.[1].map((_,i)=>"additional_"+j+"_"+i)||[]}const done=keys.filter(k=>moreAnswers[k]!==undefined).length;output.textContent="Bölüm: "+(done===keys.length?sec.parentElement.id==="fullGds"?gdsScore()+"/30 ("+(gdsScore()<=10?"normal":gdsScore()<=13?"olası depresyon":"pozitif tarama")+")":sec.id==="mmse-assessment"?(()=>{const v=keys.reduce((a,k)=>a+Number(moreAnswers[k]),0);return v+"/30 ("+(v>=24?"normal":"normalin altında")+")"})():keys.reduce((a,k)=>a+Number(moreAnswers[k]),0).toFixed(1)+" (klinik yorum gerekli)":"Eksik "+done+"/"+keys.length)});const c=moreAnswers.clock;out+='<div class="result"><strong>Saat Çizme Testi: '+(c===undefined?"Eksik":c+"/5")+'</strong></div>';const mm=Array.from({length:30},(_,i)=>moreAnswers["mmse_"+mmseVariant+"_"+i]);out+='<div class="result"><strong>MMSE ('+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+ '): '+(mm.some(v=>v===undefined)?"Eksik":mm.reduce((a,b)=>a+Number(b),0)+"/30")+'</strong></div>';const gd=gdsScore();out+='<div class="result"><strong>GDS-30: '+(gd===null?"Eksik — sonuç hesaplanmadı":gd+"/30")+'</strong></div>';$("summary").innerHTML=fullKGDOverview();}
+out+='<p><strong>'+safe(t.completed)+': '+complete+'/'+forms.length+'</strong></p>';out+='<p class="muted">'+safe(t.general)+'</p>';addInlineScores();syncMNAVisibility();document.querySelectorAll("#extraScales > section,#fullGds > section").forEach(sec=>{let output=sec.querySelector(".inline-score");if(!output){output=document.createElement("div");output.className="inline-score";sec.appendChild(output)}let keys=[];if(sec===document.querySelector("#extraScales > section:nth-child(3)")){const k=miniCogMemoryScore([0,1,2]),h=miniCogMemoryScore([4,5,6]);output.textContent="Kayıt: "+(k??"eksik")+" · Saat Çizme: "+(moreAnswers.clock===undefined?"eksik":moreAnswers.clock+"/5")+" · Hatırlama: "+(h??"eksik");return}if(sec.id==="mmse-assessment"){output.textContent="MMSE ("+(mmseVariant==="standard"?"Standart":"Eğitimsizler için")+"): "+mmseScoreSummary();return}else if(sec.parentElement.id==="fullGds"){keys=Array.from({length:30},(_,i)=>"gds30_"+i)}else{const j=[...sec.parentElement.children].indexOf(sec);keys=additional[j]?.[1].map((_,i)=>"additional_"+j+"_"+i)||[]}const done=keys.filter(k=>moreAnswers[k]!==undefined).length;if(sec.id==="mnaLFPanel"){
+ const total=kgdMNATotalScore();
+ const lfPart=moreScore("additional_0_",12);
+ output.textContent=total?"MNA toplam: "+total:(lfPart===null?"MNA-LF: Eksik "+done+"/12 yanıt; 30 üzerinden sonuç için MNA-SF ve MNA-LF tamamlanmalıdır.":"MNA-LF ek puanı: "+lfPart+"/16; MNA-SF tamamlanınca toplam /30 hesaplanır.");
+ return;
+}output.textContent="Bölüm: "+(done===keys.length?sec.parentElement.id==="fullGds"?gdsScore()+"/30 ("+(gdsScore()<=10?"normal":gdsScore()<=13?"olası depresyon":"pozitif tarama")+")":sec.id==="mmse-assessment"?(()=>{const v=keys.reduce((a,k)=>a+Number(moreAnswers[k]),0);return v+"/30 ("+(v>=24?"normal":"normalin altında")+")"})():keys.reduce((a,k)=>a+Number(moreAnswers[k]),0).toFixed(1)+" (klinik yorum gerekli)":"Eksik "+done+"/"+keys.length)});const c=moreAnswers.clock;out+='<div class="result"><strong>Saat Çizme Testi: '+(c===undefined?"Eksik":c+"/5")+'</strong></div>';const mm=Array.from({length:30},(_,i)=>moreAnswers["mmse_"+mmseVariant+"_"+i]);out+='<div class="result"><strong>MMSE ('+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+ '): '+(mm.some(v=>v===undefined)?"Eksik":mm.reduce((a,b)=>a+Number(b),0)+"/30")+'</strong></div>';const gd=gdsScore();out+='<div class="result"><strong>GDS-30: '+(gd===null?"Eksik — sonuç hesaplanmadı":gd+"/30")+'</strong></div>';$("summary").innerHTML=fullKGDOverview();}
 
 /* Temporary draft: scoped to this tab, never sent to any remote service. */
 const KGD_DRAFT_KEY="itf_kgd_session_draft_v1";
@@ -2013,7 +2039,7 @@ function compactKGDStep(i,inline=false){
    const sf=forms.find(x=>x.id==="mna");
    const vals=sf.items.map((_,j)=>$("mna_"+j)?.value??"");
    const complete=vals.every(x=>x!=="");
-   const total=n!==null&&complete?"MNA toplam: "+(n+scaleTotal(sf,vals))+"/30":null;
+   const total=n!==null&&complete?"MNA toplam: "+kgdMNATotalScore():null;
    return simple("Beslenme Değerlendirmesi (MNA)",[...clinicalLines(4,[0,1,2,3,4,5,6,7,8,9,10,15]),["MNA-SF",s?s.replace(/^MNA-SF: /,""):null],["MNA-LF",lf?lf.replace(/^MNA-LF ek: /,""):null],["MNA toplam",total?total.replace(/^MNA toplam: /,""):null]]);
  }
  if(i===4)return simple("Uyku, Boşaltım ve Yakınmalar",[...clinicalLines(4,[16,17,18]),...comprehensive[5][1].map((lab,j)=>[lab,field(5,j)])]);
@@ -2127,7 +2153,7 @@ function kgdMNATotalScore(){
  const lf=moreScore("additional_0_",12);
  if(lf===null||vals.some(x=>x===""))return null;
  const sum=scaleTotal(forms.find(x=>x.id==="mna"),vals)+lf;
- return sum+"/30 ("+(sum<17?"malnütrisyon":sum<=23.5?"malnütrisyon riski":"normal")+")";
+ return sum+"/30 ("+mnaTotalCategory(sum)+")";
 }
 function kgdEQScore(){
  const v=additional[1][1].map((_,j)=>moreAnswers["additional_1_"+j]);
