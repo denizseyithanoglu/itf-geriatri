@@ -722,7 +722,7 @@ jobs:
           const groupsStart=src.indexOf('const wizardGroups=['),groupsEnd=src.indexOf('];',groupsStart);
           const groups=src.slice(groupsStart,groupsEnd);
           const positions=[
-            groups.indexOf('tr:"Aktivite, Düşme ve Kırık"'),
+            groups.indexOf('tr:"Fiziksel Aktivite ve Düşmeler"'),
             groups.indexOf('tr:"Ağrı, Uyku Kalitesi ve Boşaltım"'),
             groups.indexOf('tr:"Beslenme Değerlendirmesi (MNA)"'),
             groups.indexOf('tr:"Yaşam Aktiviteleri ve Kalitesi')
@@ -751,7 +751,7 @@ jobs:
           const fullEnd=src.indexOf('function summarize(){',fullStart);
           const overview=src.slice(fullStart,fullEnd);
           const orderedLabels=[
-            'item("3. Fiziksel Aktivite, Düşme ve Kırık"',
+            'item("3. Fiziksel Aktivite ve Düşmeler"',
             'item("4. Ağrı, Uyku Kalitesi ve Boşaltım"',
             'item("5. Beslenme"',
             'scaleGroup("5.1 MNA-SF"',
@@ -780,6 +780,104 @@ jobs:
             'Full print must follow new wizard tab order');
           assert.ok(src.includes('const contents=kgdShortPrintStep(step,false)'),
             'Legacy single-tab print must respect new tab mapping');
+          // 2025 departmental PDF p.1 activity/fall/fracture: preserve real
+          // patient-answer keys while relocating fracture to history (tab 2).
+          const activityStart=src.indexOf('function activityChoiceMarkup(key,options){');
+          const activityEnd=src.indexOf('function reorderClinicalSections(){',activityStart);
+          assert.ok(activityStart>=0&&activityEnd>activityStart,
+            'Activity/fall/form migration functions must exist');
+          const activitySrc=src.slice(activityStart,activityEnd);
+          const choices=activitySrc.match(/\[0,\["Hiç","Bazen \(haftada 1’den az\)","Haftada 1-2","Her gün"\]\]/u);
+          assert.ok(choices,'Preserve all four physical-activity frequency options from PDF');
+          for(const pdfTerm of [
+            'Geçtiğimiz hafta içinde fiziksel aktivite düzeyinizin yaşıt sağlıklılardan daha düşük olduğunu düşünüyor musunuz?',
+            'Yürüme/mobilizasyon için yardımcı cihaz?',
+            'Son 1 yıl içinde düştü mü?',
+            'Düşme korkusu var mı?',
+            'Düşme korkusu GYA’yı olumsuz etkiliyor mu?',
+            'Son 1 yıl içinde hastane yatışı?',
+            'Son 3 yıl içinde hastane yatışı?',
+            'Yaşıtlarınıza göre kendinizi daha fazla yorgun, bitkin, halsiz hissediyor musunuz?'
+          ])assert.ok(activitySrc.includes(pdfTerm),'Missing source-derived activity question: '+pdfTerm);
+          const formStart=src.indexOf('function reorderClinicalSections(){'),formEnd=src.indexOf('function nutritionChoice(',formStart);
+          const fractureCode=src.slice(formStart,formEnd);
+          assert.ok(fractureCode.includes('<label>Hiç Kırık Oldu mu?</label>')&&
+            fractureCode.includes('makeHistoryChoice("historyFracture",["Hayır","Evet"])'),
+            'Fracture question must remain unified on the medical history tab');
+          assert.ok(activitySrc.includes('details.id="fractureDetailFields"')&&
+            activitySrc.includes('fracture.appendChild(details)'),
+            'Fracture intensity, timing and location must be physically moved to History');
+          assert.ok(activitySrc.includes('fields[14].remove()'),
+            'Fracture should not remain duplicated on the Activity tab');
+          assert.ok(activitySrc.includes('clinical_2_15",["Düşük Enerjili","Yüksek Enerjili"]'),
+            'Two fracture energy choices must appear only after Yes');
+          assert.ok(activitySrc.includes('moreText.clinical_2_14=')===false,
+            'Do not recreate a second separately editable fracture answer');
+          assert.ok(activitySrc.includes('moreText.historyFracture=legacy'),
+            'Migration from existing clinical_2_14 answer to History question');
+          assert.ok(activitySrc.includes('fields[16].querySelector("label").textContent="Kırık zamanı"')&&
+            activitySrc.includes('fields[17].querySelector("label").textContent="Kırık bölgesi"'),
+            'Both fracture follow-up text fields must be displayed when fracture is positive');
+          const activityNodes=[];
+          const fakePanel={hidden:false};
+          const fakeChoiceButtons=["Evet","Hayır"].map(value=>({
+            dataset:{historyValue:value},
+            setAttribute(name,val){this[name]=val}
+          }));
+          const fakeFractureSelector={querySelectorAll:()=>fakeChoiceButtons};
+          const responses={historyFracture:"Evet",clinical_2_15:"Düşük Enerjili",
+            clinical_2_16:"2020",clinical_2_17:"Kalça",clinical_2_6:"Evet"};
+          const fakeRoot={
+            querySelectorAll:()=>activityNodes
+          };
+          const clinicalCtx={
+            moreText:responses,safe:x=>String(x),
+            document:{
+              getElementById(id){
+                if(id==="fractureDetailFields")return fakePanel;
+                if(id==="historyFracture")return fakeFractureSelector;
+                return null;
+              },
+              querySelector:selector=>selector==='#fullFields > section[data-clinical-index="2"]'?fakeRoot:null
+            }
+          };
+          vm.runInNewContext(activitySrc,clinicalCtx);
+          clinicalCtx.syncFractureFields();
+          assert.equal(fakePanel.hidden,false);
+          assert.equal(fakeChoiceButtons[0]['aria-pressed'],'true');
+          responses.historyFracture="Hayır";
+          clinicalCtx.syncFractureFields(true);
+          assert.equal(fakePanel.hidden,true);
+          for(const key of ["clinical_2_15","clinical_2_16","clinical_2_17"])
+            assert.equal(responses[key],undefined,'No fracture must clear '+key);
+          const dependentKeys=["clinical_2_7","clinical_2_8","activityFallWhen","activityFallOutcome",
+            "clinical_2_5","clinical_2_10","activityHospitalCount1","activityHospitalCount3"];
+          for(const key of dependentKeys)
+            activityNodes.push({dataset:{activityDependent:key},hidden:false});
+          clinicalCtx.syncActivityQuestions();
+          assert.equal(activityNodes[0].hidden,false,'Falls Yes reveals annual count');
+          for(const node of activityNodes.slice(4))
+            assert.equal(node.hidden,true,'Dependent data should remain hidden without a positive parent answer');
+          responses.clinical_2_6="Hayır";clinicalCtx.syncActivityQuestions();
+          for(const node of activityNodes.slice(0,4))assert.equal(node.hidden,true,'Falls No hides fall details');
+          assert.ok(src.includes('if(sec.dataset.clinicalIndex==="2"){')&&
+            src.includes('["activityFallWhen","activityFallOutcome","activityHospitalCount1","activityHospitalCount3"].forEach(k=>delete moreText[k])'),
+            'Reset must clear new activity answer keys on tab 3');
+          assert.ok(src.includes('["historyFracture","clinical_2_14","clinical_2_15","clinical_2_16","clinical_2_17"'),
+            'Reset tab 2 must also clear moved fracture details');
+          assert.ok(src.includes('if(i===2)return simple("Fiziksel Aktivite ve Düşmeler"')&&
+            src.includes('clinicalLines(2,[0,1,2,3,4,5,6,7,8,9,10,11,12,13])'),
+            'Short tab 3 summary must contain only activity/falls, not old fracture fields');
+          assert.ok(src.includes('if(step===2)return kgdDetailedClinical(2,[0,1,2,3,4,5,6,7,8,9,10,11,12,13]'),
+            'Detailed tab 3 print must omit fracture');
+          assert.ok(src.includes('kgdDetailedBlock("Kırık Öyküsü"')&&
+            src.includes('["Kırık bölgesi",moreText.historyFracture==="Evet"?moreText.clinical_2_17:null]'),
+            'Detailed tab 2 print must include fracture details');
+          assert.ok(src.includes('grid-column:1/-1;min-width:0;border-color:#bcd7c6'),
+            'Fracture question must span the disease grid and keep its follow-up visible');
+          assert.ok(src.includes('section.supplement[data-clinical-index="2"].wizard-hidden{display:none!important}'),
+            'New activity panel grid must never leak onto other wizard tabs');
+          console.log('PDF p.1 activity/falls and History fracture migration, conditional fields, resets and prints: OK');
           console.log('Tab order Pain/Sleep #4, Nutrition MNA #5, old drafts, short/full/detail prints, SGA HQ asset: OK');
           // SGA explanatory notes must correspond 1:1 to the unchanged six
           // anatomical locations in the front/back illustration (row-major 1-2-3 / 4-5-6).
