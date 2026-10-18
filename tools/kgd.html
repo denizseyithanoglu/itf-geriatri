@@ -2180,7 +2180,10 @@ const social=[["T.C. Kimlik No",lookup(0,1)],["Hasta Adı Soyadı",lookup(0,0)],
 item("1. Sosyal ve Kişisel Öykü",social);
 item("2. Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar",[
 ...([7,6,8,9,3,10,11,13,16,4,5,12,14,0,15,17].map(i=>[comprehensive[6][1][i],lookup(6,i)])),
-["Kırık Var Mı?",moreText.historyFracture],
+["Hiç Kırık Oldu mu?",moreText.historyFracture],
+["Kırığın enerji düzeyi",moreText.historyFracture==="Evet"?lookup(2,15):null],
+["Kırık zamanı",moreText.historyFracture==="Evet"?lookup(2,16):null],
+["Kırık bölgesi",moreText.historyFracture==="Evet"?lookup(2,17):null],
 ["Diğer Hastalıklar",lookup(6,18)],
 ["İlaçlar",lookup(6,19)],
 ["Hastalık Sayısı",lookup(6,2)],
@@ -2190,7 +2193,13 @@ item("2. Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar",[
 ["Alkol Kullanımı",lookup(3,2)],["Alkol Kullanım Miktarı",moreText.alcoholQuantity],
 ...comprehensive[3][1].slice(3).map((label,i)=>[label,lookup(3,i+3)])
 ]);
-item("3. Fiziksel Aktivite, Düşme ve Kırık",clinical(2));
+item("3. Fiziksel Aktivite ve Düşmeler",[
+ ...clinical(2).slice(0,14),
+ ["Düşmenin zamanı",moreText.activityFallWhen],
+ ["Düşmenin sonucu",moreText.activityFallOutcome],
+ ["Son 1 yılda hastane yatış sayısı",moreText.activityHospitalCount1],
+ ["Son 3 yılda hastane yatış sayısı",moreText.activityHospitalCount3]
+]);
 item("4. Ağrı, Uyku Kalitesi ve Boşaltım",[...comprehensive[4][1].slice(11,15).map((label,k)=>[label,lookup(4,k+11)]),...comprehensive[4][1].slice(16,19).map((label,k)=>[label,lookup(4,k+16)]),...clinical(5)]);
 item("5. Beslenme",[...comprehensive[4][1].slice(0,11).map((label,i)=>[label,lookup(4,i)]),[comprehensive[4][1][15],lookup(4,15)]]);
 const scaleGroup=(title,ids)=>{
@@ -2334,6 +2343,9 @@ function compactKGDStep(i,inline=false){
     ["İlaç Sayısı",currentMedications().some(x=>x.trim())?field(6,1):null],
     ...historyDiagnoses.map(k=>[comprehensive[6][1][k],field(6,k)]),
     ["OA GYA Etkisi",field(6,0)],["Kırık",moreText.historyFracture],
+    ["Kırığın enerji düzeyi",moreText.historyFracture==="Evet"?field(2,15):null],
+    ["Kırık zamanı",moreText.historyFracture==="Evet"?field(2,16):null],
+    ["Kırık bölgesi",moreText.historyFracture==="Evet"?field(2,17):null],
     ["Diğer Hastalıklar",field(6,18)],["İlaçlar",field(6,19)],
     ["Soygeçmiş",field(6,20)],
     ["Sigara",field(3,0)],["Paket/Yıl",field(3,1)],
@@ -2342,7 +2354,13 @@ function compactKGDStep(i,inline=false){
    ];
    return detailed("Özgeçmiş, İlaçlar ve Görme-İşitme",pairs);
  }
- if(i===2)return simple("Aktivite, Düşme ve Kırık",clinicalLines(2,[0,1,2,4,5,6,7,8,9,10,11,12,14,15,16,17]));
+ if(i===2)return simple("Fiziksel Aktivite ve Düşmeler",[
+  ...clinicalLines(2,[0,1,2,3,4,5,6,7,8,9,10,11,12,13]),
+  ["Düşmenin zamanı",moreText.activityFallWhen],
+  ["Düşmenin sonucu",moreText.activityFallOutcome],
+  ["Son 1 yılda hastane yatış sayısı",moreText.activityHospitalCount1],
+  ["Son 3 yılda hastane yatış sayısı",moreText.activityHospitalCount3]
+ ]);
  if(i===3){
    const s=scale("mna",mna),lf=aux(0,"MNA-LF ek");
    const n=moreScore("additional_0_",additional[0][1].length);
