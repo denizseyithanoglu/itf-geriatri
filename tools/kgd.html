@@ -1739,6 +1739,28 @@ function activitySetChoice(field,key,options){
  const old=field.querySelector("textarea,input");
  if(old)old.replaceWith((()=>{const el=document.createElement("div");el.innerHTML=activityChoiceMarkup(key,options);return el.firstElementChild})());
 }
+/* A native dropdown remains keyboard-accessible and persists to the original
+   clinical_2_2 key without changing printed reports or existing patient drafts. */
+function activitySetDurationSelect(field,key,options){
+ const old=field.querySelector("textarea,input");
+ if(!old)return;
+ const select=document.createElement("select");
+ select.id=key;
+ select.className="structured-input activity-duration-select";
+ select.setAttribute("aria-label","Fiziksel aktivite süresi");
+ select.innerHTML='<option value="">Süre seçiniz</option>'+
+  options.map(option=>'<option value="'+safe(option)+'">'+safe(option)+'</option>').join("");
+ const previous=String(moreText[key]||"").trim();
+ select.value=options.includes(previous)?previous:"";
+ old.replaceWith(select);
+ field.querySelector("label").htmlFor=key;
+ select.addEventListener("change",()=>{
+  if(select.value)moreText[key]=select.value;
+  else delete moreText[key];
+  field.querySelector(".activity-legacy-duration")?.remove();
+  summarize();writeKGDDraft();
+ });
+}
 function activitySetText(field,key,type="text"){
  const old=field.querySelector("textarea,input");
  if(!old)return;
@@ -1845,7 +1867,7 @@ function formatActivityAndFracture(activity,fracture){
    [11,["Hayır","Evet"]],[12,["Hayır","Evet"]],[13,["Hayır","Evet"]]
  ])activitySetChoice(fields[index],"clinical_2_"+index,opts);
  const durationOptions=["0-15 dk","15-30 dk","30-60 dk","60-120 dk","120-240 dk","> 240 dk"];
- activitySetChoice(fields[2],"clinical_2_2",durationOptions);
+ activitySetDurationSelect(fields[2],"clinical_2_2",durationOptions);
  const previousDuration=String(moreText.clinical_2_2||"").trim();
  if(previousDuration&&!durationOptions.includes(previousDuration)){
   const note=document.createElement("small");
@@ -1916,7 +1938,6 @@ function formatActivityAndFracture(activity,fracture){
   if(!button)return;
   const key=button.dataset.activityChoice,value=button.dataset.activityValue;
   moreText[key]=value;
-  if(key==="clinical_2_2")fields[2].querySelector(".activity-legacy-duration")?.remove();
   button.closest(".activity-choices").querySelectorAll("button").forEach(b=>
    b.setAttribute("aria-pressed",String(b===button)));
   if(["Hiç","Yok","Hayır"].includes(value)){
@@ -1943,7 +1964,7 @@ function formatActivityAndFracture(activity,fracture){
  fields[17].querySelector("label").textContent="Kırık bölgesi";
  activitySetText(fields[16],"clinical_2_16");
  activitySetText(fields[17],"clinical_2_17");
- details.append(fields[15],fields[16],fields[17]);fracture.appendChild(details);
+ details.append(fields[15],fields[16],fields[17]);fracture.parentElement.appendChild(details);
  details.addEventListener("click",event=>{
   const button=event.target.closest("[data-activity-choice]");if(!button)return;
   moreText.clinical_2_15=button.dataset.activityValue;
@@ -1977,7 +1998,9 @@ function reorderClinicalSections(){
 });
 const fracture=historyBox("extra-field history-fracture-card");
  fracture.innerHTML='<label>Hiç Kırık Oldu mu?</label>'+makeHistoryChoice("historyFracture",["Hayır","Evet"]);
- diagnoses.appendChild(fracture);
+ const fractureRow=historyBox("history-fracture-row");
+ fractureRow.appendChild(fracture);
+ diagnoses.appendChild(fractureRow);
  const other=historyBox("history-paragraph");
  other.appendChild(fields[18]);fields[18].querySelector("textarea").rows=4;
  const meds=historyBox("history-paragraph history-medications");
@@ -1995,6 +2018,8 @@ const fracture=historyBox("extra-field history-fracture-card");
    const el=document.createElement("input");el.type="text";el.id="clinical_6_"+i;el.className="structured-input history-count";el.readOnly=true;el.setAttribute("aria-readonly","true");existing.replaceWith(el);count.appendChild(fields[i]);
  }
  const diseaseNote=document.createElement("small");diseaseNote.id="diseaseCountNote";count.appendChild(diseaseNote);
+ const medicationLayout=historyBox("history-medication-layout");
+ medicationLayout.append(meds,count);
  const family=historyBox("history-paragraph");family.appendChild(fields[20]);fields[20].querySelector("textarea").rows=4;
  // The old duplicate clock notes are handled by the existing clock assessment.
  fields[21].remove();
@@ -2023,7 +2048,7 @@ const fracture=historyBox("extra-field history-fracture-card");
  visionBlock.append(sensoryRow("history-vision-four",[3,4,5,6]),sensoryRow("history-vision-three",[7,8,9]));
  const hearingBlock=historyBox("history-subsection history-hearing");hearingBlock.innerHTML="<h3>İşitme</h3>";
  hearingBlock.append(sensoryRow("history-hearing-two",[10,11]),sensoryRow("history-hearing-two",[12,13]));
- history.append(diagnoses,other,meds,count,family,habits,visionBlock,hearingBlock);
+ history.append(diagnoses,other,medicationLayout,family,habits,visionBlock,hearingBlock);
  history.addEventListener("click",event=>{
    const btn=event.target.closest("[data-history-choice]");if(!btn)return;
    const key=btn.dataset.historyChoice;moreText[key]=btn.dataset.historyValue;
