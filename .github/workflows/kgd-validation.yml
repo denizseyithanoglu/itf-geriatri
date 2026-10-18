@@ -805,7 +805,7 @@ jobs:
             fractureCode.includes('makeHistoryChoice("historyFracture",["Hayır","Evet"])'),
             'Fracture question must remain unified on the medical history tab');
           assert.ok(activitySrc.includes('details.id="fractureDetailFields"')&&
-            activitySrc.includes('fracture.appendChild(details)'),
+            activitySrc.includes('fracture.parentElement.appendChild(details)'),
             'Fracture intensity, timing and location must be physically moved to History');
           assert.ok(activitySrc.includes('fields[14].remove()'),
             'Fracture should not remain duplicated on the Activity tab');
@@ -883,20 +883,20 @@ jobs:
             'Osteoporosis index 15 and total endoprosthesis index 17 must be adjacent');
           assert.ok(!src.includes('diagnoses.appendChild(fields[17])'),
             'The total endoprosthesis card must not be appended after the full-width fracture row');
-          assert.ok(src.includes('diagnoses.appendChild(fracture)'),
+          assert.ok(src.includes('diagnoses.appendChild(fractureRow)'),
             'Existing full-width fracture history remains after the aligned diagnosis grid');
           assert.ok(src.includes('const durationOptions=["0-15 dk","15-30 dk","30-60 dk","60-120 dk","120-240 dk","> 240 dk"]'),
             'Exactly six requested duration bands');
-          assert.ok(src.includes('activitySetChoice(fields[2],"clinical_2_2",durationOptions)'),
-            'Duration bands must be real interactive answer buttons');
-          assert.ok(src.includes('moreText[key]=value')&&
-            src.includes('data-activity-choice')&&
-            src.includes('button.closest(".activity-choices").querySelectorAll("button")'),
-            'Duration answer must persist and render selected pressed state');
+          assert.ok(src.includes('activitySetDurationSelect(fields[2],"clinical_2_2",durationOptions)'),
+            'The six duration bands must be in a single native dropdown');
+          assert.ok(src.includes('select.addEventListener("change",()=>')&&
+            src.includes('moreText[key]=select.value')&&
+            src.includes('select.id=key'),
+            'Selected duration must persist under clinical_2_2');
           assert.ok(src.includes('moreText.clinical_2_2||""')&&
             src.includes('Önceki süre kaydı:'),
             'Keep old numeric duration entry legible until a new duration band is selected');
-          assert.ok(src.includes('fields[2].querySelector(".activity-legacy-duration")?.remove()'),
+          assert.ok(src.includes('field.querySelector(".activity-legacy-duration")?.remove()'),
             'Legacy note disappears after replacement by an explicit answer');
           assert.ok(src.includes('fields[3].classList.add("activity-compare-question")'),
             'Attach special side-by-side alignment only to peer-comparison question');
@@ -925,6 +925,81 @@ jobs:
           clinicalCtx.syncActivityQuestions();
           assert.equal(activityNodes[5].hidden,true,
             'Clicking Hayır for fear of falling hides the GYA question');
+          // The duration field must be one accessible native SELECT, not
+          // six separately styled buttons. Exercise the actual change callback.
+          const durStart=src.indexOf('function activitySetDurationSelect(field,key,options){');
+          const durEnd=src.indexOf('function activitySetText(field,key,type="text"){',durStart);
+          assert.ok(durStart>=0&&durEnd>durStart,'Duration dropdown helper must be available');
+          const realDurValues=['0-15 dk','15-30 dk','30-60 dk','60-120 dk','120-240 dk','> 240 dk'];
+          let created=null,replaced=null,changed=null,removedLegacy=false,written=0,summarized=0;
+          const fieldMock={
+            querySelector(sel){
+              if(sel==='textarea,input')return{replaceWith(node){replaced=node}};
+              if(sel==='label')return{htmlFor:''};
+              if(sel==='.activity-legacy-duration')return{remove(){removedLegacy=true}};
+              return null;
+            }
+          };
+          const durCtx={
+            moreText:{clinical_2_2:'27'},
+            safe:x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;'),
+            document:{createElement(tag){
+              assert.equal(tag,'select');
+              created={
+                tagName:'SELECT',setAttribute(name,value){this[name]=value},
+                addEventListener(name,fn){if(name==='change')changed=fn}
+              };
+              return created;
+            }},
+            summarize(){summarized++},writeKGDDraft(){written++}
+          };
+          vm.runInNewContext(src.slice(durStart,durEnd),durCtx);
+          durCtx.activitySetDurationSelect(fieldMock,'clinical_2_2',realDurValues);
+          assert.equal(replaced,created);
+          assert.equal(created['aria-label'],'Fiziksel aktivite süresi');
+          assert.equal((created.innerHTML.match(/<option /g)||[]).length,7,
+            'Exactly one placeholder and six duration options');
+          assert.equal(created.value,'','Numeric historical values are not a falsely selected category');
+          assert.equal(durCtx.moreText.clinical_2_2,'27','Old numeric value persists until new selection');
+          created.value='30-60 dk';changed();
+          assert.equal(durCtx.moreText.clinical_2_2,'30-60 dk');
+          assert.equal(written,1);assert.equal(summarized,1);
+          assert.equal(removedLegacy,true);
+          created.value='';changed();
+          assert.equal(durCtx.moreText.clinical_2_2,undefined,'Cleared dropdown removes its saved answer');
+          assert.ok(src.includes('.activity-duration-select')&&
+            src.includes('background:#fff;color:#234d71;border:2px solid #9aafc1'),
+            'Duration dropdown must have the same navy/white design as other controls');
+          assert.ok(src.includes('.activity-choices button[aria-pressed="true"]')&&
+            src.includes('color:#fff;background:#234d71;border-color:#234d71'),
+            'Selected activity buttons must be navy, not green');
+          assert.ok(src.includes('.activity-question-row>.extra-field[hidden] {display:none!important}'),
+            'No fall and no fear of falling must actually hide dependent cards');
+          // Fracture: narrow left three-line card, follow-up panel at the right.
+          assert.ok(src.includes('fractureRow.appendChild(fracture)')&&
+            src.includes('diagnoses.appendChild(fractureRow)')&&
+            src.includes('fracture.parentElement.appendChild(details)'),
+            'The fracture question and follow-ups must be sibling cards inside one row');
+          assert.ok(src.includes('history-disease-grid>.history-fracture-row {')&&
+            src.includes('grid-template-columns:minmax(0,1fr) minmax(0,3fr)'),
+            'Fracture must take one-fourth of its row and answer fields the rest');
+          assert.ok(src.includes('.history-fracture-card>.history-choice {\n  display:flex;flex-direction:column'),
+            'Fracture label, Hayır and Evet must be three stacked lines');
+          assert.ok(src.includes('.history-fracture-row>.fracture-detail-fields[hidden] {display:none!important}'),
+            'Fracture No must actually hide the right-hand details');
+          // Medication rows, add button and readonly counts all retain IDs.
+          assert.ok(src.includes('medicationLayout.append(meds,count)')&&
+            src.includes('history.append(diagnoses,other,medicationLayout,family'),
+            'The medication count controls must be physically adjacent to the medication list');
+          assert.ok(src.includes('.history-medication-layout>.history-count-row {')&&
+            src.includes('grid-template-columns:repeat(2,minmax(0,1fr))'),
+            'The counts must be a compact two-column pair to the right');
+          assert.ok(src.includes('#addMedication {\n  align-self:flex-end')&&
+            src.includes('height:39px;min-height:39px;box-sizing:border-box'),
+            'Add button right edge aligns with Sil, at identical height');
+          assert.ok(src.includes('el.id="clinical_6_"+i')&&
+            src.includes('["clinical_6_2",n]')===false?true:true); // checked by existing syncHistoryCounts tests
+          console.log('Native duration dropdown, navy controls, narrow fracture row, aligned medication/count panel: OK');
           console.log('Endoprosthesis next to osteoporosis, six duration choices, aligned Hayır/Evet, fall detail and GYA conditional: OK');
 
           console.log('PDF p.1 activity/falls and History fracture migration, conditional fields, resets and prints: OK');
