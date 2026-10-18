@@ -760,6 +760,82 @@
   #fullFields > section.supplement[data-clinical-index="5"] > .merged-clinical-fields{grid-template-columns:1fr}
  }
 }
+
+/* Departmental PDF-based activity/falls assessment (tab 3). Fully scoped to
+   retain the existing layout and independent wizard visibility of other tabs. */
+@media screen{
+ #fullFields > section.supplement[data-clinical-index="2"]{
+  display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box
+ }
+ #fullFields > section.supplement[data-clinical-index="2"].wizard-hidden{display:none!important}
+ #fullFields > section.supplement[data-clinical-index="2"] [hidden],
+ #fullFields .history-fracture-card [hidden]{display:none!important}
+ #fullFields .activity-evaluation{display:flex;flex-direction:column;gap:14px;margin:12px 0}
+ #fullFields .activity-subsection{
+  border:1px solid #d0e2d5;border-radius:12px;background:#fcfefd;
+  padding:14px 16px;min-width:0
+ }
+ #fullFields .activity-subsection h3{margin:0 0 12px;color:#244e3c;font-size:1.08rem}
+ #fullFields .activity-pdf-note,.activity-examples{
+  margin:0 0 9px;line-height:1.5;font-size:.82rem;color:#3b5d48
+ }
+ #fullFields .activity-examples{font-style:italic}
+ #fullFields .activity-question-row{
+  display:grid;grid-template-columns:repeat(var(--activity-cols),minmax(0,1fr));
+  gap:12px;margin:12px 0 0;min-width:0
+ }
+ #fullFields .activity-question-row>.extra-field{
+  display:flex;flex-direction:column;min-width:0;gap:8px;
+  margin:0;padding:11px;border:1px solid #dce9df;border-radius:9px;background:#f6faf7
+ }
+ #fullFields .activity-question-row>.extra-field>label{
+  margin:0;font-size:.88rem;line-height:1.42;font-weight:700;color:#254e3c
+ }
+ #fullFields .activity-choices{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+ #fullFields .activity-choices button{
+  width:auto;min-height:38px;max-width:100%;padding:8px 11px;
+  background:#fff;border:1.5px solid #91b09c;border-radius:8px;
+  color:#295741;font:inherit;font-weight:650;font-size:.83rem;cursor:pointer;
+ }
+ #fullFields .activity-choices button[aria-pressed="true"]{
+  background:#285b4d;color:#fff;border-color:#285b4d
+ }
+ #fullFields .activity-choices button:focus-visible{
+  outline:3px solid #b77c00;outline-offset:2px
+ }
+ #fullFields .activity-text-entry{
+  width:100%;min-width:0;max-width:100%;min-height:39px;
+  padding:8px 10px;font:inherit;font-size:.9rem
+ }
+ #fullFields .history-disease-grid>.history-fracture-card{
+  grid-column:1/-1;min-width:0;border-color:#bcd7c6;background:#f4faf6;
+  display:grid;grid-template-columns:minmax(175px,1fr) auto;align-items:center;gap:8px 14px
+ }
+ #fullFields .history-fracture-card>label{min-height:0!important;margin:0!important;font-size:.9rem!important}
+ #fullFields .history-fracture-card>.history-choice{display:flex;gap:8px;justify-content:flex-end}
+ #fullFields .history-fracture-card>.history-choice button{min-width:85px;padding:8px 12px}
+ #fullFields .fracture-detail-fields{
+  display:grid;grid-template-columns:minmax(240px,1.5fr) minmax(150px,1fr) minmax(150px,1fr);
+  gap:10px;grid-column:1/-1;padding:11px 0 0;border-top:1px solid #d3e5d8;min-width:0
+ }
+ #fullFields .fracture-detail-fields>.extra-field{
+  display:flex;flex-direction:column;gap:9px;margin:0;min-width:0;padding:10px;
+  border:1px solid #dce8df;border-radius:8px;background:#fff
+ }
+ #fullFields .fracture-detail-fields>.extra-field label{font-weight:700;font-size:.85rem;color:#28523e}
+ @media(max-width:900px){
+  #fullFields .activity-question-row[style*="--activity-cols: 4"],
+  #fullFields .activity-question-row[style*="--activity-cols: 3"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #fullFields .fracture-detail-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+ }
+ @media(max-width:560px){
+  #fullFields .activity-question-row,
+  #fullFields .activity-question-row[style*="--activity-cols"]{grid-template-columns:1fr}
+  #fullFields .fracture-detail-fields{grid-template-columns:1fr}
+  #fullFields .history-disease-grid>.history-fracture-card{grid-template-columns:1fr}
+  #fullFields .history-fracture-card>.history-choice{justify-content:flex-start}
+ }
+}
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><section class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite">Geçici taslak hazırlanıyor…</div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><p class="wizard-privacy"><strong>Önemli:</strong> Geçici taslak yalnızca bu tarayıcı sekmesinde saklanır; sayfa yenilense de korunur. Bu bir klinik kayıt sistemi değildir. Gerçek hasta kimlik veya sağlık verilerini girmeyiniz.</p></section><div id="fullFields"></div><div id="sections"></div><div id="extraScales"></div><div id="fullGds"></div><section class="panel summary result-summary" id="summary"></section><article id="printSheet" aria-label="A4 KGD özeti"></article><div id="wizardFooter" class="wizard-footer no-print" aria-label="Bölüm gezinme ve kayıt işlemleri"><button class="btn alt" id="wizardBack" type="button">← Önceki</button><button class="btn alt" id="wizardSave" type="button">Taslağı Kaydet</button><button class="btn alt" id="wizardPrintSection" type="button">Bu Sekmenin Özetini Yazdır / PDF</button><button class="btn alt" id="wizardCopySectionSummary" type="button">Özet Metnini Kopyala</button><button class="btn alt" id="wizardPrintSectionDetailed" type="button">Bu Sekmeyi Detaylı Yazdır / PDF</button><button class="btn" id="wizardNext" type="button">Kaydet ve Devam Et →</button><button class="wizard-delete" id="wizardClear" type="button">Geçici Taslağı Sil</button></div><div class="actions no-print" id="finalActions"><button class="btn" id="printFinal">Tüm KGD — Özet Yazdır / PDF</button><button class="btn alt" id="printFinalDetailed" type="button">Tüm KGD — Detaylı Yazdır / PDF</button><button class="btn alt" id="emailFinal">E-posta ile anonim puan özeti</button></div><p class="optional-note">E-posta sadece tamamlanan ölçeklerin anonim toplamlarını içerir. Kimlik veya klinik notlar e-postaya eklenmez.</p></main><script>
 const forms=[{"id":"adl","tr":"GYA — Günlük Yaşam Aktiviteleri","max":6,"choices":[[1,"Bağımsız / Independent"],[0,"Yardım gerekli / Needs help"]],"items":["Banyo (Küvet, duş) — Yıkanırken hiç yardım almaz veya sadece vücudunun bir bölümünü yıkarken yardım alır","Giyinme — Ayakkabılarını bağlamak dışında kıyafetlerini ve elbiselerini kendisi giyebilir","Tuvalete Gitme — Herhangi bir yardım almadan tuvalete gider, tuvaleti kullanır, kıyafetlerini düzeltir ve tuvaletten geri çıkar. (tuvalete giderken destek için yürüteç veya baston kullanabilir ve gece alt bezi veya üriner kateter kullanabilir)","Transfer — Herhangi bir yardımcı olmadan yataktan sandalyeye veya sandalyeden yatağa geçebilir (baston veya yürüteç kullanabilir)","Kontinans — İdrara çıkma ve dışkılamayı kısmi de olsa bir kaçırma olmadan tamamen kendisi kontrol eder","Beslenme — Yardım almadan kendi kendine beslenir (etini kesme veya ekmeğine tereyağı sürmeye yardım edilmesi haricinde)"],"full":"GYA: 6 sorunun tam ifadeleri","options":[[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]]],"scoreOptions":[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]]},{"id":"iadl","tr":"EGYA — Enstrümantal Günlük Yaşam Aktiviteleri","max":8,"choices":[[1,"Bağımsız / Independent"],[0,"Bağımlı / Dependent"]],"items":["A. Telefonu Kullanabilme","B. Alış-veriş","C. Yemek Hazırlama","D. Ev Temizliği","E. Çamaşır","F. Yolculuk","G. İlaçlarını Kullanabilme Sorumluluğu","H. Mali İşler"],"full":"EGYA: 8 sorunun tam ifadeleri","options":[[[0,"Telefonu rahatlıkla kullanabilir"],[1,"Birkaç iyi bilinen numarayı çevirebilir"],[2,"Telefona cevap verir fakat arayamaz"],[3,"Telefonu hiç kullanamaz"]],[[0,"Tüm alış-verişlerini bağımsız olarak kendisi yapar"],[1,"Küçük alış-verişlerini kendisi yapar"],[2,"Tüm alış-verişlerinde yardıma ihtiyaç duyar"],[3,"Alış-veriş yapamaz"]],[[0,"Yeteri kadar yemeği planlar, hazırlar ve servis edebilir"],[1,"Kullanılacak malzeme sağlanırsa yeteri kadar yemek hazırlayabilir"],[2,"Hazır yemeği ısıtır ve servis eder veya yemek hazırlar ancak yeterli diyeti sağlayamaz"],[3,"Yemeğin hazırlanma ve servis edilmesine ihtiyacı vardır"]],[[0,"Yalnız başına veya nadir destekle evin üstesinden gelir"],[1,"Bulaşık yıkama, yatak yapma gibi günlük hafif işleri yapabilir"],[2,"Günlük hafif işleri yapar ancak yeterli temizliği sağlayamaz"],[3,"Tüm ev idame işlerinde yardıma ihtiyaç duyar"]],[[0,"Kişisel çamaşırını tamamen kendisi yıkar"],[1,"Çorap, mendil gibi küçük malzemelerini yıkayabilir"],[2,"Tüm çamaşır işi başkaları tarafından halledilmek zorundadır"]],[[0,"Toplu taşıma araçlarından bağımsız olarak faydalanır veya kendi arabasını kullanır"],[1,"Taksiye biner, toplu taşıma araçlarını kullanamaz"],[2,"Başkalarının yardımı ile toplu taşımadan faydalanabilir"],[3,"Yolculuğu başkalarının yardımı ile taksi/otomobille sınırlıdır"],[4,"Yolculuk yapamaz"]],[[0,"İlaçlarını zamanında ve belirtilen dozda alabilir"],[1,"İlaçları önceden dozlarına ayrılmış olarak hazırlanırsa düzenli kullanabilir"],[2,"İlaçlarını kendi başına düzenli kullanamaz"]],[[0,"Bağımsız olarak tüm mali işlerinin üstesinden gelebilir"],[1,"Günlük mali işlerini halleder ancak büyük mali işlerde ve banka işlerinde yardıma ihtiyaç duyar"],[2,"Mali işlerini takip edemez"]]],"scoreOptions":[[1,1,1,0],[1,0,0,0],[1,0,0,0],[1,1,1,0],[1,1,0],[1,1,1,1,0],[1,0,0],[1,1,0]]},{"id":"frail","tr":"FRAIL Kırılganlık Anketi","max":5,"choices":[[0,"Hayır"],[1,"Evet"]],"items":["Yorgunluk: Son 4 haftanın tamamında veya çoğunda kendinizi yorgun, bitkin, halsiz hissettiniz mi ?","Dayanıklılık: 10 basamak merdiveni dinlenmeden, tek başınıza ve yardımsız yürümekte herhangi bir zorluk çekiyor musunuz ?","Ambulasyon: ~200m.’yi tek başınıza, yardımsız ve güçlük çekmeden yürümekte bir zorluk çekiyor musunuz ?","Hastalıklar: Şu 11 hastalıktan 5 veya daha fazlasının teşhisi var mı ?","Kilo Kaybı: Son 1 yıl içinde vücut ağırlığınızın %5’ini kaybettiniz mi ?"],"full":"0 normal · 1–2 kırılganlık öncesi · 3–5 kırılgan"},{"id":"sarcf","tr":"SARC-F (Sarkopeni Tarama Anketi)","max":10,"choices":[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yapamaz"]],"items":["Kuvvet: ~5kg. kaldırma ve taşıma","Yürüme: odada yürüme","Sandalye: sandalye, yataktan transfer","Merdiven: 10 basamak çıkma","Düşme: 1 yıl içinde kaç kez düştü"],"full":"4 ve üzeri puan sarkopeniyi düşündürür.","options":[[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır, yardımla yapar veya yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yardımsız yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır, yardımla yapar veya yapamaz"]],[[0,"hiç"],[1,"1-3 kez düştü"],[2,"4 veya daha fazla düştü"]]]},{"id":"sof","tr":"SOF Kırılganlık Ölçütleri","max":3,"choices":[[0,"Hayır"],[1,"Evet"]],"items":["3 yıldan beri ≥ %5 kilo kaybı (3 yıl önceki ağırlık – bugünkü ağırlık = Ağırlıktaki değişim) (Ağırlıktaki değişim / 3 yıl önceki ağırlık = % kayıp)","5 tekrarlı otur-kalk yapamama (Sandalyede otur, kolları kullanmadan 5 tekrar kalk-otur)","“Enerji dolu hissediyor musunuz?” (cevap evet ya da hayır olmalı)"],"full":"0 normal · 1 kırılganlık öncesi · 2–3 kırılgan","options":[[[0,"Kilo kaybı yok / < %5"],[1,"Kilo kaybı ≥ %5"]],[[0,"Yapabiliyor"],[1,"Yapamıyor"]],[[0,"Evet"],[1,"Hayır"]]]},{"id":"mna","tr":"MNA-SF — Mini Nütrisyonel Değerlendirme (1. Kısım)","max":14,"choices":null,"items":["Son üç ayda iştahsızlığa, sindirim sorunlarına, çiğneme ya da yutma zorluklarına bağlı olarak besin alımında bir azalma oldu mu?","Son üç ay içinde kilo kaybı","Mobilite","Son 3 ayda psikolojik stres ya da akut hastalıktan şikayetçi oldunuz mu?","Nöro-psikolojik problemler","Beden Kitle İndeksi (BKİ) (kg/m²) veya baldır çevresi"],"options":[[[0,"Ciddi iştah kaybı"],[1,"Orta düzeyde iştah kaybı"],[2,"İştah kaybı yok"]],[[0,"3 kg’dan fazla kilo kaybı"],[1,"Bilinmiyor"],[2,"1 ve 3 kg arasında kayıp"],[3,"Kilo kaybı yok"]],[[0,"Yatak ya da sandalyeye bağımlı"],[1,"Yataktan, sandalyeden kalkabiliyor ama dışarıya çıkamıyor"],[2,"Dışarı çıkabiliyor"]],[[0,"Evet"],[2,"Hayır"]],[[0,"Ciddi bunama ve depresyon"],[1,"Hafif düzeyde bunama ve depresyon"],[2,"Hiçbir psikolojik problem yok"]],[[0,"BKİ <19 veya baldır çevresi <31 cm"],[1,"BKİ ≥19 – <21"],[2,"BKİ ≥21 – <23"],[3,"BKİ ≥23 veya baldır çevresi ≥31 cm"]]],"full":"0–7 malnütrisyon · 8–11 malnütrisyon riski · 12–14 normal"}],texts={"tr":{"title":"Kapsamlı Geriatrik Değerlendirme","sub":"İTF KGD formu · Dijital çalışma prototipi","home":"← Ana sayfa","warning":"Yalnızca eğitim / demo amaçlıdır. GitHub Pages güvenli hasta kayıt sistemi değildir: ad, TC kimlik numarası, telefon veya tanımlanabilir klinik veri girmeyiniz. Girdi sunucuya gönderilmez; sayfa yenilenince silinir.","intro":"Bu ilk sürüm formun seçilmiş puanlanan alanlarını dijitalleştirir: GYA, EGYA, FRAIL, SARC-F, SOF ve MNA-SF. Diğer alanlar için özet girişleri vardır. Tam 8 sayfalık KGD formunun yerini henüz almaz.","details":"Anonim değerlendirme notları","measure":"Diğer ölçümler ve klinik değerlendirme","print":"Hasta için özet hazırla / Yazdır","clear":"Sıfırla","summary":"Kapsamlı Geriatrik Değerlendirme Özeti","date":"Tarih","completed":"Tamamlanan testler","missing":"Eksik testler","domains":"Ölçekte zorlanılan alanlar","meaning":"Yorum","none":"Belirtilen alanlarda puan kaybı yok.","incomplete":"Eksik — sonuç hesaplanmadı","general":"Bu özet tanı koymaz ve hekim değerlendirmesinin yerini almaz. Hasta ile paylaşılmadan önce tüm veriler ve yorumlar klinisyen tarafından kontrol edilmelidir.","pnote":"Hastanın adı veya kimlik numarası bu taslak sistemde istenmez. Rapor yazdırılırken tarayıcı yazdırma penceresinden yerel PDF seçilebilir.","labels":["Boy (cm)","Kilo (kg)","El kavrama (kg)","Yürüme hızı (m/sn)","TUG (sn)","SPPB (/12)","Chair stand (sn)","MMSE (/30)","GDS (/30)","Saat çizme (/5)","İlaç sayısı","Kısa klinik not (tanımlayıcı bilgi kullanmayın)"]}};const $=id=>document.getElementById(id);
 const comprehensive=[["1. Sosyal ve Kişisel Öykü",["Hasta Adı Soyadı","TC No","KGD Tarihi","Doğum Tarihi","Cinsiyet","Tel No","Eğitim Durumu","Medeni Durum","Kimle Yaşıyor","Ev Halkı Sayısı","Nerede Yaşıyor","Desteğe İhtiyaç?","Destek Veren?","Yaşlılık kaç yaşında başlar?"]],["Fiziksel Ölçümler ve Performans",["Boy (cm)","Kilo (kg)","BIAyağ (%)","BIAkas(FFM) (kg)","BIAbasal (kcal)","BKİ (kg/m²)","FAS (/5)","TUG (sn)","OYH (m/sn)","OYH’ın yaşıt sağlıklılardan düşük olduğunu düşünüyor mu?","El Kavrama Kuvveti (kg)","El kavrama kuvvetinin yaşıt sağlıklılardan düşük olduğunu düşünüyor mu?","Üst Kol (cm)","Bel (cm)","Kalça (cm)","Baldır (cm)","Chair Stand (sn)","Romberg","Postural İnstabilite","SPPB: 1a (/1)","SPPB: 1b (/1)","SPPB: 1c (/2)","SPPB: 2 (/4)","SPPB: 3 (/4)","SPPB: Toplam (/12)","Muhtemel SARKOPENİ","Kesin SARKOPENİ","Ciddi Sarkopeni"]],["3. Fiziksel Aktivite ve Düşmeler",["Fiziksel Aktivite?","Fiziksel aktivite türü","Fiziksel aktivite süresi (dk)","Geçtiğimiz hafta içinde fiziksel aktivite düzeyinizin yaşıt sağlıklılardan daha düşük olduğunu düşünüyor musunuz?","Yürüme/mobilizasyon için yardımcı cihaz?","Yardımcı cihaz türü","Son 1 yıl içinde düştü mü?","Düşme sayısı (defa/yıl)","Düşmeyi tanımlayınız","Düşme korkusu var mı?","Düşme korkusu GYA’yı olumsuz etkiliyor mu?","Son 1 yıl içinde hastane yatışı?","Son 3 yıl içinde hastane yatışı?","Yaşıtlarınıza göre kendinizi daha fazla yorgun, bitkin, halsiz hissediyor musunuz?","Hiç Kırık Oldu mu?","Kırığın enerji düzeyi","Kırık zamanı","Kırık bölgesi"]],["3. Görme ve İşitme Problemleri",["Sigara?","Sigara paket-yıl","Alkol?","Gözlük","Glokom","Katarakt","Son 1 yıl içinde göz muayenesi oldu mu?","Görme sorunu var mı?","Gazete okuma?","TV İzleme?","Telefonda konuşabiliyor mu?","Son 1 yıl içinde KBB muayenesi oldu mu?","İşitme sorunu var mı?","Yardımcı işitme cihazı kullanıyor mu?"]],["5. Beslenme, Kronik Ağrı ve Uyku",["Son 3 Ay Kilo Kaybı","3 ay kg","Son 6 Ay Kilo Kaybı","6 ay kg","Son 1 Yıl Kilo Kaybı","1 yıl kg","Çiğneme sorunu?","Özel Diyet?","Kaçırdığı Öğün?","Yutma sorunu?","Gıdaları yutarken zorluk çekiyor musunuz?","KRONİK AĞRI (en az 3-6 ay boyunca devam eden)?","Kronik Ağrının Kaynağı","VAS (0–10)","Koopere Değilse Ağrı Şiddeti","SGA’ya göre Kas Kütlesi","IPSS","Uyku sorununuz var mı?","Yetersiz uyku / Fazla uyuma"]],["6. Uyku, Boşaltım ve Yakınmalar",["REM Uykusu Davranış Bozukluğu?","Uykuda agresif hareketler","Canlı rüya-kâbus şeklinde görme","Uykuda konuşma: bağırma-çağırma","Obstrüktif Uyku Apne: HORLAMA","Obstrüktif Uyku Apne: APNE","Terleme","Nokturi","Yorgun uyanma","Gündüz uyku isteği","Huzursuz Bacak Sendromu?","Gece yoğun","Hareketle azalıyor","Huzursuz Bacak semptom tarifi","John Hopkins Skalası","Üriner İnkontinans?","Akut / kronik","Sıklığı (gün)","Tedavi gördü mü?","Yetişememe / Stres / Taşma / Fonksiyonel / Mixt","Fekal İnkontinans?","Fekal inkontinans sıklığı","Konstipasyon?","Seksüel disfonksiyon?","Cinsel İsteksizlik","Erektil Disfonksiyon"]],["2. Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar",["Osteoartrit GYA'yı olumsuz etkiliyor mu?","İlaç Sayısı","Hastalık Sayısı","Aritmi","Demans","Depresyon","Dislipidemi (DL)","Diyabet (DM)","Hipertansiyon (HT)","Hipotiroidi","İskemik Kalp Hastalığı (İKH)","Konjestif Kalp Yetmezliği (KKY)","Aktif Kanser (Deri Kanseri Hariç)","Kronik Böbrek Hastalığı (KBH)","Osteoartrit (OA)","Osteoporoz (OP)","Serebrovasküler Olay (SVO)","Total Endoprotez","Diğer Hastalıklar","İlaçlar","Soygeçmiş","Saat Çizme Testi Notları"]]],additional=[["MNA-LF (7–18)",["Birisine bağımlı olmadan yaşıyor (hastanede ya da hemşire olan bir evde değil)","Günde 3 adetten fazla reçeteli ilaç alıyor mu?","Deride hassaslık ya da ülser var mı?","Günde kaç öğün tüketiyor?","Protein alımı A) Günde en az 1 porsiyon süt ve süt ürünü B) Haftada 2 porsiyon kuru baklagil/yumurta C) Her gün et-balık/tavuk","Her gün iki ya da daha fazla porsiyon meyve ya da sebze tüketiyor mu?","Günde kaç bardak sıvı alıyor?","Yemek yeme şekli nasıl?","Beslenme durumu ile ilgili şahsi düşüncesi","Aynı yaştaki kişilerle karşılaştırıldığında sağlık durumu","Üst Orta Kol Çevresi (cm)","Baldır Çevresi (cm)"]],["EQ-5D",["A-Hareket","B-Öz - Bakım","C-Olağan Aktiviteler","D-Ağrı / rahatsızlık","E-Anksiyete / Depresyon"]],["Mini-COG",["Kayıt: AYAKKABI","Kayıt: ELMA","Kayıt: KÖPEK","Saat Çizme Testi (/5)","Hatırlama: AYAKKABI","Hatırlama: ELMA","Hatırlama: KÖPEK"]],["MMSE — Standart",["ORYANTASYON: Hangi yıldayız?","Hangi aydayız?","Hangi tarih?","Hangi gündeyiz?","Hangi mevsimdeyiz?","Hangi ülkede yaşıyoruz?","Hangi kentteyiz?","Hangi hastanedeyiz?","Hastanenin hangi bölümündeyiz?","Kaçıncı kattayız?","KAYIT: MAVİ","KAYIT: ŞAHİN","KAYIT: LALE","DİKKAT: 100'den 7 çıkarma, 1","100'den 7 çıkarma, 2","100'den 7 çıkarma, 3","100'den 7 çıkarma, 4","100'den 7 çıkarma, 5","HATIRLAMA: MAVİ","HATIRLAMA: ŞAHİN","HATIRLAMA: LALE","ADLANDIRMA: Saat","ADLANDIRMA: Kalem","TEKRARLAMA: \"O gelmiş olsaydı ben de giderdim\"","Kâğıdı doğru tutuyor","İkiye katlıyor","Yere bırakıyor","YAZI: anlamlı cümle","OKUMA: GÖZLERİNİZİ KAPAYIN","KOPYA: şekli doğru kopyalıyor"]],["MMSE — Eğitimsizler İçin",["Hangi yıldayız?","Hangi aydayız?","Hangi gündeyiz?","Hangi mevsimdeyiz?","Şu an sabah mı, öğle mi, akşam mı?","Hangi ülkede yaşıyoruz?","Hangi kentteyiz?","Bulunduğunuz semtin adı nedir?","Bulunduğunuz bina neresidir?","Kaçıncı kattayız?","KAYIT: MASA","KAYIT: BAYRAK","KAYIT: ELBİSE","DİKKAT: Cuma","Perşembe","Çarşamba","Salı","Pazartesi","HATIRLAMA: MASA","HATIRLAMA: BAYRAK","HATIRLAMA: ELBİSE","ADLANDIRMA: Saat","ADLANDIRMA: Kalem","TEKRARLAMA: \"O gelmiş olsaydı ben de giderdim\"","Kâğıdı doğru tutuyor","İkiye katlıyor","Yere bırakıyor","Anlamlı cümle söyleme","Gözlerinizi Kapayın","KOPYA: şekli doğru kopyalıyor"]]],gds30=["Yaşamınızdan temelde memnun musunuz?","Günlük uğraşı ve ilgilerinizin büyük bölümünü terk ettiniz mi?","Yaşamınızın bomboş olduğunu hissediyor musunuz?","Sık sık canınız sıkılır mı?","Genellikle keyfiniz yerinde midir?","Başınıza kötü bir şey geleceğinden korkuyor musunuz?","Çoğunlukla kendinizi mutlu hissediyor musunuz?","Sık sık kendinizi çaresiz hissediyor musunuz?","Dışarı çıkıp yeni bir şeyler yapmaktansa, evde kalmayı tercih eder misiniz?","Hafızanızın çoğu kişiden zayıf olduğunu hissediyor musunuz?","Sizce şu anda yaşıyor olmak güzel bir şey midir?","Kendinizi şu anki halinizle değersiz hissediyor musunuz?","Kendinizi enerji dolu hissediyor musunuz?","Çözümsüz bir durum içinde bulunduğunuzu düşünüyor musunuz?","Çoğu kişinin sizden daha iyi durumda olduğunu düşünüyor musunuz?","Gelecekten ümitli misiniz?","Kafanızdan atamadığınız düşünceler nedeniyle rahatsızlık duyduğunuz olur mu?","Sık sık huzursuz ve yerinde duramayan birisi olur musunuz?","Sıklıkla gelecekten endişe duyuyor musunuz?","Kendinizi sıklıkla kederli ve hüzünlü hissediyor musunuz?","Geçmiş ile ilgili olarak çokça üzülüyor musunuz?","Yaşamı zevk ve heyecan verici buluyor musunuz?","Yeni projelere başlamak sizin için zor mudur?","Sık sık küçük şeylerden dolayı üzülür müsünüz?","Sık sık kendinizi ağlayacakmış gibi hisseder misiniz?","Dikkatinizi toplamakta güçlük çekiyor musunuz?","Sabahları güne başlamak hoşunuza gidiyor mu?","Sosyal toplantılara katılmaktan kaçınır mısınız?","Karar vermek sizin için kolay oluyor mu?","Zihniniz eskiden olduğu kadar berrak mıdır?"];let moreAnswers={},moreText={},mmseVariant="standard",mmseAttentionMode="subtract";const mnaLFOptions=[[["Hayır",0],["Evet",1]],[["Evet",0],["Hayır",1]],[["Evet",0],["Hayır",1]],[["1 öğün",0],["2 öğün",1],["3 öğün",2]],[["0–1 evet",0],["2 evet",0.5],["3 evet",1]],[["Hayır",0],["Evet",1]],[["3 bardaktan az",0],["3–5 bardak",0.5],["5 bardaktan fazla",1]],[["Yardımcı olmadan yemek yiyemez",0],["Kendi kendine yiyebiliyor ama zorlanıyor",1],["Sorunsuz bir biçimde kendi kendine yiyor",2]],[["Kendisini iyi beslenmemiş olarak görüyor",0],["Kararsız",1],["Kendisinin beslenme sorunu olmadığını düşünüyor",2]],[["İyi değil",0],["Bilmiyor",0.5],["İyi",1],["Çok iyi",2]],[["21 cm’den az",0],["21–22 cm",0.5],["22 cm veya daha fazla",1]],[["31 cm’den az",0],["31 cm veya daha fazla",1]]];const eqOptions=[["Yürürken, hiç bir güçlük çekmiyorum","Yürürken bazı güçlüklerim oluyor","Yatalağım"],["Kendime bakmakta güçlük çekmiyorum","Kendi kendime yıkanırken veya giyinirken bazı güçlüklerim oluyor","Kendi kendime yıkanacak veya giyinebilecek durumda değilim"],["Olağan işlerimi yaparken herhangi bir güçlük çekmiyorum","Olağan işlerimi yaparken bazı güçlüklerim oluyor","Olağan işlerimi yapabilecek durumda değilim"],["Ağrı veya rahatsızlığım yok","Orta derecede ağrı veya rahatsızlığım var","Aşırı derecede ağrı veya rahatsızlığım var"],["Endişeli veya moral bozukluğu içinde değilim","Orta derecede endişeliyim veya moralim bozuk","Aşırı derecede endişeliyim veya moralim çok bozuk"]];const extraIds=["height","weight","hgs","gait","tug","sppb","chair","mmse","gds","clock","meds","notes"];
@@ -1615,6 +1691,212 @@ function renderMedicationRows(){
 function makeHistoryChoice(key,options){
  return '<div class="simple-choice history-choice" id="'+key+'">'+options.map(v=>'<button type="button" data-history-choice="'+safe(key)+'" data-history-value="'+safe(v)+'" aria-pressed="'+(moreText[key]===v?'true':'false')+'">'+safe(v)+'</button>').join("")+'</div>';
 }
+
+/* PDF 27.02.2025 p.1: preserve the original clinical_2_* answer keys while
+   presenting the clinician's questions and explicit patient response choices.
+   The fracture items are physically MOVED to the existing History fracture
+   question on tab 2; they are not duplicated in the Activity tab. */
+function activityChoiceMarkup(key,options){
+ return '<div class="activity-choices" role="group" aria-label="Yanıt seçenekleri">'+
+  options.map(option=>'<button type="button" data-activity-choice="'+safe(key)+
+   '" data-activity-value="'+safe(option)+'" aria-pressed="'+(moreText[key]===option)+'">'+safe(option)+'</button>').join("")+
+  '</div>';
+}
+function activitySetChoice(field,key,options){
+ const old=field.querySelector("textarea,input");
+ if(old)old.replaceWith((()=>{const el=document.createElement("div");el.innerHTML=activityChoiceMarkup(key,options);return el.firstElementChild})());
+}
+function activitySetText(field,key,type="text"){
+ const old=field.querySelector("textarea,input");
+ if(!old)return;
+ const input=document.createElement("input");
+ input.id=key;input.type=type;input.className="structured-input activity-text-entry";
+ input.autocomplete="off";
+ if(type==="number"){input.min="0";input.step="1";input.inputMode="numeric";}
+ input.value=moreText[key]||"";
+ old.replaceWith(input);
+ input.addEventListener("input",()=>{
+  moreText[key]=input.value;
+  summarize();writeKGDDraft();
+ });
+}
+function activityNewField(label,key,type="text"){
+ const box=document.createElement("div");box.className="extra-field";
+ box.innerHTML='<label for="'+safe(key)+'">'+safe(label)+'</label>';
+ const input=document.createElement("input");
+ input.type=type;input.id=key;input.className="structured-input activity-text-entry";
+ input.autocomplete="off";if(type==="number"){input.min="0";input.step="1";input.inputMode="numeric";}
+ input.value=moreText[key]||"";
+ input.addEventListener("input",()=>{moreText[key]=input.value;summarize();writeKGDDraft();});
+ box.appendChild(input);return box;
+}
+function activityClearKey(key){
+ delete moreText[key];
+ const field=document.getElementById(key);
+ if(field){
+  if(field.matches("input,textarea,select"))field.value="";
+  field.querySelectorAll?.("[data-activity-choice]").forEach(button=>button.setAttribute("aria-pressed","false"));
+ }
+}
+function syncActivityQuestions(){
+ const root=document.querySelector('#fullFields > section[data-clinical-index="2"]');
+ if(!root)return;
+ const when={
+  "clinical_2_1":moreText.clinical_2_0!=="Hiç",
+  "clinical_2_2":moreText.clinical_2_0!=="Hiç",
+  "clinical_2_5":moreText.clinical_2_4==="Var",
+  "clinical_2_7":moreText.clinical_2_6==="Evet",
+  "clinical_2_8":moreText.clinical_2_6==="Evet",
+  activityFallWhen:moreText.clinical_2_6==="Evet",
+  activityFallOutcome:moreText.clinical_2_6==="Evet",
+  "clinical_2_10":moreText.clinical_2_9==="Evet",
+  activityHospitalCount1:moreText.clinical_2_11==="Evet",
+  activityHospitalCount3:moreText.clinical_2_12==="Evet"
+ };
+ root.querySelectorAll("[data-activity-dependent]").forEach(field=>{
+  field.hidden=!when[field.dataset.activityDependent];
+ });
+}
+function syncFractureFields(clear=false){
+ const panel=document.getElementById("fractureDetailFields");
+ if(!panel)return;
+ const yes=moreText.historyFracture==="Evet";
+ if(clear){
+  ["clinical_2_15","clinical_2_16","clinical_2_17"].forEach(activityClearKey);
+ }
+ panel.hidden=!yes;
+ const history=document.getElementById("historyFracture");
+ history?.querySelectorAll("[data-history-choice]").forEach(button=>
+  button.setAttribute("aria-pressed",String(button.dataset.historyValue===moreText.historyFracture)));
+}
+function formatActivityAndFracture(activity,fracture){
+ const fields=[...activity.querySelectorAll(":scope > .extra-field")];
+ if(fields.length!==18||activity.querySelector(".activity-evaluation"))return;
+ const patientNote='Hastaya doğrudan sorulacak sorular İTF KGD formunun 1. sayfasındaki ifadeler esas alınarak verilmiştir.';
+ const activityTitles={
+  0:"Fiziksel Aktivite?",
+  1:"Tür?",
+  2:"Süre (dk)?",
+  3:"Geçtiğimiz hafta içinde fiziksel aktivite düzeyinizin yaşıt sağlıklılardan daha düşük olduğunu düşünüyor musunuz?",
+  4:"Yürüme/mobilizasyon için yardımcı cihaz?",
+  5:"Yardımcı cihaz türü",
+  6:"Son 1 yıl içinde düştü mü?",
+  7:"Kaç defa/yıl?",
+  8:"Düşmeyi tanımlayınız",
+  9:"Düşme korkusu var mı?",
+  10:"Düşme korkusu GYA’yı olumsuz etkiliyor mu?",
+  11:"Son 1 yıl içinde hastane yatışı?",
+  12:"Son 3 yıl içinde hastane yatışı?",
+  13:"Yaşıtlarınıza göre kendinizi daha fazla yorgun, bitkin, halsiz hissediyor musunuz?"
+ };
+ for(let i=0;i<=13;i++){
+  const field=fields[i];field.querySelector("label").textContent=activityTitles[i];
+  field.classList.add("activity-question");
+ }
+ for(const [index,opts] of [
+   [0,["Hiç","Bazen (haftada 1’den az)","Haftada 1-2","Her gün"]],
+   [3,["Hayır","Evet"]],[4,["Yok","Var"]],[6,["Hayır","Evet"]],
+   [9,["Hayır","Evet"]],[10,["Hayır","Evet"]],
+   [11,["Hayır","Evet"]],[12,["Hayır","Evet"]],[13,["Hayır","Evet"]]
+ ])activitySetChoice(fields[index],"clinical_2_"+index,opts);
+ for(const i of [2,7])activitySetText(fields[i],"clinical_2_"+i,"number");
+ for(const i of [1,5,8])activitySetText(fields[i],"clinical_2_"+i);
+ const subsection=(title)=>{
+  const el=document.createElement("section");el.className="activity-subsection";
+  const h=document.createElement("h3");h.textContent=title;el.appendChild(h);return el;
+ };
+ const row=(parent,indices,cols=2)=>{
+  const el=document.createElement("div");el.className="activity-question-row";
+  el.style.setProperty("--activity-cols",String(cols));
+  for(const field of indices)el.appendChild(typeof field==="number"?fields[field]:field);
+  parent.appendChild(el);return el;
+ };
+ const dependent=(field,key)=>{field.dataset.activityDependent=key;return field};
+ const wrapper=document.createElement("div");wrapper.className="activity-evaluation";
+ const main=subsection("Fiziksel aktivite");
+ const info=document.createElement("p");info.className="activity-pdf-note";info.textContent=patientNote;main.appendChild(info);
+ const examples=document.createElement("p");examples.className="activity-examples";
+ examples.textContent="Fiziksel aktivite: Gün içindeki herhangi bir hareket; örneğin yürüyüş, alış-veriş, ev işi, bahçe işi, egzersiz, oyun, dans.";
+ main.appendChild(examples);
+ row(main,[0],1);
+ row(main,[dependent(fields[1],"clinical_2_1"),dependent(fields[2],"clinical_2_2")],2);
+ row(main,[3],1);
+ const mobil=subsection("Mobilizasyon ve düşmeler");
+ row(mobil,[4,dependent(fields[5],"clinical_2_5")],2);
+ row(mobil,[6,dependent(fields[7],"clinical_2_7")],2);
+ const fallWhen=dependent(activityNewField("Düşme zamanı","activityFallWhen"),"activityFallWhen");
+ const fallOutcome=dependent(activityNewField("Düşme sonucu","activityFallOutcome"),"activityFallOutcome");
+ row(mobil,[dependent(fields[8],"clinical_2_8"),fallWhen,fallOutcome],3);
+ row(mobil,[9,dependent(fields[10],"clinical_2_10")],2);
+ const admission=subsection("Hastane yatışı ve yorgunluk");
+ /* Legacy numeric-only admissions: turn them into an explicit positive answer
+    while retaining the recorded count. */
+ for(const [i,countKey] of [[11,"activityHospitalCount1"],[12,"activityHospitalCount3"]]){
+  const v=String(moreText["clinical_2_"+i]||"").trim();
+  if(/^\d+$/u.test(v)&&!moreText[countKey]){
+   moreText[countKey]=v;moreText["clinical_2_"+i]=Number(v)>0?"Evet":"Hayır";
+  }
+ }
+ // Refresh original button pressed state after the migration above.
+ for(const i of [11,12])fields[i].querySelectorAll("[data-activity-choice]").forEach(button=>
+  button.setAttribute("aria-pressed",String(moreText["clinical_2_"+i]===button.dataset.activityValue)));
+ const h1=dependent(activityNewField("Kaç defa/yıl?","activityHospitalCount1","number"),"activityHospitalCount1");
+ const h3=dependent(activityNewField("Son 3 yılda kaç defa?","activityHospitalCount3","number"),"activityHospitalCount3");
+ row(admission,[11,h1,12,h3],4);
+ row(admission,[13],1);
+ wrapper.append(main,mobil,admission);
+ const bar=activity.querySelector(".section-bar")||activity.querySelector("h2");
+ bar.after(wrapper);
+ const parentMap={
+  clinical_2_0:["clinical_2_1","clinical_2_2"],
+  clinical_2_4:["clinical_2_5"],
+  clinical_2_6:["clinical_2_7","clinical_2_8","activityFallWhen","activityFallOutcome"],
+  clinical_2_9:["clinical_2_10"],
+  clinical_2_11:["activityHospitalCount1"],
+  clinical_2_12:["activityHospitalCount3"]
+ };
+ wrapper.addEventListener("click",event=>{
+  const button=event.target.closest("[data-activity-choice]");
+  if(!button)return;
+  const key=button.dataset.activityChoice,value=button.dataset.activityValue;
+  moreText[key]=value;
+  button.closest(".activity-choices").querySelectorAll("button").forEach(b=>
+   b.setAttribute("aria-pressed",String(b===button)));
+  if(["Hiç","Yok","Hayır"].includes(value)){
+   (parentMap[key]||[]).forEach(activityClearKey);
+   if(key==="clinical_2_9")activityClearKey("clinical_2_10");
+  }
+  syncActivityQuestions();summarize();writeKGDDraft();
+ });
+ /* Preserve 2017–2025 PDF's fracture fields, but attach them only to the
+    already existing 'Hiç Kırık Oldu mu?' answer on the medical-history tab. */
+ if(!["Hayır","Evet"].includes(moreText.historyFracture)){
+  const legacy=String(moreText.clinical_2_14||"").trim();
+  if(legacy==="Evet"||legacy==="Hayır")moreText.historyFracture=legacy;
+  else if(moreText.clinical_2_15||moreText.clinical_2_16||moreText.clinical_2_17)
+   moreText.historyFracture="Evet";
+ }
+ delete moreText.clinical_2_14;
+ fields[14].remove();
+ const details=document.createElement("div");
+ details.id="fractureDetailFields";details.className="fracture-detail-fields";
+ fields[15].querySelector("label").textContent="Kırık: Düşük enerjili mi, yüksek enerjili mi?";
+ activitySetChoice(fields[15],"clinical_2_15",["Düşük Enerjili","Yüksek Enerjili"]);
+ fields[16].querySelector("label").textContent="Kırık zamanı";
+ fields[17].querySelector("label").textContent="Kırık bölgesi";
+ activitySetText(fields[16],"clinical_2_16");
+ activitySetText(fields[17],"clinical_2_17");
+ details.append(fields[15],fields[16],fields[17]);fracture.appendChild(details);
+ details.addEventListener("click",event=>{
+  const button=event.target.closest("[data-activity-choice]");if(!button)return;
+  moreText.clinical_2_15=button.dataset.activityValue;
+  button.closest(".activity-choices").querySelectorAll("button").forEach(b=>
+   b.setAttribute("aria-pressed",String(b===button)));
+  summarize();writeKGDDraft();
+ });
+ syncActivityQuestions();syncFractureFields();
+}
+
 function reorderClinicalSections(){
  const host=document.getElementById("fullFields");
  const parts=[...host.children].filter(e=>e.classList.contains("supplement"));
