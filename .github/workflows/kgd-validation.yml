@@ -877,6 +877,56 @@ jobs:
             'Fracture question must span the disease grid and keep its follow-up visible');
           assert.ok(src.includes('section.supplement[data-clinical-index="2"].wizard-hidden{display:none!important}'),
             'New activity panel grid must never leak onto other wizard tabs');
+          // 2026-10-18 user layout refinements: the osteoporotic fracture and
+          // total endoprosthesis diagnosis cards must share one final grid row.
+          assert.ok(src.includes('const order=[7,6,8,9,3,10,11,13,16,4,5,12,14,0,15,17]'),
+            'Osteoporosis index 15 and total endoprosthesis index 17 must be adjacent');
+          assert.ok(!src.includes('diagnoses.appendChild(fields[17])'),
+            'The total endoprosthesis card must not be appended after the full-width fracture row');
+          assert.ok(src.includes('diagnoses.appendChild(fracture)'),
+            'Existing full-width fracture history remains after the aligned diagnosis grid');
+          assert.ok(src.includes('const durationOptions=["0-15 dk","15-30 dk","30-60 dk","60-120 dk","120-240 dk","> 240 dk"]'),
+            'Exactly six requested duration bands');
+          assert.ok(src.includes('activitySetChoice(fields[2],"clinical_2_2",durationOptions)'),
+            'Duration bands must be real interactive answer buttons');
+          assert.ok(src.includes('moreText[key]=value')&&
+            src.includes('data-activity-choice')&&
+            src.includes('button.closest(".activity-choices").querySelectorAll("button")'),
+            'Duration answer must persist and render selected pressed state');
+          assert.ok(src.includes('moreText.clinical_2_2||""')&&
+            src.includes('Önceki süre kaydı:'),
+            'Keep old numeric duration entry legible until a new duration band is selected');
+          assert.ok(src.includes('fields[2].querySelector(".activity-legacy-duration")?.remove()'),
+            'Legacy note disappears after replacement by an explicit answer');
+          assert.ok(src.includes('fields[3].classList.add("activity-compare-question")'),
+            'Attach special side-by-side alignment only to peer-comparison question');
+          assert.ok(src.includes('.activity-question-row>.activity-compare-question{\n  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center'),
+            'Peer-comparison question left and its Hayır/Evet controls right on the same row');
+          assert.ok(src.includes('.activity-compare-question>.activity-choices{\n  justify-content:flex-end'),
+            'Peer comparison answers should align to the right');
+          assert.ok(src.includes('fields[3].classList.add("activity-compare-question")')&&
+            src.includes('@media(max-width:700px)'),
+            'Keep comparison controls mobile-friendly');
+          assert.ok(src.includes('8:"Detay"')&&
+            src.includes('activitySetLongText(fields[8],"clinical_2_8")')&&
+            src.includes('textarea.rows=2'),
+            'Positive falls should reveal a multi-line Detay entry, still saved at clinical_2_8');
+          assert.ok(src.includes('"clinical_2_8":moreText.clinical_2_6==="Evet"'),
+            'Detay should be hidden when no fall is reported');
+          assert.ok(src.includes('"clinical_2_10":moreText.clinical_2_9==="Evet"'),
+            'Impact on GYA must only appear when fall fear is Yes');
+          assert.ok(src.includes('clinical_2_9:["clinical_2_10"]'),
+            'Fall-fear No must reset former impact selection');
+          responses.clinical_2_9="Evet";
+          clinicalCtx.syncActivityQuestions();
+          assert.equal(activityNodes[5].hidden,false,
+            'Clicking Evet for fear of falling reveals the GYA question');
+          responses.clinical_2_9="Hayır";
+          clinicalCtx.syncActivityQuestions();
+          assert.equal(activityNodes[5].hidden,true,
+            'Clicking Hayır for fear of falling hides the GYA question');
+          console.log('Endoprosthesis next to osteoporosis, six duration choices, aligned Hayır/Evet, fall detail and GYA conditional: OK');
+
           console.log('PDF p.1 activity/falls and History fracture migration, conditional fields, resets and prints: OK');
           console.log('Tab order Pain/Sleep #4, Nutrition MNA #5, old drafts, short/full/detail prints, SGA HQ asset: OK');
           // SGA explanatory notes must correspond 1:1 to the unchanged six
