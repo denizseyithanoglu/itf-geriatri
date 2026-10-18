@@ -998,7 +998,9 @@ jobs:
             src.includes('height:39px;min-height:39px;box-sizing:border-box'),
             'Add button right edge aligns with Sil, at identical height');
           assert.ok(src.includes('el.id="clinical_6_"+i')&&
-            src.includes('["clinical_6_2",n]')===false?true:true); // checked by existing syncHistoryCounts tests
+            src.includes('const n=historyDiagnoses.reduce(')&&
+            src.includes('for(const [id,count] of [["clinical_6_2",n],["clinical_6_1",meds.length]])'),
+            'Readonly disease and medication count IDs and their live calculations must stay intact');
           console.log('Native duration dropdown, navy controls, narrow fracture row, aligned medication/count panel: OK');
           console.log('Endoprosthesis next to osteoporosis, six duration choices, aligned Hayır/Evet, fall detail and GYA conditional: OK');
 
