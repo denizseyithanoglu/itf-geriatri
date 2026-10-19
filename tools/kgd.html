@@ -1535,6 +1535,9 @@
  #physicalSection .sarco-practitioner-note strong{
   display:block;margin-bottom:9px;color:#244e3c;font-size:.93rem
  }
+ #physicalSection .sarco-practitioner-note b{
+  font-weight:750;color:#244e3c
+ }
  #physicalSection .sarco-practitioner-note p{margin:7px 0}
  #physicalSection .sarco-practitioner-note small{
   display:block;margin-top:9px;font-size:.72rem;color:#61756a
@@ -2734,30 +2737,35 @@ function arrangePhysical(){
   layout.appendChild(row);
  });
  sec.appendChild(layout);
+
  const status=document.createElement("div");status.className="sarco-auto";
+ // Current diagnostic interpretation is displayed here; formulas and
+ // thresholds are explained once in the practitioner note below.
  status.innerHTML='<strong id="sarcoState">Sarkopeni değerlendirmesi</strong>'+
-  '<p id="sarcoIndex"></p><small>'+
-  'Türk kesimleri: HGS E &lt;35 / K &lt;20 kg; SMM/boy² E &lt;9,2 / K &lt;7,4; '+
-  'SMM/kilo E &lt;%37,4 / K &lt;%33,6; yağ E &gt;%27,3 / K &gt;%40,7. '+
-  'EWGSOP2: 5-CST &gt;15 sn, OYH ≤0,8 m/sn, TUG ≥20 sn, SPPB ≤8. '+
-  'Eksik ölçüm varsa otomatik karar bekletilir.</small>';
+  '<p id="sarcoIndex"></p>';
  sec.appendChild(status);
  const information=document.createElement("aside");
  information.className="sarco-practitioner-note";
  information.setAttribute("aria-label","SMM indeksleri ve yüzdeler için uygulayıcı notu");
  information.innerHTML=
-  '<strong>Uygulayıcı notu — SMM indeksleri ve yüzdeler nasıl hesaplanır?</strong>'+
-  '<p><b>SMM (kg)</b> = BIA yağsız kütle (FFM, kg) × 0,566. '+
+  '<strong>Uygulayıcı notu — hesaplamalar ve kesim değerleri</strong>'+
+  '<p><b>SMM (kg)</b> = BIA yağsız kütle (<b>FFM</b>, kg) × 0,566. '+
   '<b>SMM/boy²</b> = SMM (kg) / [boy (m)]². '+
-  '<b>SMM/BKİ</b> = SMM (kg) / BKİ (kg/m²); bu oran yüzde değildir.</p>'+
-  '<p><b>SMM/kilo (%)</b> = SMM (kg) × 100 / kilo (kg). Örneğin SMM 24 kg ve kilo 80 kg ise SMM/kilo %30 olur. '+
+  '<b>SMM/BKİ</b> = SMM (kg) / BKİ (kg/m²); yüzde değildir.</p>'+
+  '<p><b>SMM/kilo (%)</b> = SMM (kg) × 100 / kilo (kg). '+
   '<b>BIA yağ (%)</b> = yağ kütlesi (kg) × 100 / kilo (kg). '+
-  'Uygulama BIA cihazından girilen yağ yüzdesini kullanır; yağ kütlesini ayrıca hesaplamaz.</p>'+
-  '<p><b>Türk kas kütlesi eşikleri:</b> SMM/boy² erkek &lt;9,2; kadın &lt;7,4 kg/m². '+
-  'SMM/kilo erkek &lt;%37,4; kadın &lt;%33,6. '+
-  'SMM/BKİ erkek &lt;1,049; kadın &lt;0,823. '+
-  '<b>Yağ yüzdesi yüksek:</b> erkek &gt;%27,3; kadın &gt;%40,7. '+
-  'Sarkopenik obezite = düşük HGS + düşük SMM/kilo + yüksek BIA yağ yüzdesi.</p>'+
+  'Uygulama BIA cihazında ölçülen yağ yüzdesini doğrudan kullanır.</p>'+
+  '<p><b>Türk kesim değerleri:</b> '+
+  '<b>HGS</b> erkek &lt;35 kg, kadın &lt;20 kg; '+
+  '<b>SMM/boy²</b> erkek &lt;9,2, kadın &lt;7,4 kg/m²; '+
+  '<b>SMM/kilo</b> erkek &lt;%37,4, kadın &lt;%33,6; '+
+  '<b>SMM/BKİ</b> erkek &lt;1,049, kadın &lt;0,823; '+
+  '<b>BIA yağ (%)</b> erkek &gt;%27,3, kadın &gt;%40,7.</p>'+
+  '<p><b>Fiziksel performans (EWGSOP2):</b> '+
+  '<b>5-CST</b> &gt;15 sn, <b>OYH</b> ≤0,8 m/sn, '+
+  '<b>TUG</b> ≥20 sn, <b>SPPB</b> ≤8 puan. '+
+  '<b>Sarkopenik Obezite</b> = düşük <b>HGS</b> + düşük <b>SMM/kilo</b> + yüksek <b>BIA yağ (%)</b>. '+
+  'Gerekli ölçümler eksikse otomatik sonuç bekletilir.</p>'+
   '<small>Kaynak: Türk SMM indeks eşikleri ve Bahat ve ark. yağ yüzdesi kesim değerleri '+
   '(The Aging Male, DOI 10.1080/13685538.2018.1530208). '+
   'Bu hesaplamalar klinik değerlendirmenin yerine geçmez.</small>';
