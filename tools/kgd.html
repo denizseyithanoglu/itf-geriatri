@@ -1887,14 +1887,19 @@ function makeHistoryChoice(key,options){
    The fracture items are physically MOVED to the existing History fracture
    question on tab 2; they are not duplicated in the Activity tab. */
 function activityChoiceMarkup(key,options){
- return '<div class="activity-choices" role="group" aria-label="Yanıt seçenekleri">'+
+ return '<div class="activity-choices" id="'+safe(key)+'" role="group" aria-label="Yanıt seçenekleri">'+
   options.map(option=>'<button type="button" data-activity-choice="'+safe(key)+
    '" data-activity-value="'+safe(option)+'" aria-pressed="'+(moreText[key]===option)+'">'+safe(option)+'</button>').join("")+
   '</div>';
 }
 function activitySetChoice(field,key,options){
- const old=field.querySelector("textarea,input");
- if(old)old.replaceWith((()=>{const el=document.createElement("div");el.innerHTML=activityChoiceMarkup(key,options);return el.firstElementChild})());
+ // Yes/no fields start as .simple-choice groups; replace the entire group so
+ // the activity-specific click handler updates conditional fields immediately.
+ const old=field.querySelector(".simple-choice,textarea,input,select");
+ if(!old)return;
+ const container=document.createElement("div");
+ container.innerHTML=activityChoiceMarkup(key,options);
+ old.replaceWith(container.firstElementChild);
 }
 /* A native dropdown remains keyboard-accessible and persists to the original
    clinical_2_2 key without changing printed reports or existing patient drafts. */
