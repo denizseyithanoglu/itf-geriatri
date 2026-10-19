@@ -2135,7 +2135,16 @@ function attachMMSE(){
 }
 const demographics={0:{type:"text",label:"Hastanın Adı Soyadı"},1:{type:"text",label:"TC No"},2:{type:"date",label:"Tarih"},3:{type:"date",label:"Doğum Tarihi",age:true},4:{type:"buttons",options:["Kadın","Erkek"]},5:{type:"tel"},6:{type:"select",options:["Okur-yazar değil","Okur-yazar","İlkokul","Ortaokul","Lise","Ön lisans","Üniversite","Yüksek lisans","Doktora","Diğer"]},7:{type:"select",options:["Evli","Bekâr","Boşanmış","Dul"]},8:{type:"text"},9:{type:"number"},10:{type:"buttons",options:["Ev","Huzurevi","Bakımevi","Diğer"]},11:{type:"buttons",options:["Yok","Var"]},12:{type:"buttons",options:["Yok","Var"]},13:{type:"number"}};
 function structuredField(j,i,label,key){const setting=j===0?demographics[i]:null;const basic=(type,extra="")=>'<input class="structured-input" type="'+type+'" id="'+key+'" value="'+safe(moreText[key]||"")+'" '+extra+'>';if(j===0){if(i===2||i===3)return '<input class="structured-input date-text" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="gg.aa.yyyy" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===5)return '<input class="structured-input tel-text" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="0 (___) ___ ____" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===4)return '<div class="simple-choice gender-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+o+'" aria-pressed="'+(moreText[key]===o)+'">'+(o==="Kadın"?"♀ ":"♂ ")+o+'</button>').join("")+'</div>';if(setting?.type==="buttons")return '<div class="simple-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+safe(o)+'" aria-pressed="'+(moreText[key]===o)+'">'+safe(o)+'</button>').join("")+'</div>';if(setting?.type==="select")return '<select class="structured-input" id="'+key+'"><option value="">Seçiniz…</option>'+setting.options.map(o=>'<option '+(moreText[key]===o?"selected":"")+'>'+safe(o)+'</option>').join("")+'</select>';if(setting?.age)return basic("date",'max="'+new Date().toISOString().slice(0,10)+'"')+'<output class="calculated" id="ageOut"></output>';return basic(setting?.type||"text")}
-if(j===1){if(i>=25)return '<div class="simple-choice" id="'+key+'"><button type="button" data-answer="Hayır" disabled>Hayır</button><button type="button" data-answer="Evet" disabled>Evet</button></div>';if(i===0)return basic("number",'min="70" max="240" step="0.1" placeholder="cm"');if(i===1||i===3)return basic("number",'min="0" step="0.1"');if(i===5)return '<output class="calculated" id="bmiOut">—</output>';if(i===4)return basic("number",'min="0" step="0.1"');if(/\(m\/sn\)|\(cm\)|\(sn\)|\(kg\)|\(kcal\)|\/\d+|\(%\)/i.test(label))return basic("number",'step="any" min="0"')}
+if(j===1){
+ if(i>=25)return '<div class="simple-choice" id="'+key+'"><button type="button" data-answer="Hayır" disabled>Hayır</button><button type="button" data-answer="Evet" disabled>Evet</button></div>';
+ if(i===5)return '<output class="calculated" id="bmiOut">—</output>';
+ if([2,3,4].includes(i))return basic("number",'min="0" step="0.01" inputmode="decimal"');
+ // Gait speed needs decimals to distinguish the EWGSOP2 0.8 m/s threshold.
+ if(i===8)return basic("number",'min="0" step="0.01" inputmode="decimal"');
+ if(i===0)return basic("number",'min="70" max="240" step="1" inputmode="numeric" placeholder="cm"');
+ if([1,6,7,10,12,13,14,15,16,17,18,19,20,21,22,23,24].includes(i))
+  return basic("number",'min="0" step="1" inputmode="numeric"');
+}
 return '<textarea id="'+key+'" rows="1">'+safe(moreText[key]||"")+'</textarea>'}
 
 const sarcoTurkishCutoffs={
@@ -2217,6 +2226,24 @@ function parseKGDDate(value){if(!/^\d{2}\.\d{2}\.\d{4}$/.test(value||""))return 
 function formatKGDTel(value){let digits=value.replace(/\D/g,"");if(!digits)return"";if(digits[0]!=="0")digits="0"+digits;digits=digits.slice(0,11);return"0"+(digits.length>1?" ("+digits.slice(1,4)+(digits.length>=4?")":""):"")+(digits.length>4?" "+digits.slice(4,7):"")+(digits.length>7?" "+digits.slice(7,11):"")}
 const turkishProvinces=["Adana","Adıyaman","Afyonkarahisar","Ağrı","Aksaray","Amasya","Ankara","Antalya","Ardahan","Artvin","Aydın","Balıkesir","Bartın","Batman","Bayburt","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Düzce","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkâri","Hatay","Iğdır","Isparta","İstanbul","İzmir","Kahramanmaraş","Karabük","Karaman","Kars","Kastamonu","Kayseri","Kırıkkale","Kırklareli","Kırşehir","Kilis","Kocaeli","Konya","Kütahya","Malatya","Manisa","Mardin","Mersin","Muğla","Muş","Nevşehir","Niğde","Ordu","Osmaniye","Rize","Sakarya","Samsun","Siirt","Sinop","Sivas","Şanlıurfa","Şırnak","Tekirdağ","Tokat","Trabzon","Tunceli","Uşak","Van","Yalova","Yozgat","Zonguldak"];
 function localKGDToday(){const d=new Date();return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear()}
+/* Shared age used by the demographics and performance screens. */
+function kgdAgeFromDates(){
+ const birth=parseKGDDate(moreText.clinical_0_3);
+ const assessment=parseKGDDate(moreText.clinical_0_2);
+ if(!birth||!assessment||assessment<birth)return null;
+ let years=assessment.getFullYear()-birth.getFullYear();
+ if(assessment.getMonth()<birth.getMonth()||
+  (assessment.getMonth()===birth.getMonth()&&assessment.getDate()<birth.getDate()))years--;
+ return years>=0&&years<=130?years:null;
+}
+function kgdRecordedAge(){
+ const calculated=kgdAgeFromDates();
+ if(calculated!==null)return calculated;
+ const raw=String(moreText.physicalAge??"").trim();
+ if(!/^\d{1,3}$/.test(raw))return null;
+ const age=Number(raw);
+ return age<=130?age:null;
+}
 function arrangeDemographics(){
   const sec=document.querySelector('#fullFields > [data-clinical-index="0"]');
   if(!sec)return;
@@ -2423,9 +2450,35 @@ function initMNAControls(){
  syncMNAVisibility();
 }
 
-function updateAnthropometry(){const get=(j,i)=>Number(moreText["clinical_"+j+"_"+i]),has=(j,i)=>{const v=moreText["clinical_"+j+"_"+i];return v!==undefined&&v!==""};const start=parseKGDDate(moreText.clinical_0_3),end=parseKGDDate(moreText.clinical_0_2);if($("ageOut")){let years="__";if(start&&end&&end>=start){let n=end.getFullYear()-start.getFullYear();if(end.getMonth()<start.getMonth()||(end.getMonth()===start.getMonth()&&end.getDate()<start.getDate()))n--;years=String(n)}$("ageOut").textContent=years}
-if($("bmiOut"))$("bmiOut").textContent=has(1,0)&&has(1,1)&&get(1,0)>0&&get(1,1)>0?(get(1,1)/(get(1,0)/100)**2).toFixed(1)+" kg/m²":"—";
-syncMNAAnthropometry();syncSarco()}
+function updateAnthropometry(){
+ const get=(j,i)=>Number(moreText["clinical_"+j+"_"+i]);
+ const has=(j,i)=>{const v=moreText["clinical_"+j+"_"+i];return v!==undefined&&v!==""};
+ const datedAge=kgdAgeFromDates();
+ const currentAge=kgdRecordedAge();
+ const ageOut=$("ageOut");
+ if(ageOut)ageOut.textContent=currentAge===null?"__":String(currentAge);
+ const ageEntry=$("physicalAge");
+ if(ageEntry){
+  if(datedAge!==null){
+   ageEntry.value=String(datedAge);ageEntry.readOnly=true;
+  }else{
+   ageEntry.readOnly=false;
+   const recorded=String(moreText.physicalAge??"");
+   if(ageEntry.value!==recorded)ageEntry.value=recorded;
+  }
+ }
+ const ageHint=document.querySelector(".physical-age-hint");
+ if(ageHint)ageHint.textContent=datedAge!==null?
+  "1. sekmedeki doğum tarihinden hesaplandı.":
+  "Doğum tarihi girilmediyse yaşı buradan yazınız.";
+ document.querySelectorAll('#clinical_0_4 [data-answer], #physicalSex [data-physical-sex]').forEach(button=>{
+  const value=button.dataset.answer||button.dataset.physicalSex;
+  button.setAttribute("aria-pressed",String(value===moreText.clinical_0_4));
+ });
+ if($("bmiOut"))$("bmiOut").textContent=has(1,0)&&has(1,1)&&get(1,0)>0&&get(1,1)>0?
+  (get(1,1)/(get(1,0)/100)**2).toFixed(1)+" kg/m²":"—";
+ syncMNAAnthropometry();syncSarco();
+}
 function scaleItemScore(s,i,value){return s.scoreOptions?s.scoreOptions[i][Number(value)]:Number(value)}
 function scaleTotal(s,vals){return vals.reduce((n,v,i)=>n+scaleItemScore(s,i,v),0)}
 function addInlineScores(){document.querySelectorAll("#sections > section").forEach(sec=>{let s=forms.find(x=>sec.id==="form_"+x.id);if(!s)return;let vals=s.items.map((_,i)=>$(s.id+"_"+i)?.value||"");let count=vals.filter(v=>v!=="").length,score=vals.length===count?scaleTotal(s,vals):null;let out=sec.querySelector(".inline-score");if(!out){out=document.createElement("div");out.className="inline-score";sec.appendChild(out)}out.textContent=("Bölüm puanı: ")+(score===null?"Eksik ("+count+"/"+vals.length+")":score+" / "+s.max+" ("+(meaning(s,score)||"Klinik yorum gerekli")+")")})}
@@ -2449,6 +2502,38 @@ function arrangePhysical(){
  const h2=card("SMM / boy²","smmHeightPhysical","SMM (kg) / boy (m)²");
  const w=card("SMM / kilo","smmWeightPhysical","SMM (kg) × 100 / kilo (kg)");
  const bmi=card("SMM / BKİ","smmBMIPhysical","SMM (kg) / BKİ (kg/m²)");
+ // The 10th tab may be used alone, before demographics is completed.
+ const age=document.createElement("div");age.className="extra-field physical-age-field";
+ const ageLabel=document.createElement("label");ageLabel.htmlFor="physicalAge";ageLabel.textContent="Yaş";
+ const ageInput=document.createElement("input");ageInput.id="physicalAge";
+ ageInput.className="structured-input";ageInput.type="number";
+ ageInput.min="0";ageInput.max="130";ageInput.step="1";
+ ageInput.inputMode="numeric";ageInput.placeholder="Yaşı giriniz";
+ ageInput.value=String(moreText.physicalAge??"");
+ const ageHint=document.createElement("small");ageHint.className="physical-age-hint";
+ ageHint.textContent="Doğum tarihi girilmediyse buradan yazınız.";
+ age.append(ageLabel,ageInput,ageHint);
+ const sex=document.createElement("div");sex.className="extra-field physical-sex-field";
+ const sexLabel=document.createElement("label");sexLabel.id="physicalSexLabel";
+ sexLabel.textContent="Cinsiyet";
+ const sexChoices=document.createElement("div");
+ sexChoices.id="physicalSex";sexChoices.className="physical-sex-buttons";
+ sexChoices.setAttribute("role","group");sexChoices.setAttribute("aria-labelledby",sexLabel.id);
+ [["Kadın","♀ Kadın"],["Erkek","♂ Erkek"]].forEach(([value,label])=>{
+  const btn=document.createElement("button");btn.type="button";
+  btn.textContent=label;btn.dataset.physicalSex=value;
+  btn.setAttribute("aria-pressed",String(moreText.clinical_0_4===value));
+  sexChoices.appendChild(btn);
+ });
+ sexChoices.addEventListener("click",event=>{
+  const btn=event.target.closest("[data-physical-sex]");
+  if(!btn)return;
+  moreText.clinical_0_4=btn.dataset.physicalSex;
+  updateAnthropometry();summarize();writeKGDDraft();
+ });
+ const sexHint=document.createElement("small");sexHint.className="physical-sex-hint";
+ sexHint.textContent="1. sekme ile eş zamanlıdır.";
+ sex.append(sexLabel,sexChoices,sexHint);
  const so=document.createElement("div");so.className="extra-field sarco-derived-outcome";
  so.innerHTML='<label>Sarkopenik Obezite</label>'+
   '<div class="simple-choice" id="sarcopenicObesity" role="group" aria-label="Sarkopenik obezite">'+
@@ -2456,7 +2541,7 @@ function arrangePhysical(){
   '<button type="button" data-answer="Evet" disabled>Evet</button></div>';
  const rows=[
   [0,1,5,2,3,4],
-  [smm,h2,w,bmi],
+  [smm,h2,w,bmi,age,sex],
   [12,13,14,15,10],
   [11,16,6,7,8],
   [9,17,18],
@@ -2480,6 +2565,26 @@ function arrangePhysical(){
   'EWGSOP2: 5-CST &gt;15 sn, OYH ≤0,8 m/sn, TUG ≥20 sn, SPPB ≤8. '+
   'Eksik ölçüm varsa otomatik karar bekletilir.</small>';
  sec.appendChild(status);
+ const information=document.createElement("aside");
+ information.className="sarco-practitioner-note";
+ information.setAttribute("aria-label","SMM indeksleri ve yüzdeler için uygulayıcı notu");
+ information.innerHTML=
+  '<strong>Uygulayıcı notu — SMM indeksleri ve yüzdeler nasıl hesaplanır?</strong>'+
+  '<p><b>SMM (kg)</b> = BIA yağsız kütle (FFM, kg) × 0,566. '+
+  '<b>SMM/boy²</b> = SMM (kg) / [boy (m)]². '+
+  '<b>SMM/BKİ</b> = SMM (kg) / BKİ (kg/m²); bu oran yüzde değildir.</p>'+
+  '<p><b>SMM/kilo (%)</b> = SMM (kg) × 100 / kilo (kg). Örneğin SMM 24 kg ve kilo 80 kg ise SMM/kilo %30 olur. '+
+  '<b>BIA yağ (%)</b> = yağ kütlesi (kg) × 100 / kilo (kg). '+
+  'Uygulama BIA cihazından girilen yağ yüzdesini kullanır; yağ kütlesini ayrıca hesaplamaz.</p>'+
+  '<p><b>Türk kas kütlesi eşikleri:</b> SMM/boy² erkek &lt;9,2; kadın &lt;7,4 kg/m². '+
+  'SMM/kilo erkek &lt;%37,4; kadın &lt;%33,6. '+
+  'SMM/BKİ erkek &lt;1,049; kadın &lt;0,823. '+
+  '<b>Yağ yüzdesi yüksek:</b> erkek &gt;%27,3; kadın &gt;%40,7. '+
+  'Sarkopenik obezite = düşük HGS + düşük SMM/kilo + yüksek BIA yağ yüzdesi.</p>'+
+  '<small>Kaynak: Türk SMM indeks eşikleri ve Bahat ve ark. yağ yüzdesi kesim değerleri '+
+  '(The Aging Male, DOI 10.1080/13685538.2018.1530208). '+
+  'Bu hesaplamalar klinik değerlendirmenin yerine geçmez.</small>';
+ sec.appendChild(information);
  syncSarco();
 }
 const historyDiagnoses=[7,6,8,9,3,10,11,13,16,4,5,12,14,15,17]; // Include total endoprosthesis as one positive item; exclude OA functional impact and fracture.
