@@ -1418,7 +1418,7 @@
  }
  #physicalSection .measurement-row-1{grid-template-columns:repeat(6,minmax(0,1fr))}
  #physicalSection .measurement-row-2{grid-template-columns:repeat(4,minmax(0,1fr))}
- #physicalSection .measurement-row-3{grid-template-columns:repeat(5,minmax(0,1fr))}
+ #physicalSection .measurement-row-3{grid-template-columns:repeat(6,minmax(0,1fr))}
  #physicalSection .measurement-row-4{grid-template-columns:repeat(5,minmax(0,1fr))}
  #physicalSection .measurement-row-5,
  #physicalSection .measurement-row-6,
@@ -2199,6 +2199,9 @@ const demographics={0:{type:"text",label:"Hastanın Adı Soyadı"},1:{type:"text
 function structuredField(j,i,label,key){const setting=j===0?demographics[i]:null;const basic=(type,extra="")=>'<input class="structured-input" type="'+type+'" id="'+key+'" value="'+safe(moreText[key]||"")+'" '+extra+'>';if(j===0){if(i===2||i===3)return '<input class="structured-input date-text" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="gg.aa.yyyy" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===5)return '<input class="structured-input tel-text" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="0 (___) ___ ____" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===4)return '<div class="simple-choice gender-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+o+'" aria-pressed="'+(moreText[key]===o)+'">'+(o==="Kadın"?"♀ ":"♂ ")+o+'</button>').join("")+'</div>';if(setting?.type==="buttons")return '<div class="simple-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+safe(o)+'" aria-pressed="'+(moreText[key]===o)+'">'+safe(o)+'</button>').join("")+'</div>';if(setting?.type==="select")return '<select class="structured-input" id="'+key+'"><option value="">Seçiniz…</option>'+setting.options.map(o=>'<option '+(moreText[key]===o?"selected":"")+'>'+safe(o)+'</option>').join("")+'</select>';if(setting?.age)return basic("date",'max="'+new Date().toISOString().slice(0,10)+'"')+'<output class="calculated" id="ageOut"></output>';return basic(setting?.type||"text")}
 if(j===1){
  if(i>=25)return '<div class="simple-choice" id="'+key+'"><button type="button" data-answer="Hayır" disabled>Hayır</button><button type="button" data-answer="Evet" disabled>Evet</button></div>';
+ if(i===9||i===11)return '<div class="simple-choice" id="'+key+'">'+
+  ["Hayır","Evet"].map(answer=>'<button type="button" data-key="'+key+
+   '" data-answer="'+answer+'" aria-pressed="'+(moreText[key]===answer)+'">'+answer+'</button>').join("")+'</div>';
  if(i===5)return '<output class="calculated" id="bmiOut">—</output>';
  if([2,3,4].includes(i))return basic("number",'min="0" step="0.01" inputmode="decimal"');
  // Gait speed needs decimals to distinguish the EWGSOP2 0.8 m/s threshold.
@@ -2604,9 +2607,9 @@ function arrangePhysical(){
  const rows=[
   [0,1,5,2,3,4],
   [smm,h2,w,bmi,age,sex],
-  [12,13,14,15,10],
-  [11,16,6,7,8],
-  [9,17,18],
+  [12,13,14,15,10,11],
+  [16,6,7,8,9],
+  [17,18],
   [19,20,21],
   [22,23,24],
   [25,26,27,so]
