@@ -733,6 +733,36 @@
  }
 }
 
+/* Chronic pain on tab 4, visually consistent with EQ5D scale. */
+@media screen{
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-fields>.extra-field{min-width:0}
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-fields .pain-choice-card{
+  background:#ecf6ef;border:1px solid #d7e7dd;padding:12px;border-radius:9px
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-choice{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-choice button{
+  background:#fff;border:2px solid #9aafc1;color:#234d71;border-radius:8px;
+  min-height:43px;padding:8px 17px;font:inherit;font-size:.85rem;font-weight:700;cursor:pointer
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-choice button[aria-pressed="true"]{
+  background:#234d71;color:#fff;border-color:#234d71
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-choice button:focus-visible{
+  outline:3px solid #b77c00;outline-offset:2px
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-fields .pain-vas-field{grid-column:1/-1;min-width:0}
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-vas{
+  margin:9px 0 0;padding:14px;background:#ecf6ef;border-color:#d5e7db
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-vas output{
+  min-width:88px;color:#234d71;border-color:#9aafc1
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-vas input[type="range"]{accent-color:#234d71}
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-vas-legacy,
+ #fullFields > section.supplement[data-clinical-index="5"] .pain-legacy-note{
+  display:block;color:#835d30;font-size:.77rem;margin-top:6px
+ }
+}
 /* Reordered tab 4: pain/VAS must span the full panel, with sleep symptoms
    in their own responsive grid. Keep the original clinical data indexes. */
 @media screen{
@@ -1115,7 +1145,14 @@ function sectionResets(){document.querySelectorAll("#fullFields>section,#section
   const box=$("clinical_3_1")?.closest(".extra-field");if(box)box.hidden=true;
   if(alcoholField)alcoholField.closest(".extra-field").hidden=true;
   syncHistoryCounts();syncFractureFields();
-}if(sec.dataset.clinicalIndex==="2"){
+}if(sec.dataset.clinicalIndex==="5"){
+  // Do not silently save the native range input's default midpoint.
+  delete moreText.clinical_4_11;
+  delete moreText.clinical_4_13;
+  const painSlider=$("clinical_4_13");
+  if(painSlider?.type==="range"){painSlider.value="5";const value=$("painVASValue");if(value)value.textContent="— / 10";}
+  sec.querySelectorAll(".pain-legacy-note,.pain-vas-legacy").forEach(note=>note.remove());
+ }if(sec.dataset.clinicalIndex==="2"){
   for(let index=0;index<=13;index++)delete moreText["clinical_2_"+index];
   ["activityFallWhen","activityFallOutcome","activityHospitalCount1","activityHospitalCount3"].forEach(k=>delete moreText[k]);
   syncActivityQuestions();
@@ -2174,6 +2211,71 @@ function formatActivityAndFracture(activity,fracture){
  syncActivityQuestions();syncFractureFields();
 }
 
+/* Keep the original clinical_4_11–14 data keys for drafts and print output. */
+function formatPainVASFields(pain){
+ const painField=$("clinical_4_11")?.closest(".extra-field");
+ const vasField=$("clinical_4_13")?.closest(".extra-field");
+ if(!painField||!vasField||painField.querySelector(".pain-choice"))return;
+ const oldPain=String(moreText.clinical_4_11||"").trim();
+ if(oldPain==="Evet")moreText.clinical_4_11="Var";
+ if(oldPain==="Hayır")moreText.clinical_4_11="Yok";
+ painField.classList.add("pain-choice-card");
+ const oldControl=painField.querySelector(".simple-choice,textarea,input,select");
+ const choice=document.createElement("div");
+ choice.id="clinical_4_11";choice.className="pain-choice";
+ choice.setAttribute("role","group");choice.setAttribute("aria-label","Kronik ağrı");
+ choice.innerHTML=["Yok","Var"].map(value=>
+  '<button type="button" data-key="clinical_4_11" data-pain-choice="'+value+
+  '" aria-pressed="'+(moreText.clinical_4_11===value)+'">'+value+'</button>').join("");
+ if(oldControl)oldControl.replaceWith(choice);else painField.appendChild(choice);
+ if(oldPain&&!["Var","Yok","Evet","Hayır"].includes(oldPain)){
+  const note=document.createElement("small");note.className="pain-legacy-note";
+  note.textContent="Önceki kayıt: "+oldPain;choice.after(note);
+ }
+ choice.addEventListener("click",event=>{
+  const button=event.target.closest("[data-pain-choice]");
+  if(!button)return;
+  moreText.clinical_4_11=button.dataset.painChoice;
+  choice.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));
+  painField.querySelector(".pain-legacy-note")?.remove();
+  summarize();writeKGDDraft();
+ });
+
+ const originalVAS=$("clinical_4_13");
+ const prior=String(moreText.clinical_4_13??"").trim();
+ const valid=/^(10|[0-9])$/.test(prior);
+ const legacyNumber=/^(?:10(?:[.,]0+)?|[0-9](?:[.,][0-9]+)?)$/.test(prior);
+ const initial=legacyNumber?String(Math.round(Number(prior.replace(",",".")))):"5";
+ const sliderBox=document.createElement("div");
+ sliderBox.className="eq-vas pain-vas";
+ sliderBox.innerHTML=
+  '<div class="eq-vas-main"><div class="eq-vas-track">'+
+  '<input type="range" id="clinical_4_13" min="0" max="10" step="1" value="'+initial+
+  '" aria-describedby="painVASEnds painVASValue" aria-label="Ağrı şiddeti, sıfırdan ona">'+
+  '<div class="eq-vas-ticks" aria-hidden="true">'+
+  Array.from({length:11},(_,i)=>'<span>'+i+'</span>').join("")+'</div></div>'+
+  '<output id="painVASValue" for="clinical_4_13" aria-live="polite">'+
+  (legacyNumber?prior+" / 10":"— / 10")+'</output></div>'+
+  '<div class="eq-vas-ends" id="painVASEnds"><span>0 — Ağrı yok</span><span>10 — Hayal edilebilecek en şiddetli ağrı</span></div>';
+ originalVAS.replaceWith(sliderBox);
+ vasField.classList.add("pain-vas-field");
+ const vasLabel=vasField.querySelector("label");
+ if(vasLabel){vasLabel.textContent="Ağrı şiddeti — VAS (0–10)";vasLabel.htmlFor="clinical_4_13";}
+ if(prior&&!valid){
+  const note=document.createElement("small");note.className="pain-vas-legacy";
+  note.textContent="Önceki VAS kaydı: "+prior+". Yeni bir seçim yapana kadar önceki değer korunur.";
+  sliderBox.appendChild(note);
+ }
+ const slider=$("clinical_4_13"),out=$("painVASValue");
+ const update=()=>{
+  moreText.clinical_4_13=slider.value;
+  out.textContent=slider.value+" / 10";
+  sliderBox.querySelector(".pain-vas-legacy")?.remove();
+  summarize();writeKGDDraft();
+ };
+ slider.addEventListener("input",update);
+ slider.addEventListener("change",update);
+}
 function reorderClinicalSections(){
  const host=document.getElementById("fullFields");
  const parts=[...host.children].filter(e=>e.classList.contains("supplement"));
@@ -2261,6 +2363,7 @@ const fracture=historyBox("extra-field history-fracture-card");
  nutritionItems.slice(16,19).forEach(el=>transferredSleep.appendChild(el));
  /* Move original fields, not their data: pain, VAS and all clinical_4_11–14 keys stay intact. */
  (sleep.querySelector(".section-bar")||sleep.querySelector("h2")).after(pain,transferredSleep);
+  formatPainVASFields(pain);
  const sleepSymptoms=historyBox("sleep-symptoms-grid");
  [...sleep.querySelectorAll(":scope > .extra-field")].forEach(el=>sleepSymptoms.appendChild(el));
  sleep.appendChild(sleepSymptoms);
@@ -2975,7 +3078,7 @@ function readKGDDraft(){try{const raw=sessionStorage.getItem(KGD_DRAFT_KEY);if(!
 function restoreKGDDraft(data){if(!data)return;moreText=Object.assign({},data.text);moreAnswers=Object.assign({},data.answers);frailSelected.clear();for(const n of data.diseases||[])if(Number.isInteger(n)&&n>=0&&n<11)frailSelected.add(n);frailNone=data.noDiseases===true;mmseVariant=data.mmseVariant==="uneducated"?"uneducated":"standard";mmseAttentionMode=data.mmseAttentionMode==="world"?"world":"subtract";draftScales=data.scales||{};const oldStep=Number.isInteger(data.step)?data.step:0;const legacyStep=data.version===1?(oldStep>2?oldStep-1:oldStep===2?1:oldStep):oldStep;const oldToNew=[0,1,2,3,4,5,6,3,5,7,8,9,10];const priorStep=data.version===3?oldStep:data.version===4?oldStep:(oldToNew[legacyStep]??0);const nextStep=data.version===4?priorStep:priorStep===3?4:priorStep===4?3:priorStep;wizardStep=Math.min(wizardGroups.length-1,Math.max(0,nextStep));draftSavedAt=data.savedAt||""}
 function stepElements(i){return wizardGroups[i].q.flatMap(q=>Array.from(document.querySelectorAll(q)))}
 function everyWizardElement(){const nodes=[...document.querySelectorAll("#fullFields > section,#sections > section,#extraScales > section,#fullGds > section"),document.getElementById("physicalSection"),$("summary"),$("finalActions")];return [...new Set(nodes.filter(Boolean))]}
-function stepHasData(i){return stepElements(i).some(el=>{if(el.id==="summary"||el.id==="finalActions")return false;return [...el.querySelectorAll("input,textarea,select")].some(x=>x.type==="checkbox"?x.checked:x.value&&String(x.value).trim()!=="")||!!el.querySelector('button[aria-pressed="true"]')})}
+function stepHasData(i){return stepElements(i).some(el=>{if(el.id==="summary"||el.id==="finalActions")return false;return [...el.querySelectorAll("input,textarea,select")].some(x=>x.id==="clinical_4_13"&&!moreText.clinical_4_13?false:x.type==="checkbox"?x.checked:x.value&&String(x.value).trim()!=="")||!!el.querySelector('button[aria-pressed="true"]')})}
 function renderWizardTabs(){if(!wizardReady)return;const bar=$("wizardTabs");bar.innerHTML=wizardGroups.map((g,i)=>'<button type="button" data-wizard-step="'+i+'" aria-current="'+(i===wizardStep?"step":"false")+'"><span class="wizard-count">'+(i+1)+'</span>'+safe(g.tr)+(stepHasData(i)&&i!==wizardStep?' <span aria-label="Yanıt var">✓</span>':"")+'</button>').join("");$("wizardStepTitle").textContent=(wizardStep+1)+" / "+wizardGroups.length+" — "+(wizardGroups[wizardStep].tr);$("wizardStepHint").textContent="Sekmelerden bölümleri açabilir, önceki yanıtları düzenleyebilirsiniz.";const back=$("wizardBack"),next=$("wizardNext");back.disabled=wizardStep===0;next.disabled=wizardStep===wizardGroups.length-1;back.textContent="← Önceki";next.textContent="Kaydet ve Devam Et →";$("wizardSave").textContent="Taslağı Kaydet";$("wizardCopySectionSummary").textContent="Özet Metnini Kopyala";$("wizardPrintSection").hidden=wizardStep===wizardGroups.length-1;$("wizardCopySectionSummary").hidden=wizardStep===wizardGroups.length-1;$("wizardPrintSectionDetailed").hidden=wizardStep===wizardGroups.length-1;$("wizardClear").textContent="Geçici Taslağı Sil"}
 function showWizardStep(i,scroll=false){if(!wizardReady)return;wizardStep=Math.min(wizardGroups.length-1,Math.max(0,i));const visible=new Set(stepElements(wizardStep));for(const el of everyWizardElement())el.classList.toggle("wizard-hidden",!visible.has(el));renderWizardTabs();const current=$("wizardTabs")?.querySelector('[aria-current="step"]');if(current)current.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});if(scroll)$("wizardStepTitle").scrollIntoView({block:"start",behavior:"smooth"})}
 function displayDraftStatus(ok){const target=$("wizardSaveStatus");if(!target)return;target.dataset.error=String(!ok);target.textContent=ok?("Bu sekmede kaydedildi · ")+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):("Kaydedilemedi! Yenilerseniz veriler kaybolabilir.")}
