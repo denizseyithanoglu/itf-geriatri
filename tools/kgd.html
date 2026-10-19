@@ -1427,6 +1427,8 @@ function sectionResets(){document.querySelectorAll("#fullFields>section,#section
   const painSlider=$("clinical_4_13");
   if(painSlider?.type==="range"){painSlider.value="5";const value=$("painVASValue");if(value)value.textContent="— / 10";}
   delete moreText.clinical_4_14;
+  delete moreText.clinical_4_17;
+  delete moreText.clinical_4_18;
   for(const i of [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25])
    delete moreText["clinical_5_"+i];
   for(const key of ["sleepInsufficient","sleepExcess","fecalSince","fecalTreatment",
@@ -1445,7 +1447,7 @@ function sectionResets(){document.querySelectorAll("#fullFields>section,#section
   }
   const noct=$("urinaryNocturiaFrequency")?.closest(".extra-field");if(noct)noct.hidden=true;
   sec.querySelectorAll(".urinary-bph-symptom button").forEach(b=>b.setAttribute("aria-pressed","false"));
-  sec.querySelectorAll(".rls-symptom-grid button,.sexual-types-grid button,.bowel-details button,.sleep-problem-options button")
+  sec.querySelectorAll(".clinical-toggle-buttons button,.clinical-multi-buttons button,.rls-hopkins-buttons button,.rls-symptom-grid button,.sexual-types-grid button,.bowel-details button,.sleep-problem-options button,.clinical-selection-button")
    .forEach(b=>b.setAttribute("aria-pressed","false"));
   const rls=$("rlsConditional");if(rls)rls.hidden=true;
   const rlsCount=$("rlsSymptomCount");if(rlsCount)rlsCount.textContent="0 / 11";
