@@ -2657,6 +2657,13 @@ function sarcoStatus(){
 
 /* One source of truth for cutoff interpretations in the on-screen KGD summary,
    concise report, detailed print report, and legacy report. */
+function kgdPhysicalReportLabel(index,label){
+ const labels={
+  2:"BIA yağ (%)",7:"TUG (sn)",8:"OYH (m/sn)",
+  10:"HGS (kg)",16:"5-CST (sn)",24:"SPPB Toplam"
+ };
+ return labels[index]||label;
+}
 function kgdPhysicalAnnotatedValue(index,value,status=sarcoStatus()){
  if(value===undefined||value===null||String(value).trim()==="")return value;
  const v=Number(String(value).trim().replace(",","."));
@@ -4621,7 +4628,8 @@ function fullRender(){if(moreText.clinical_6_21&&!moreText["clock-notes"])moreTe
 function simpleQuestion(key,q,options){return '<div class="extra-field"><label>'+safe(q)+' <span class="redstar">*</span></label><div class="simple-choice">'+options.map(([t,v])=>'<button type="button" data-key="'+key+'" data-value="'+v+'" aria-pressed="'+(moreAnswers[key]===String(v))+'">'+safe(t)+'</button>').join("")+'</div></div>'}
 function moreScore(prefix,count){let v=Array.from({length:count},(_,i)=>moreAnswers[prefix+i]);return v.some(x=>x===undefined)?null:v.reduce((n,x)=>n+Number(x),0)}
 function renderA4Detailed(){const col=[];const add=(title,rows)=>{if(!rows.length)return;col.push('<section class="report-section"><h3>'+safe(title)+'</h3><div>'+rows.map(([k,v])=>'<span class="report-item"><b>'+safe(k)+':</b> '+safe(String(v))+'</span>').join("")+'</div></section>')};for(let j=0;j<comprehensive.length;j++){const sec=comprehensive[j];const physicalStatus=j===1?sarcoStatus():null;
- const entries=sec[1].map((name,i)=>[name,
+ const entries=sec[1].map((name,i)=>[
+  physicalStatus?kgdPhysicalReportLabel(i,name):name,
   physicalStatus?kgdPhysicalAnnotatedValue(i,moreText["clinical_"+j+"_"+i],physicalStatus):
   moreText["clinical_"+j+"_"+i]]).filter(([name,v])=>v!==undefined&&String(v).trim()!=="");if(j===0){if(moreText.clinical_0_3&&$("ageOut"))entries.push(["Yaş",$("ageOut").textContent]);}if(j===1){
   if($("bmiOut"))entries.push(["VKİ",$("bmiOut").textContent]);
@@ -4743,7 +4751,7 @@ item("8.1 MMSE — "+(mmseVariant==="uneducated"?"Eğitimsizler İçin":"Standar
 const gd=gdsScore();
 item("9. GDS-30 — Duygudurum",[["GDS-30 Puanı",gd===null?"__":gd+"/30"+(gd<=10?" (normal)":gd<=13?" (olası depresyon)":" (pozitif tarama)")],...gds30.map((q,i)=>[(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?"__":moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"])]);
 const sarco=sarcoStatus();
-const phys=clinical(1).map(([label,value],i)=>[label,
+const phys=clinical(1).map(([label,value],i)=>[kgdPhysicalReportLabel(i,label),
   kgdPhysicalAnnotatedValue(i,i===5?document.getElementById("bmiOut")?.textContent:value,sarco)]);
 const formatSarco=(value,suffix="",digits=2,low=null)=>
  value===null?"__":kgdPhysicalIndexValue(value,suffix,low,digits);
@@ -4925,7 +4933,7 @@ function compactKGDStep(i,inline=false){
    const short=["Boy","Kilo","Yağ (%)","FFM","BMR","BKİ","FAS","TUG","OYH","OYH algısı","HGS","HGS algısı","Kol","Bel","Kalça","Baldır","5-CST","Romberg","Postural instabilite","SPPB 1a","SPPB 1b","SPPB 1c","SPPB 2","SPPB 3","SPPB","Olası sarkopeni","Kesin sarkopeni","Ciddi sarkopeni"];
    const r=sarcoStatus();
    return simple("Fiziksel Performans",[
-    ...comprehensive[1][1].map((_,j)=>[short[j],
+    ...comprehensive[1][1].map((_,j)=>[kgdPhysicalReportLabel(j,short[j]),
       kgdPhysicalAnnotatedValue(j,j===5?$("bmiOut")?.textContent:field(1,j),r)]),
     ["Yaş",kgdRecordedAge()],["Cinsiyet",moreText.clinical_0_4],
     ["SMM",r.smm===null?null:r.smm.toFixed(2)+" kg"],
@@ -5080,7 +5088,8 @@ function kgdDetailedClinical(j,indices,title){
  const status=j===1?sarcoStatus():null;
  return kgdDetailedBlock(title||comprehensive[j][0],
   (indices||comprehensive[j][1].map((_,i)=>i)).map(k=>[
-   comprehensive[j][1][k],status?
+   status?kgdPhysicalReportLabel(k,comprehensive[j][1][k]):comprehensive[j][1][k],
+   status?
     kgdPhysicalAnnotatedValue(k,moreText["clinical_"+j+"_"+k],status):
     moreText["clinical_"+j+"_"+k]
   ]));
