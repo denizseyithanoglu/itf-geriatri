@@ -2049,8 +2049,81 @@ const demographics={0:{type:"text",label:"Hastanın Adı Soyadı"},1:{type:"text
 function structuredField(j,i,label,key){const setting=j===0?demographics[i]:null;const basic=(type,extra="")=>'<input class="structured-input" type="'+type+'" id="'+key+'" value="'+safe(moreText[key]||"")+'" '+extra+'>';if(j===0){if(i===2||i===3)return '<input class="structured-input date-text" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="gg.aa.yyyy" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===5)return '<input class="structured-input tel-text" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="0 (___) ___ ____" id="'+key+'" value="'+safe(moreText[key]||"")+'">';if(i===4)return '<div class="simple-choice gender-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+o+'" aria-pressed="'+(moreText[key]===o)+'">'+(o==="Kadın"?"♀ ":"♂ ")+o+'</button>').join("")+'</div>';if(setting?.type==="buttons")return '<div class="simple-choice" id="'+key+'">'+setting.options.map(o=>'<button type="button" data-key="'+key+'" data-answer="'+safe(o)+'" aria-pressed="'+(moreText[key]===o)+'">'+safe(o)+'</button>').join("")+'</div>';if(setting?.type==="select")return '<select class="structured-input" id="'+key+'"><option value="">Seçiniz…</option>'+setting.options.map(o=>'<option '+(moreText[key]===o?"selected":"")+'>'+safe(o)+'</option>').join("")+'</select>';if(setting?.age)return basic("date",'max="'+new Date().toISOString().slice(0,10)+'"')+'<output class="calculated" id="ageOut"></output>';return basic(setting?.type||"text")}
 if(j===1){if(i>=25)return '<div class="simple-choice" id="'+key+'"><button type="button" data-answer="Hayır" disabled>Hayır</button><button type="button" data-answer="Evet" disabled>Evet</button></div>';if(i===0)return basic("number",'min="70" max="240" step="0.1" placeholder="cm"');if(i===1||i===3)return basic("number",'min="0" step="0.1"');if(i===5)return '<output class="calculated" id="bmiOut">—</output>';if(i===4)return '<div>'+basic("number",'min="0" step="0.1"')+'<output class="calculated" id="smmOut"></output></div>';if(/\(m\/sn\)|\(cm\)|\(sn\)|\(kg\)|\(kcal\)|\/\d+|\(%\)/i.test(label))return basic("number",'step="any" min="0"')}
 return '<textarea id="'+key+'" rows="1">'+safe(moreText[key]||"")+'</textarea>'}
-function sarcoStatus(){const n=i=>{const v=moreText["clinical_1_"+i];return v===undefined||v===""?null:Number(v)};const sex=moreText.clinical_0_4,h=n(10),ht=n(0),ffm=n(3),sp=n(24),gs=n(8),tug=n(7);const hc=sex==="Erkek"?35:sex==="Kadın"?20:null,mc=sex==="Erkek"?9.2:sex==="Kadın"?7.4:null;const low=h===null||hc===null?null:h<hc;const smmi=ffm===null||!ht?null:0.566*ffm/(ht/100)**2;const mass=smmi===null||mc===null?null:smmi<mc;const confirmed=low===null||mass===null?null:low&&mass;const perf=(sp!==null&&sp<=8)||(gs!==null&&gs<=0.8)||(tug!==null&&tug>=20);return{low,mass,confirmed,severe:confirmed===null?null:confirmed&&perf,smmi,perf}}
-function syncSarco(){const r=sarcoStatus();for(const [i,value] of [[25,r.low],[26,r.confirmed],[27,r.severe]]){const k="clinical_1_"+i;if(value===null)delete moreText[k];else moreText[k]=value?"Evet":"Hayır";const el=document.getElementById(k);if(el)el.querySelectorAll("button[data-answer]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.answer===moreText[k])))}const d=document.getElementById("sarcoState");if(d)d.textContent=r.low===null?"HGS ve cinsiyet bekleniyor":r.severe?"Ciddi Sarkopeni":r.confirmed?"Kesin Sarkopeni":r.low?"Olası Sarkopeni":"HGS düşük değil";const m=document.getElementById("sarcoIndex");if(m)m.textContent=r.smmi===null?"SMM/boy²: __":"SMM/boy²: "+r.smmi.toFixed(2)+" kg/m²"+(r.mass===null?"":r.mass?" (düşük)":" (normal aralık)")}
+
+const sarcoTurkishCutoffs={
+ Erkek:{hgs:35,h2:9.2,weight:37.4,bmi:1.049,fat:27.3},
+ Kadın:{hgs:20,h2:7.4,weight:33.6,bmi:0.823,fat:40.7}
+};
+function sarcoStatus(){
+ const n=(i,zeroAllowed=false)=>{
+  const raw=moreText["clinical_1_"+i];
+  if(raw===undefined||raw===null||String(raw).trim()==="")return null;
+  const value=Number(String(raw).replace(",","."));
+  return Number.isFinite(value)&&(zeroAllowed?value>=0:value>0)?value:null;
+ };
+ const sex=moreText.clinical_0_4,cut=sarcoTurkishCutoffs[sex]||null;
+ const height=n(0),weight=n(1),fat=n(2),ffm=n(3),hgs=n(10);
+ const heightM=height===null?null:height/100;
+ const bmi=heightM&&weight!==null?weight/(heightM*heightM):null;
+ const smm=ffm===null?null:ffm*0.566;
+ const smmi=smm!==null&&heightM?smm/(heightM*heightM):null;
+ const smmw=smm!==null&&weight!==null?smm/weight*100:null;
+ const smmbmi=smm!==null&&bmi!==null?smm/bmi:null;
+ const low=cut===null||hgs===null?null:hgs<cut.hgs;
+ const mass=cut===null||smmi===null?null:smmi<cut.h2;
+ const massW=cut===null||smmw===null?null:smmw<cut.weight;
+ const massBMI=cut===null||smmbmi===null?null:smmbmi<cut.bmi;
+ const fatHigh=cut===null||fat===null||fat>100?null:fat>cut.fat;
+ const and3=(a,b,c)=>a===false||b===false||c===false?false:
+  a===null||b===null||c===null?null:true;
+ const confirmed=low===false?false:low===null?null:mass;
+ const cst=n(16),gs=n(8),tug=n(7),sp=n(24,true);
+ const impaired={
+  cst:cst===null?null:cst>15,
+  gs:gs===null?null:gs<=0.8,
+  tug:tug===null?null:tug>=20,
+  sppb:sp===null||sp>12?null:sp<=8
+ };
+ const perfParts=Object.values(impaired);
+ const perf=perfParts.some(v=>v===true)?true:
+  perfParts.every(v=>v===false)?false:null;
+ const severe=confirmed===false?false:confirmed===null?null:perf;
+ const obesity=and3(low,massW,fatHigh);
+ return {sex,cut,bmi,smm,smmi,smmw,smmbmi,low,mass,massW,massBMI,
+  fatHigh,confirmed,severe,obesity,perf,impaired};
+}
+function syncSarco(){
+ const r=sarcoStatus();
+ for(const [key,value] of [
+  ["clinical_1_25",r.low],["clinical_1_26",r.confirmed],
+  ["clinical_1_27",r.severe],["sarcopenicObesity",r.obesity]
+ ]){
+  if(value===null)delete moreText[key];
+  else moreText[key]=value?"Evet":"Hayır";
+  const group=document.getElementById(key);
+  if(group)group.querySelectorAll("button[data-answer]").forEach(button=>
+   button.setAttribute("aria-pressed",String(button.dataset.answer===moreText[key])));
+ }
+ for(const [id,value,unit,places] of [
+  ["smmPhysical",r.smm,"kg",2],["smmHeightPhysical",r.smmi,"kg/m²",2],
+  ["smmWeightPhysical",r.smmw,"%",2],["smmBMIPhysical",r.smmbmi,"",3]
+ ]){
+  const node=$(id);
+  if(node)node.textContent=value===null?"—":value.toFixed(places)+(unit?" "+unit:"");
+ }
+ const title=$("sarcoState");
+ if(title)title.textContent=r.low===null?"HGS ve cinsiyet bekleniyor":
+  r.severe===true?"Ciddi Sarkopeni":r.confirmed===true?"Kesin Sarkopeni":
+  r.low===true?"Muhtemel Sarkopeni":"HGS düşük değil";
+ const detail=$("sarcoIndex");
+ if(detail){
+  const flag=v=>v===null?"Ölçüm eksik":v?"Düşük / pozitif":"Normal / negatif";
+  detail.textContent="HGS: "+flag(r.low)+" · SMM/boy²: "+flag(r.mass)+
+   " · SMM/kilo: "+flag(r.massW)+" · Yağ oranı: "+
+   (r.fatHigh===null?"Ölçüm eksik":r.fatHigh?"Yüksek":"Yüksek değil")+
+   " · Performans: "+flag(r.perf);
+ }
+}
 function formatKGDDate(value){const digits=value.replace(/[^0-9]/g,"").slice(0,8);return digits.slice(0,2)+(digits.length>2?"."+digits.slice(2,4):"")+(digits.length>4?"."+digits.slice(4,8):"")}
 function parseKGDDate(value){if(!/^\d{2}\.\d{2}\.\d{4}$/.test(value||""))return null;const [d,m,y]=value.split(".").map(Number);const date=new Date(y,m-1,d);return date.getFullYear()===y&&date.getMonth()===m-1&&date.getDate()===d?date:null}
 function formatKGDTel(value){let digits=value.replace(/\D/g,"");if(!digits)return"";if(digits[0]!=="0")digits="0"+digits;digits=digits.slice(0,11);return"0"+(digits.length>1?" ("+digits.slice(1,4)+(digits.length>=4?")":""):"")+(digits.length>4?" "+digits.slice(4,7):"")+(digits.length>7?" "+digits.slice(7,11):"")}
