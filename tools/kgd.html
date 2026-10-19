@@ -2899,9 +2899,12 @@ function formatSleepSymptoms(sleepTopic,symptomFields,nutritionItems){
  apneaGroup.className="osa-screening";
  const heading=document.createElement("h4");heading.textContent="Obstrüktif Uyku Apne Ayırıcı Tanısı";
  const grid=document.createElement("div");grid.className="osa-five-grid";
+ // First insert relative to the original sleep-field node. Moving it before
+ // insertBefore would make that reference no longer a child of sleepGrid,
+ // throwing NotFoundError and aborting the wizard/tab initialization.
+ sleepGrid.insertBefore(apneaGroup,symptomFields[4]);
  [4,5,6,8,9].forEach(i=>grid.appendChild(symptomFields[i]));
  apneaGroup.append(heading,grid);
- sleepGrid.insertBefore(apneaGroup,symptomFields[4]);
  // The RUDB question is always shown, and its three findings only on Evet.
  const rbd=symptomFields[0];
  const note=sleepGrid.querySelector(".clinical-practitioner-note");
