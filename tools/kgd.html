@@ -1937,6 +1937,34 @@ function activitySetText(field,key,type="text"){
   summarize();writeKGDDraft();
  });
 }
+/* Editable suggestions: keep exact numeric counts while also offering 1–10 and >10. */
+function activitySetFallCount(field,key){
+ const old=field.querySelector("textarea,input");
+ if(!old)return;
+ const input=document.createElement("input");
+ input.id=key;
+ input.type="text";
+ input.className="structured-input activity-text-entry activity-fall-count";
+ input.setAttribute("list",key+"_options");
+ input.setAttribute("inputmode","numeric");
+ input.setAttribute("autocomplete","off");
+ input.placeholder="Seçiniz veya elle yazınız";
+ input.value=moreText[key]||"";
+ const options=document.createElement("datalist");
+ options.id=key+"_options";
+ for(const value of [...Array.from({length:10},(_,i)=>String(i+1)),">10"]){
+  const option=document.createElement("option");option.value=value;options.appendChild(option);
+ }
+ old.replaceWith(input);
+ input.after(options);
+ field.querySelector("label").htmlFor=key;
+ input.addEventListener("input",()=>{
+  const value=input.value.trim();
+  if(value)moreText[key]=value;
+  else delete moreText[key];
+  summarize();writeKGDDraft();
+ });
+}
 function activitySetLongText(field,key){
  const old=field.querySelector("textarea,input");
  if(!old)return;
@@ -2037,7 +2065,7 @@ function formatActivityAndFracture(activity,fracture){
   note.textContent="Önceki süre kaydı: "+previousDuration+(/^[\d.,]+$/.test(previousDuration)?" dk":"")+". Lütfen yeni aralığı seçiniz.";
   fields[2].appendChild(note);
  }
- activitySetText(fields[7],"clinical_2_7","number");
+ activitySetFallCount(fields[7],"clinical_2_7");
  for(const i of [1,5])activitySetText(fields[i],"clinical_2_"+i);
  activitySetLongText(fields[8],"clinical_2_8");
  fields[3].classList.add("activity-compare-question");
@@ -2065,7 +2093,15 @@ function formatActivityAndFracture(activity,fracture){
  row(mobil,[4,dependent(fields[5],"clinical_2_5")],2);
  row(mobil,[6,dependent(fields[7],"clinical_2_7")],2);
  const fallWhen=dependent(activityNewField("Düşme zamanı","activityFallWhen"),"activityFallWhen");
- const fallOutcome=dependent(activityNewField("Düşme sonucu","activityFallOutcome"),"activityFallOutcome");
+ const fallOutcome=dependent(document.createElement("div"),"activityFallOutcome");
+ fallOutcome.className="extra-field";
+ fallOutcome.innerHTML='<label>Düşme sonucu</label>'+activityChoiceMarkup("activityFallOutcome",["Kırık yok","Kırık var","Çoklu kırık var"]);
+ if(moreText.activityFallOutcome&&!["Kırık yok","Kırık var","Çoklu kırık var"].includes(moreText.activityFallOutcome)){
+  const previous=document.createElement("small");
+  previous.className="activity-legacy-outcome";
+  previous.textContent="Önceki kayıt: "+moreText.activityFallOutcome;
+  fallOutcome.appendChild(previous);
+ }
  row(mobil,[dependent(fields[8],"clinical_2_8"),fallWhen,fallOutcome],3);
  row(mobil,[9,dependent(fields[10],"clinical_2_10")],2);
  const admission=subsection("Hastane yatışı ve yorgunluk");
@@ -2100,6 +2136,7 @@ function formatActivityAndFracture(activity,fracture){
   if(!button)return;
   const key=button.dataset.activityChoice,value=button.dataset.activityValue;
   moreText[key]=value;
+  if(key==="activityFallOutcome")button.closest(".extra-field")?.querySelector(".activity-legacy-outcome")?.remove();
   button.closest(".activity-choices").querySelectorAll("button").forEach(b=>
    b.setAttribute("aria-pressed",String(b===button)));
   if(["Hiç","Yok","Hayır"].includes(value)){
