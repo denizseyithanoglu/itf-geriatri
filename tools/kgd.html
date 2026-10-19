@@ -3196,7 +3196,7 @@ function formatSleepAndUrinaryFields(sleepTopic,urinaryTopic,symptomFields){
    '<button type="button" data-clinical-value="'+safe(value)+
    '" aria-pressed="'+(moreText[key]===value)+'">'+safe(value)+'</button>').join("");
   old.replaceWith(group);
-  if(previous&&!["Evet","Hayır","Var","Yok"].includes(previous)){
+  if(previous&&!options.includes(previous)&&!["Evet","Hayır","Var","Yok"].includes(previous)){
    const note=document.createElement("small");
    note.className="clinical-legacy-note";note.textContent="Önceki kayıt: "+previous;
    group.after(note);
