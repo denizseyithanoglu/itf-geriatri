@@ -2654,6 +2654,37 @@ function sarcoStatus(){
  return {sex,cut,bmi,smm,smmi,smmw,smmbmi,low,mass,massW,massBMI,
   fatHigh,confirmed,severe,obesity,perf,impaired};
 }
+
+/* One source of truth for cutoff interpretations in the on-screen KGD summary,
+   concise report, detailed print report, and legacy report. */
+function kgdPhysicalAnnotatedValue(index,value,status=sarcoStatus()){
+ if(value===undefined||value===null||String(value).trim()==="")return value;
+ const v=Number(String(value).trim().replace(",","."));
+ if(!Number.isFinite(v))return value;
+ const mapping={
+  2:[status.fatHigh,"yüksek yağ oranı"],
+  7:[status.impaired.tug,"düşük performans"],
+  8:[status.impaired.gs,"düşük performans"],
+  10:[status.low,"düşük kas gücü"],
+  16:[status.impaired.cst,"düşük performans"],
+  24:[status.impaired.sppb,"düşük performans"]
+ };
+ const assessment=mapping[index];
+ if(!assessment)return value;
+ const display=index===24?String(v)+"/12":String(value);
+ if(assessment[0]===null||assessment[0]===undefined){
+  if(!status.cut&&(index===2||index===10))
+   return display+" (yorum için cinsiyet gerekli)";
+  return display;
+ }
+ return display+" ("+(assessment[0]?assessment[1]:"normal")+")";
+}
+function kgdPhysicalIndexValue(value,unit,low,digits=2){
+ if(value===null||!Number.isFinite(value))return null;
+ const display=value.toFixed(digits)+(unit?" "+unit:"");
+ return low===null||low===undefined?display:
+  display+" ("+(low?"düşük kas kütlesi":"normal")+")";
+}
 /* SPPB subscore validation: 1a/1b: 0–1, 1c: 0–2, gait/chair: 0–4. */
 function calculateSPPBTotal(source=moreText){
  const maxima=[1,1,2,4,4];
@@ -4589,7 +4620,19 @@ function formatNutritionFields(){
 function fullRender(){if(moreText.clinical_6_21&&!moreText["clock-notes"])moreText["clock-notes"]=moreText.clinical_6_21;delete moreText.clinical_6_21;if(!moreText.clinical_0_2)moreText.clinical_0_2=localKGDToday();const historyYesNo=new Set([0,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);const sensoryYesNo=new Set([3,4,5,6,7,8,9,10,11,12,13]);const binary=x=>/var mı|oldu mu|düşünüyor mu|kullanıyor mu|mu\\?|mı\\?|mi\\?|mü\\?|^Gözlük$|^Glokom$|^Katarakt$|^DM$|^HT$|^KBH$|^OA$|^SVO$|^Aritmi$|^Demans$|^Depresyon$/i.test(x);const es=x=>safe(x);$("fullFields").innerHTML=comprehensive.map((sec,j)=>'<section class="supplement" data-clinical-index="'+j+'"><h2>'+es(sec[0])+'</h2>'+sec[1].map((label,i)=>{const key="clinical_"+j+"_"+i;return '<div class="extra-field"><label for="'+key+'">'+es(label)+'</label>'+(j===0||j===1&&!binary(label)?structuredField(j,i,label,key):(j===6?historyYesNo.has(i):j===3?i>2&&sensoryYesNo.has(i)||binary(label):binary(label))?'<div class="simple-choice" id="'+key+'"><button type="button" data-key="'+key+'" data-answer="Hayır" aria-pressed="'+(moreText[key]==="Hayır")+'">Hayır</button><button type="button" data-key="'+key+'" data-answer="Evet" aria-pressed="'+(moreText[key]==="Evet")+'">Evet</button></div>':'<textarea id="'+key+'" rows="1">'+es(moreText[key]||"")+'</textarea>')+'</div>'}).join("")+'</section>').join("");arrangePhysical();arrangeDemographics();$("extraScales").innerHTML=additional.filter((sec,j)=>j<3).map((sec,j)=>'<section class="supplement"><h2>'+es(sec[0])+'</h2><p class="optional-note">Madde işaretleme — klinik değerlendirme ve doğrulama gerektirir.</p>'+sec[1].map((q,i)=>simpleQuestion("additional_"+j+"_"+i,q,j===0?mnaLFOptions[i]:j===1?eqOptions[i].map((x,n)=>[(n+1)+" — "+x,n+1]):[["0",0],["1",1]])).join("")+'</section>').join("");$("extraScales").insertAdjacentHTML("beforeend",renderClockAndMMSE());organizeMiniCog();$("fullGds").innerHTML='<section class="supplement"><h2>GDS-30 (Geriatrik Depresyon Skalası)</h2><p>Lütfen son bir haftanızda kendinizi nasıl hissettiğinize dair aşağıdaki sorularda uygun olan yanıtı işaretleyiniz.</p>'+gds30.map((q,i)=>simpleQuestion("gds30_"+i,(i+1)+". "+q,(new Set([0,4,6,10,12,15,21,26,28,29]).has(i)?[["Evet (0 puan)",1],["Hayır (1 puan)",0]]:[["Evet (1 puan)",1],["Hayır (0 puan)",0]]))).join("")+'</section>';document.querySelectorAll("#fullFields textarea,#fullFields input,#fullFields select").forEach(x=>x.oninput=()=>{moreText[x.id]=x.value;updateAnthropometry();summarize()});updateAnthropometry();sectionResets();attachMMSE();document.querySelectorAll(".simple-choice button:not([data-mmse])").forEach(b=>b.onclick=()=>{const k=b.dataset.key,v=b.dataset.answer||b.dataset.value;if(b.dataset.answer){moreText[k]=v;if(k==="clinical_0_4")updateAnthropometry()}else moreAnswers[k]=v;b.parentElement.querySelectorAll("button").forEach(y=>y.setAttribute("aria-pressed",String(y===b)));if(k==="additional_0_10"||k==="additional_0_11")syncMNAAnthropometry();const star=b.parentElement.parentElement.querySelector(".redstar");if(star)star.style.display="none";summarize()});}
 function simpleQuestion(key,q,options){return '<div class="extra-field"><label>'+safe(q)+' <span class="redstar">*</span></label><div class="simple-choice">'+options.map(([t,v])=>'<button type="button" data-key="'+key+'" data-value="'+v+'" aria-pressed="'+(moreAnswers[key]===String(v))+'">'+safe(t)+'</button>').join("")+'</div></div>'}
 function moreScore(prefix,count){let v=Array.from({length:count},(_,i)=>moreAnswers[prefix+i]);return v.some(x=>x===undefined)?null:v.reduce((n,x)=>n+Number(x),0)}
-function renderA4Detailed(){const col=[];const add=(title,rows)=>{if(!rows.length)return;col.push('<section class="report-section"><h3>'+safe(title)+'</h3><div>'+rows.map(([k,v])=>'<span class="report-item"><b>'+safe(k)+':</b> '+safe(String(v))+'</span>').join("")+'</div></section>')};for(let j=0;j<comprehensive.length;j++){const sec=comprehensive[j];const entries=sec[1].map((name,i)=>[name,moreText["clinical_"+j+"_"+i]]).filter(([name,v])=>v!==undefined&&String(v).trim()!=="");if(j===0){if(moreText.clinical_0_3&&$("ageOut"))entries.push(["Yaş",$("ageOut").textContent]);}if(j===1){if($("bmiOut"))entries.push(["VKİ",$("bmiOut").textContent]);if($("smmPhysical"))entries.push(["SMM",$("smmPhysical").textContent]);}add(sec[0],entries)}for(const form of forms){const rows=form.items.map((name,i)=>{const node=$(form.id+"_"+i);if(!node||node.value==="")return null;const opt=node.options[node.selectedIndex];return [name,opt?.textContent||node.value]}).filter(Boolean);const vals=form.items.map((_,i)=>$(form.id+"_"+i)?.value??"");if(vals.every(x=>x!==""))rows.unshift(["Toplam puan",scaleTotal(form,vals)+"/"+form.max]);add(form.tr,rows)}for(let j=0;j<3;j++){const list=additional[j];if(!list)continue;const rows=list[1].map((q,i)=>[q,moreAnswers["additional_"+j+"_"+i]]).filter(([a,v])=>v!==undefined);add(list[0],rows)}add("Saat çizme",[["Puan",moreAnswers.clock??"Eksik"],["Not",moreText["clock-notes"]||""]].filter(x=>x[1]!==""));const mm=additional[mmseVariant==="standard"?3:4][1];add("MMSE ("+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+")",mm.map((original,i)=>{const q=mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18?mmseWorldLetters[i-13]:original;const key=mmseAnswerKey(i);let v=moreAnswers[key],spoken=moreText["response_"+key];return [q,((v!==undefined?v+"p":"")+(spoken?" — "+spoken:"")).trim()]}).filter(x=>x[1]));add("GDS-30",gds30.map((q,i)=>[String(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?null:moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"]).filter(x=>x[1]!==null));const holder=$("printSheet");holder.innerHTML='<header class="print-head"><strong>İTF Geriatri — Kapsamlı Geriatrik Değerlendirme Özeti</strong><span>'+new Date().toLocaleDateString("tr-TR")+'</span></header><div class="report-columns">'+col.join("")+'</div><footer>Yerel tarayıcıda hazırlanmış özet; klinisyen tarafından kontrol edilmelidir.</footer>'}
+function renderA4Detailed(){const col=[];const add=(title,rows)=>{if(!rows.length)return;col.push('<section class="report-section"><h3>'+safe(title)+'</h3><div>'+rows.map(([k,v])=>'<span class="report-item"><b>'+safe(k)+':</b> '+safe(String(v))+'</span>').join("")+'</div></section>')};for(let j=0;j<comprehensive.length;j++){const sec=comprehensive[j];const physicalStatus=j===1?sarcoStatus():null;
+ const entries=sec[1].map((name,i)=>[name,
+  physicalStatus?kgdPhysicalAnnotatedValue(i,moreText["clinical_"+j+"_"+i],physicalStatus):
+  moreText["clinical_"+j+"_"+i]]).filter(([name,v])=>v!==undefined&&String(v).trim()!=="");if(j===0){if(moreText.clinical_0_3&&$("ageOut"))entries.push(["Yaş",$("ageOut").textContent]);}if(j===1){
+  if($("bmiOut"))entries.push(["VKİ",$("bmiOut").textContent]);
+  if($("smmPhysical"))entries.push(["SMM",$("smmPhysical").textContent]);
+  entries.push(
+   ["SMM/boy²",kgdPhysicalIndexValue(physicalStatus.smmi,"kg/m²",physicalStatus.mass)],
+   ["SMM/kilo",kgdPhysicalIndexValue(physicalStatus.smmw,"%",physicalStatus.massW)],
+   ["SMM/BKİ",kgdPhysicalIndexValue(physicalStatus.smmbmi,"",physicalStatus.massBMI,3)],
+   ["Sarkopenik obezite",moreText.sarcopenicObesity]
+  );
+ }add(sec[0],entries)}for(const form of forms){const rows=form.items.map((name,i)=>{const node=$(form.id+"_"+i);if(!node||node.value==="")return null;const opt=node.options[node.selectedIndex];return [name,opt?.textContent||node.value]}).filter(Boolean);const vals=form.items.map((_,i)=>$(form.id+"_"+i)?.value??"");if(vals.every(x=>x!==""))rows.unshift(["Toplam puan",scaleTotal(form,vals)+"/"+form.max]);add(form.tr,rows)}for(let j=0;j<3;j++){const list=additional[j];if(!list)continue;const rows=list[1].map((q,i)=>[q,moreAnswers["additional_"+j+"_"+i]]).filter(([a,v])=>v!==undefined);add(list[0],rows)}add("Saat çizme",[["Puan",moreAnswers.clock??"Eksik"],["Not",moreText["clock-notes"]||""]].filter(x=>x[1]!==""));const mm=additional[mmseVariant==="standard"?3:4][1];add("MMSE ("+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+")",mm.map((original,i)=>{const q=mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18?mmseWorldLetters[i-13]:original;const key=mmseAnswerKey(i);let v=moreAnswers[key],spoken=moreText["response_"+key];return [q,((v!==undefined?v+"p":"")+(spoken?" — "+spoken:"")).trim()]}).filter(x=>x[1]));add("GDS-30",gds30.map((q,i)=>[String(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?null:moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"]).filter(x=>x[1]!==null));const holder=$("printSheet");holder.innerHTML='<header class="print-head"><strong>İTF Geriatri — Kapsamlı Geriatrik Değerlendirme Özeti</strong><span>'+new Date().toLocaleDateString("tr-TR")+'</span></header><div class="report-columns">'+col.join("")+'</div><footer>Yerel tarayıcıda hazırlanmış özet; klinisyen tarafından kontrol edilmelidir.</footer>'}
 
 function installEqHealthVAS(){
  const sec=document.querySelector("#extraScales > section:nth-child(2)");
@@ -4699,16 +4742,17 @@ const mtotal=mvals.some(v=>v===undefined)?null:mvals.reduce((n,v)=>n+Number(v),0
 item("8.1 MMSE — "+(mmseVariant==="uneducated"?"Eğitimsizler İçin":"Standart"),[["Dikkat yöntemi",mmseVariant==="standard"?(mmseAttentionMode==="world"?"DÜNYA (tersten söyleme)":"100’den 7 çıkarma"):"Haftanın günlerini tersten sayma"],["MMSE Puanı",mtotal===null?"__":mtotal+"/30"+(mtotal>=24?" (normal)":" (normalin altında)")],...qlist.map((label,i)=>{const answerKey=mmseAnswerKey(i);return [(i+1)+". "+label,mvals[i]===undefined?"__":mvals[i]+" puan"+(moreText["response_"+answerKey]?" — "+moreText["response_"+answerKey]:"")]}),["Hatırlama — Ek Notlar",moreText["mmse-recall-notes-"+mmseVariant]],["MMSE Ek Notlar",moreText["mmse-notes"]]]);
 const gd=gdsScore();
 item("9. GDS-30 — Duygudurum",[["GDS-30 Puanı",gd===null?"__":gd+"/30"+(gd<=10?" (normal)":gd<=13?" (olası depresyon)":" (pozitif tarama)")],...gds30.map((q,i)=>[(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?"__":moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"])]);
-const phys=clinical(1).map(([label,value],i)=>[label,i===5?document.getElementById("bmiOut")?.textContent:value]);
 const sarco=sarcoStatus();
-const formatSarco=(value,suffix="",digits=2)=>
- value===null?"__":value.toFixed(digits)+suffix;
+const phys=clinical(1).map(([label,value],i)=>[label,
+  kgdPhysicalAnnotatedValue(i,i===5?document.getElementById("bmiOut")?.textContent:value,sarco)]);
+const formatSarco=(value,suffix="",digits=2,low=null)=>
+ value===null?"__":kgdPhysicalIndexValue(value,suffix,low,digits);
 item("10. Fiziksel Ölçümler ve Performans",[...phys,
  ["Yaş",kgdRecordedAge()??"__"],["Cinsiyet",moreText.clinical_0_4??"__"],
  ["SMM",formatSarco(sarco.smm," kg")],
- ["SMM / Boy²",formatSarco(sarco.smmi," kg/m²")],
- ["SMM / kilo",formatSarco(sarco.smmw," %")],
- ["SMM / BKİ",formatSarco(sarco.smmbmi,"",3)],
+ ["SMM / Boy²",formatSarco(sarco.smmi," kg/m²",2,sarco.mass)],
+ ["SMM / kilo",formatSarco(sarco.smmw," %",2,sarco.massW)],
+ ["SMM / BKİ",formatSarco(sarco.smmbmi,"",3,sarco.massBMI)],
  ["Sarkopenik obezite",moreText.sarcopenicObesity??"__"]]);
 return '<header class="summary-full-header"><h2>KGD Özeti — Tüm Bölümler</h2><p>__ = Henüz girilmedi. Önceki sekmelere dönerek tüm bilgileri düzenleyebilirsiniz.</p></header>'+rows.join("");
 }
@@ -4881,12 +4925,13 @@ function compactKGDStep(i,inline=false){
    const short=["Boy","Kilo","Yağ (%)","FFM","BMR","BKİ","FAS","TUG","OYH","OYH algısı","HGS","HGS algısı","Kol","Bel","Kalça","Baldır","5-CST","Romberg","Postural instabilite","SPPB 1a","SPPB 1b","SPPB 1c","SPPB 2","SPPB 3","SPPB","Olası sarkopeni","Kesin sarkopeni","Ciddi sarkopeni"];
    const r=sarcoStatus();
    return simple("Fiziksel Performans",[
-    ...comprehensive[1][1].map((_,j)=>[short[j],j===5?$("bmiOut")?.textContent:field(1,j)]),
+    ...comprehensive[1][1].map((_,j)=>[short[j],
+      kgdPhysicalAnnotatedValue(j,j===5?$("bmiOut")?.textContent:field(1,j),r)]),
     ["Yaş",kgdRecordedAge()],["Cinsiyet",moreText.clinical_0_4],
     ["SMM",r.smm===null?null:r.smm.toFixed(2)+" kg"],
-    ["SMM/boy²",r.smmi===null?null:r.smmi.toFixed(2)+" kg/m²"],
-    ["SMM/kilo",r.smmw===null?null:r.smmw.toFixed(2)+" %"],
-    ["SMM/BKİ",r.smmbmi===null?null:r.smmbmi.toFixed(3)],
+    ["SMM/boy²",kgdPhysicalIndexValue(r.smmi,"kg/m²",r.mass)],
+    ["SMM/kilo",kgdPhysicalIndexValue(r.smmw,"%",r.massW)],
+    ["SMM/BKİ",kgdPhysicalIndexValue(r.smmbmi,"",r.massBMI,3)],
     ["Sarkopenik obezite",moreText.sarcopenicObesity]
    ]);
  }
@@ -5032,7 +5077,13 @@ function kgdDetailedScale(id){
  return kgdDetailedBlock(form.tr,entries);
 }
 function kgdDetailedClinical(j,indices,title){
- return kgdDetailedBlock(title||comprehensive[j][0],(indices||comprehensive[j][1].map((_,i)=>i)).map(k=>[comprehensive[j][1][k],moreText["clinical_"+j+"_"+k]]));
+ const status=j===1?sarcoStatus():null;
+ return kgdDetailedBlock(title||comprehensive[j][0],
+  (indices||comprehensive[j][1].map((_,i)=>i)).map(k=>[
+   comprehensive[j][1][k],status?
+    kgdPhysicalAnnotatedValue(k,moreText["clinical_"+j+"_"+k],status):
+    moreText["clinical_"+j+"_"+k]
+  ]));
 }
 function kgdDetailedExtra(j,title,indices){
  return kgdDetailedBlock(title,indices.map(i=>{
@@ -5127,11 +5178,10 @@ function kgdDetailedPrintStep(step){
     ["Yaş",kgdRecordedAge()],["Cinsiyet",moreText.clinical_0_4],
     ["BKİ",$("bmiOut")?.textContent],["SMM",$("smmPhysical")?.textContent],
     ["Sarkopeni değerlendirmesi",$("sarcoState")?.textContent],
-    ["SMM / boy²",$("smmHeightPhysical")?.textContent],
-    ["SMM / kilo",$("smmWeightPhysical")?.textContent],
-    ["SMM / BKİ",$("smmBMIPhysical")?.textContent],
-    ["Sarkopenik obezite",moreText.sarcopenicObesity],
-    ["Kesim değerleri ve yorum",$("sarcoIndex")?.textContent]
+    ["SMM / boy²",kgdPhysicalIndexValue(sarcoStatus().smmi,"kg/m²",sarcoStatus().mass)],
+    ["SMM / kilo",kgdPhysicalIndexValue(sarcoStatus().smmw,"%",sarcoStatus().massW)],
+    ["SMM / BKİ",kgdPhysicalIndexValue(sarcoStatus().smmbmi,"",sarcoStatus().massBMI,3)],
+    ["Sarkopenik obezite",moreText.sarcopenicObesity]
    ]);
  }
  return "";
