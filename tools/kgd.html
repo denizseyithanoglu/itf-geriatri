@@ -1141,6 +1141,61 @@
   }
  }
 }
+
+@media screen{
+ #fullFields > section.supplement[data-clinical-index="5"] .clinical-topic-grid>.extra-field[hidden]{display:none!important}
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-types-field,
+ #fullFields > section.supplement[data-clinical-index="5"] .nocturia-frequency,
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph,
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-ipss{grid-column:1/-1}
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph{
+  min-width:0;padding:13px;margin-top:6px;background:#f8fcf9;
+  border:1px solid #d5e7db;border-radius:10px
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph h4{
+  color:#244e3c;margin:0 0 7px;font-size:1rem
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph p{
+  font-size:.82rem;margin:0 0 11px;color:#52695d
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph-symptom{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px;background:#ecf6ef;border:1px solid #d7e7dd;
+  border-radius:8px;font-size:.82rem
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph-symptom button{
+  min-width:52px;min-height:40px;cursor:pointer;background:white;color:#234d71;
+  border:2px solid #9aafc1;border-radius:8px;font:inherit;font-weight:700
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph-symptom button[aria-pressed="true"]{
+  background:#234d71;color:white;border-color:#234d71
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-ipss-result{
+  display:block;margin:10px 0;font-weight:800;color:#234d71
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-ipss-guide{
+  padding:12px;background:#f8fcf9;border:1px solid #d5e7db;border-radius:10px
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-ipss-guide summary{
+  color:#234d71;font-weight:750;cursor:pointer
+ }
+ #fullFields > section.supplement[data-clinical-index="5"] .urinary-ipss-guide p{
+  font-size:.84rem;line-height:1.5
+ }
+ @media(max-width:920px){
+  #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph-grid{
+   grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+ }
+ @media(max-width:530px){
+  #fullFields > section.supplement[data-clinical-index="5"] .urinary-bph-grid{
+   grid-template-columns:1fr
+  }
+ }
+}
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><section class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite">Geçici taslak hazırlanıyor…</div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><p class="wizard-privacy"><strong>Önemli:</strong> Geçici taslak yalnızca bu tarayıcı sekmesinde saklanır; sayfa yenilense de korunur. Bu bir klinik kayıt sistemi değildir. Gerçek hasta kimlik veya sağlık verilerini girmeyiniz.</p></section><div id="fullFields"></div><div id="sections"></div><div id="extraScales"></div><div id="fullGds"></div><section class="panel summary result-summary" id="summary"></section><article id="printSheet" aria-label="A4 KGD özeti"></article><div id="wizardFooter" class="wizard-footer no-print" aria-label="Bölüm gezinme ve kayıt işlemleri"><button class="btn alt" id="wizardBack" type="button">← Önceki</button><button class="btn alt" id="wizardSave" type="button">Taslağı Kaydet</button><button class="btn alt" id="wizardPrintSection" type="button">Bu Sekmenin Özetini Yazdır / PDF</button><button class="btn alt" id="wizardCopySectionSummary" type="button">Özet Metnini Kopyala</button><button class="btn alt" id="wizardPrintSectionDetailed" type="button">Bu Sekmeyi Detaylı Yazdır / PDF</button><button class="btn" id="wizardNext" type="button">Kaydet ve Devam Et →</button><button class="wizard-delete" id="wizardClear" type="button">Geçici Taslağı Sil</button></div><div class="actions no-print" id="finalActions"><button class="btn" id="printFinal">Tüm KGD — Özet Yazdır / PDF</button><button class="btn alt" id="printFinalDetailed" type="button">Tüm KGD — Detaylı Yazdır / PDF</button><button class="btn alt" id="emailFinal">E-posta ile anonim puan özeti</button></div><p class="optional-note">E-posta sadece tamamlanan ölçeklerin anonim toplamlarını içerir. Kimlik veya klinik notlar e-postaya eklenmez.</p></main><script>
 const forms=[{"id":"adl","tr":"GYA — Günlük Yaşam Aktiviteleri","max":6,"choices":[[1,"Bağımsız / Independent"],[0,"Yardım gerekli / Needs help"]],"items":["Banyo (Küvet, duş) — Yıkanırken hiç yardım almaz veya sadece vücudunun bir bölümünü yıkarken yardım alır","Giyinme — Ayakkabılarını bağlamak dışında kıyafetlerini ve elbiselerini kendisi giyebilir","Tuvalete Gitme — Herhangi bir yardım almadan tuvalete gider, tuvaleti kullanır, kıyafetlerini düzeltir ve tuvaletten geri çıkar. (tuvalete giderken destek için yürüteç veya baston kullanabilir ve gece alt bezi veya üriner kateter kullanabilir)","Transfer — Herhangi bir yardımcı olmadan yataktan sandalyeye veya sandalyeden yatağa geçebilir (baston veya yürüteç kullanabilir)","Kontinans — İdrara çıkma ve dışkılamayı kısmi de olsa bir kaçırma olmadan tamamen kendisi kontrol eder","Beslenme — Yardım almadan kendi kendine beslenir (etini kesme veya ekmeğine tereyağı sürmeye yardım edilmesi haricinde)"],"full":"GYA: 6 sorunun tam ifadeleri","options":[[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]],[[0,"Evet"],[1,"Hayır"]]],"scoreOptions":[[1,0],[1,0],[1,0],[1,0],[1,0],[1,0]]},{"id":"iadl","tr":"EGYA — Enstrümantal Günlük Yaşam Aktiviteleri","max":8,"choices":[[1,"Bağımsız / Independent"],[0,"Bağımlı / Dependent"]],"items":["A. Telefonu Kullanabilme","B. Alış-veriş","C. Yemek Hazırlama","D. Ev Temizliği","E. Çamaşır","F. Yolculuk","G. İlaçlarını Kullanabilme Sorumluluğu","H. Mali İşler"],"full":"EGYA: 8 sorunun tam ifadeleri","options":[[[0,"Telefonu rahatlıkla kullanabilir"],[1,"Birkaç iyi bilinen numarayı çevirebilir"],[2,"Telefona cevap verir fakat arayamaz"],[3,"Telefonu hiç kullanamaz"]],[[0,"Tüm alış-verişlerini bağımsız olarak kendisi yapar"],[1,"Küçük alış-verişlerini kendisi yapar"],[2,"Tüm alış-verişlerinde yardıma ihtiyaç duyar"],[3,"Alış-veriş yapamaz"]],[[0,"Yeteri kadar yemeği planlar, hazırlar ve servis edebilir"],[1,"Kullanılacak malzeme sağlanırsa yeteri kadar yemek hazırlayabilir"],[2,"Hazır yemeği ısıtır ve servis eder veya yemek hazırlar ancak yeterli diyeti sağlayamaz"],[3,"Yemeğin hazırlanma ve servis edilmesine ihtiyacı vardır"]],[[0,"Yalnız başına veya nadir destekle evin üstesinden gelir"],[1,"Bulaşık yıkama, yatak yapma gibi günlük hafif işleri yapabilir"],[2,"Günlük hafif işleri yapar ancak yeterli temizliği sağlayamaz"],[3,"Tüm ev idame işlerinde yardıma ihtiyaç duyar"]],[[0,"Kişisel çamaşırını tamamen kendisi yıkar"],[1,"Çorap, mendil gibi küçük malzemelerini yıkayabilir"],[2,"Tüm çamaşır işi başkaları tarafından halledilmek zorundadır"]],[[0,"Toplu taşıma araçlarından bağımsız olarak faydalanır veya kendi arabasını kullanır"],[1,"Taksiye biner, toplu taşıma araçlarını kullanamaz"],[2,"Başkalarının yardımı ile toplu taşımadan faydalanabilir"],[3,"Yolculuğu başkalarının yardımı ile taksi/otomobille sınırlıdır"],[4,"Yolculuk yapamaz"]],[[0,"İlaçlarını zamanında ve belirtilen dozda alabilir"],[1,"İlaçları önceden dozlarına ayrılmış olarak hazırlanırsa düzenli kullanabilir"],[2,"İlaçlarını kendi başına düzenli kullanamaz"]],[[0,"Bağımsız olarak tüm mali işlerinin üstesinden gelebilir"],[1,"Günlük mali işlerini halleder ancak büyük mali işlerde ve banka işlerinde yardıma ihtiyaç duyar"],[2,"Mali işlerini takip edemez"]]],"scoreOptions":[[1,1,1,0],[1,0,0,0],[1,0,0,0],[1,1,1,0],[1,1,0],[1,1,1,1,0],[1,0,0],[1,1,0]]},{"id":"frail","tr":"FRAIL Kırılganlık Anketi","max":5,"choices":[[0,"Hayır"],[1,"Evet"]],"items":["Yorgunluk: Son 4 haftanın tamamında veya çoğunda kendinizi yorgun, bitkin, halsiz hissettiniz mi ?","Dayanıklılık: 10 basamak merdiveni dinlenmeden, tek başınıza ve yardımsız yürümekte herhangi bir zorluk çekiyor musunuz ?","Ambulasyon: ~200m.’yi tek başınıza, yardımsız ve güçlük çekmeden yürümekte bir zorluk çekiyor musunuz ?","Hastalıklar: Şu 11 hastalıktan 5 veya daha fazlasının teşhisi var mı ?","Kilo Kaybı: Son 1 yıl içinde vücut ağırlığınızın %5’ini kaybettiniz mi ?"],"full":"0 normal · 1–2 kırılganlık öncesi · 3–5 kırılgan"},{"id":"sarcf","tr":"SARC-F (Sarkopeni Tarama Anketi)","max":10,"choices":[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yapamaz"]],"items":["Kuvvet: ~5kg. kaldırma ve taşıma","Yürüme: odada yürüme","Sandalye: sandalye, yataktan transfer","Merdiven: 10 basamak çıkma","Düşme: 1 yıl içinde kaç kez düştü"],"full":"4 ve üzeri puan sarkopeniyi düşündürür.","options":[[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır, yardımla yapar veya yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır veya yardımsız yapamaz"]],[[0,"hiç"],[1,"biraz zorlanır"],[2,"çok zorlanır, yardımla yapar veya yapamaz"]],[[0,"hiç"],[1,"1-3 kez düştü"],[2,"4 veya daha fazla düştü"]]]},{"id":"sof","tr":"SOF Kırılganlık Ölçütleri","max":3,"choices":[[0,"Hayır"],[1,"Evet"]],"items":["3 yıldan beri ≥ %5 kilo kaybı (3 yıl önceki ağırlık – bugünkü ağırlık = Ağırlıktaki değişim) (Ağırlıktaki değişim / 3 yıl önceki ağırlık = % kayıp)","5 tekrarlı otur-kalk yapamama (Sandalyede otur, kolları kullanmadan 5 tekrar kalk-otur)","“Enerji dolu hissediyor musunuz?” (cevap evet ya da hayır olmalı)"],"full":"0 normal · 1 kırılganlık öncesi · 2–3 kırılgan","options":[[[0,"Kilo kaybı yok / < %5"],[1,"Kilo kaybı ≥ %5"]],[[0,"Yapabiliyor"],[1,"Yapamıyor"]],[[0,"Evet"],[1,"Hayır"]]]},{"id":"mna","tr":"MNA-SF — Mini Nütrisyonel Değerlendirme (1. Kısım)","max":14,"choices":null,"items":["Son üç ayda iştahsızlığa, sindirim sorunlarına, çiğneme ya da yutma zorluklarına bağlı olarak besin alımında bir azalma oldu mu?","Son üç ay içinde kilo kaybı","Mobilite","Son 3 ayda psikolojik stres ya da akut hastalıktan şikayetçi oldunuz mu?","Nöro-psikolojik problemler","Beden Kitle İndeksi (BKİ) (kg/m²) veya baldır çevresi"],"options":[[[0,"Ciddi iştah kaybı"],[1,"Orta düzeyde iştah kaybı"],[2,"İştah kaybı yok"]],[[0,"3 kg’dan fazla kilo kaybı"],[1,"Bilinmiyor"],[2,"1 ve 3 kg arasında kayıp"],[3,"Kilo kaybı yok"]],[[0,"Yatak ya da sandalyeye bağımlı"],[1,"Yataktan, sandalyeden kalkabiliyor ama dışarıya çıkamıyor"],[2,"Dışarı çıkabiliyor"]],[[0,"Evet"],[2,"Hayır"]],[[0,"Ciddi bunama ve depresyon"],[1,"Hafif düzeyde bunama ve depresyon"],[2,"Hiçbir psikolojik problem yok"]],[[0,"BKİ <19 veya baldır çevresi <31 cm"],[1,"BKİ ≥19 – <21"],[2,"BKİ ≥21 – <23"],[3,"BKİ ≥23 veya baldır çevresi ≥31 cm"]]],"full":"0–7 malnütrisyon · 8–11 malnütrisyon riski · 12–14 normal"}],texts={"tr":{"title":"Kapsamlı Geriatrik Değerlendirme","sub":"İTF KGD formu · Dijital çalışma prototipi","home":"← Ana sayfa","warning":"Yalnızca eğitim / demo amaçlıdır. GitHub Pages güvenli hasta kayıt sistemi değildir: ad, TC kimlik numarası, telefon veya tanımlanabilir klinik veri girmeyiniz. Girdi sunucuya gönderilmez; sayfa yenilenince silinir.","intro":"Bu ilk sürüm formun seçilmiş puanlanan alanlarını dijitalleştirir: GYA, EGYA, FRAIL, SARC-F, SOF ve MNA-SF. Diğer alanlar için özet girişleri vardır. Tam 8 sayfalık KGD formunun yerini henüz almaz.","details":"Anonim değerlendirme notları","measure":"Diğer ölçümler ve klinik değerlendirme","print":"Hasta için özet hazırla / Yazdır","clear":"Sıfırla","summary":"Kapsamlı Geriatrik Değerlendirme Özeti","date":"Tarih","completed":"Tamamlanan testler","missing":"Eksik testler","domains":"Ölçekte zorlanılan alanlar","meaning":"Yorum","none":"Belirtilen alanlarda puan kaybı yok.","incomplete":"Eksik — sonuç hesaplanmadı","general":"Bu özet tanı koymaz ve hekim değerlendirmesinin yerini almaz. Hasta ile paylaşılmadan önce tüm veriler ve yorumlar klinisyen tarafından kontrol edilmelidir.","pnote":"Hastanın adı veya kimlik numarası bu taslak sistemde istenmez. Rapor yazdırılırken tarayıcı yazdırma penceresinden yerel PDF seçilebilir.","labels":["Boy (cm)","Kilo (kg)","El kavrama (kg)","Yürüme hızı (m/sn)","TUG (sn)","SPPB (/12)","Chair stand (sn)","MMSE (/30)","GDS (/30)","Saat çizme (/5)","İlaç sayısı","Kısa klinik not (tanımlayıcı bilgi kullanmayın)"]}};const $=id=>document.getElementById(id);
 const comprehensive=[["1. Sosyal ve Kişisel Öykü",["Hasta Adı Soyadı","TC No","KGD Tarihi","Doğum Tarihi","Cinsiyet","Tel No","Eğitim Durumu","Medeni Durum","Kimle Yaşıyor","Ev Halkı Sayısı","Nerede Yaşıyor","Desteğe İhtiyaç?","Destek Veren?","Yaşlılık kaç yaşında başlar?"]],["Fiziksel Ölçümler ve Performans",["Boy (cm)","Kilo (kg)","BIAyağ (%)","BIAkas(FFM) (kg)","BIAbasal (kcal)","BKİ (kg/m²)","FAS (/5)","TUG (sn)","OYH (m/sn)","OYH’ın yaşıt sağlıklılardan düşük olduğunu düşünüyor mu?","El Kavrama Kuvveti (kg)","El kavrama kuvvetinin yaşıt sağlıklılardan düşük olduğunu düşünüyor mu?","Üst Kol (cm)","Bel (cm)","Kalça (cm)","Baldır (cm)","Chair Stand (sn)","Romberg","Postural İnstabilite","SPPB: 1a (/1)","SPPB: 1b (/1)","SPPB: 1c (/2)","SPPB: 2 (/4)","SPPB: 3 (/4)","SPPB: Toplam (/12)","Muhtemel SARKOPENİ","Kesin SARKOPENİ","Ciddi Sarkopeni"]],["3. Fiziksel Aktivite ve Düşmeler",["Fiziksel Aktivite?","Fiziksel aktivite türü","Fiziksel aktivite süresi (dk)","Geçtiğimiz hafta içinde fiziksel aktivite düzeyinizin yaşıt sağlıklılardan daha düşük olduğunu düşünüyor musunuz?","Yürüme/mobilizasyon için yardımcı cihaz?","Yardımcı cihaz türü","Son 1 yıl içinde düştü mü?","Düşme sayısı (defa/yıl)","Düşmeyi tanımlayınız","Düşme korkusu var mı?","Düşme korkusu GYA’yı olumsuz etkiliyor mu?","Son 1 yıl içinde hastane yatışı?","Son 3 yıl içinde hastane yatışı?","Yaşıtlarınıza göre kendinizi daha fazla yorgun, bitkin, halsiz hissediyor musunuz?","Hiç Kırık Oldu mu?","Kırığın enerji düzeyi","Kırık zamanı","Kırık bölgesi"]],["3. Görme ve İşitme Problemleri",["Sigara?","Sigara paket-yıl","Alkol?","Gözlük","Glokom","Katarakt","Son 1 yıl içinde göz muayenesi oldu mu?","Görme sorunu var mı?","Gazete okuma?","TV İzleme?","Telefonda konuşabiliyor mu?","Son 1 yıl içinde KBB muayenesi oldu mu?","İşitme sorunu var mı?","Yardımcı işitme cihazı kullanıyor mu?"]],["5. Beslenme, Kronik Ağrı ve Uyku",["Son 3 Ay Kilo Kaybı","3 ay kg","Son 6 Ay Kilo Kaybı","6 ay kg","Son 1 Yıl Kilo Kaybı","1 yıl kg","Çiğneme sorunu?","Özel Diyet?","Kaçırdığı Öğün?","Yutma sorunu?","Gıdaları yutarken zorluk çekiyor musunuz?","KRONİK AĞRI (en az 3-6 ay boyunca devam eden)?","Kronik Ağrının Kaynağı","VAS (0–10)","Koopere Değilse Ağrı Şiddeti","SGA’ya göre Kas Kütlesi","IPSS","Uyku sorununuz var mı?","Yetersiz uyku / Fazla uyuma"]],["6. Uyku, Boşaltım ve Yakınmalar",["REM Uykusu Davranış Bozukluğu?","Uykuda agresif hareketler","Canlı rüya-kâbus şeklinde görme","Uykuda konuşma: bağırma-çağırma","Obstrüktif Uyku Apne: HORLAMA","Obstrüktif Uyku Apne: APNE","Terleme","Nokturi","Yorgun uyanma","Gündüz uyku isteği","Huzursuz Bacak Sendromu?","Gece yoğun","Hareketle azalıyor","Huzursuz Bacak semptom tarifi","John Hopkins Skalası","Üriner İnkontinans?","Akut / kronik","Sıklığı (gün)","Tedavi gördü mü?","Yetişememe / Stres / Taşma / Fonksiyonel / Mixt","Fekal İnkontinans?","Fekal inkontinans sıklığı","Konstipasyon?","Seksüel disfonksiyon?","Cinsel İsteksizlik","Erektil Disfonksiyon"]],["2. Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar",["Osteoartrit GYA'yı olumsuz etkiliyor mu?","İlaç Sayısı","Hastalık Sayısı","Aritmi","Demans","Depresyon","Dislipidemi (DL)","Diyabet (DM)","Hipertansiyon (HT)","Hipotiroidi","İskemik Kalp Hastalığı (İKH)","Konjestif Kalp Yetmezliği (KKY)","Aktif Kanser (Deri Kanseri Hariç)","Kronik Böbrek Hastalığı (KBH)","Osteoartrit (OA)","Osteoporoz (OP)","Serebrovasküler Olay (SVO)","Total Endoprotez","Diğer Hastalıklar","İlaçlar","Soygeçmiş","Saat Çizme Testi Notları"]]],additional=[["MNA-LF (7–18)",["Birisine bağımlı olmadan yaşıyor (hastanede ya da hemşire olan bir evde değil)","Günde 3 adetten fazla reçeteli ilaç alıyor mu?","Deride hassaslık ya da ülser var mı?","Günde kaç öğün tüketiyor?","Protein alımı A) Günde en az 1 porsiyon süt ve süt ürünü B) Haftada 2 porsiyon kuru baklagil/yumurta C) Her gün et-balık/tavuk","Her gün iki ya da daha fazla porsiyon meyve ya da sebze tüketiyor mu?","Günde kaç bardak sıvı alıyor?","Yemek yeme şekli nasıl?","Beslenme durumu ile ilgili şahsi düşüncesi","Aynı yaştaki kişilerle karşılaştırıldığında sağlık durumu","Üst Orta Kol Çevresi (cm)","Baldır Çevresi (cm)"]],["EQ-5D",["A-Hareket","B-Öz - Bakım","C-Olağan Aktiviteler","D-Ağrı / rahatsızlık","E-Anksiyete / Depresyon"]],["Mini-COG",["Kayıt: AYAKKABI","Kayıt: ELMA","Kayıt: KÖPEK","Saat Çizme Testi (/5)","Hatırlama: AYAKKABI","Hatırlama: ELMA","Hatırlama: KÖPEK"]],["MMSE — Standart",["ORYANTASYON: Hangi yıldayız?","Hangi aydayız?","Hangi tarih?","Hangi gündeyiz?","Hangi mevsimdeyiz?","Hangi ülkede yaşıyoruz?","Hangi kentteyiz?","Hangi hastanedeyiz?","Hastanenin hangi bölümündeyiz?","Kaçıncı kattayız?","KAYIT: MAVİ","KAYIT: ŞAHİN","KAYIT: LALE","DİKKAT: 100'den 7 çıkarma, 1","100'den 7 çıkarma, 2","100'den 7 çıkarma, 3","100'den 7 çıkarma, 4","100'den 7 çıkarma, 5","HATIRLAMA: MAVİ","HATIRLAMA: ŞAHİN","HATIRLAMA: LALE","ADLANDIRMA: Saat","ADLANDIRMA: Kalem","TEKRARLAMA: \"O gelmiş olsaydı ben de giderdim\"","Kâğıdı doğru tutuyor","İkiye katlıyor","Yere bırakıyor","YAZI: anlamlı cümle","OKUMA: GÖZLERİNİZİ KAPAYIN","KOPYA: şekli doğru kopyalıyor"]],["MMSE — Eğitimsizler İçin",["Hangi yıldayız?","Hangi aydayız?","Hangi gündeyiz?","Hangi mevsimdeyiz?","Şu an sabah mı, öğle mi, akşam mı?","Hangi ülkede yaşıyoruz?","Hangi kentteyiz?","Bulunduğunuz semtin adı nedir?","Bulunduğunuz bina neresidir?","Kaçıncı kattayız?","KAYIT: MASA","KAYIT: BAYRAK","KAYIT: ELBİSE","DİKKAT: Cuma","Perşembe","Çarşamba","Salı","Pazartesi","HATIRLAMA: MASA","HATIRLAMA: BAYRAK","HATIRLAMA: ELBİSE","ADLANDIRMA: Saat","ADLANDIRMA: Kalem","TEKRARLAMA: \"O gelmiş olsaydı ben de giderdim\"","Kâğıdı doğru tutuyor","İkiye katlıyor","Yere bırakıyor","Anlamlı cümle söyleme","Gözlerinizi Kapayın","KOPYA: şekli doğru kopyalıyor"]]],gds30=["Yaşamınızdan temelde memnun musunuz?","Günlük uğraşı ve ilgilerinizin büyük bölümünü terk ettiniz mi?","Yaşamınızın bomboş olduğunu hissediyor musunuz?","Sık sık canınız sıkılır mı?","Genellikle keyfiniz yerinde midir?","Başınıza kötü bir şey geleceğinden korkuyor musunuz?","Çoğunlukla kendinizi mutlu hissediyor musunuz?","Sık sık kendinizi çaresiz hissediyor musunuz?","Dışarı çıkıp yeni bir şeyler yapmaktansa, evde kalmayı tercih eder misiniz?","Hafızanızın çoğu kişiden zayıf olduğunu hissediyor musunuz?","Sizce şu anda yaşıyor olmak güzel bir şey midir?","Kendinizi şu anki halinizle değersiz hissediyor musunuz?","Kendinizi enerji dolu hissediyor musunuz?","Çözümsüz bir durum içinde bulunduğunuzu düşünüyor musunuz?","Çoğu kişinin sizden daha iyi durumda olduğunu düşünüyor musunuz?","Gelecekten ümitli misiniz?","Kafanızdan atamadığınız düşünceler nedeniyle rahatsızlık duyduğunuz olur mu?","Sık sık huzursuz ve yerinde duramayan birisi olur musunuz?","Sıklıkla gelecekten endişe duyuyor musunuz?","Kendinizi sıklıkla kederli ve hüzünlü hissediyor musunuz?","Geçmiş ile ilgili olarak çokça üzülüyor musunuz?","Yaşamı zevk ve heyecan verici buluyor musunuz?","Yeni projelere başlamak sizin için zor mudur?","Sık sık küçük şeylerden dolayı üzülür müsünüz?","Sık sık kendinizi ağlayacakmış gibi hisseder misiniz?","Dikkatinizi toplamakta güçlük çekiyor musunuz?","Sabahları güne başlamak hoşunuza gidiyor mu?","Sosyal toplantılara katılmaktan kaçınır mısınız?","Karar vermek sizin için kolay oluyor mu?","Zihniniz eskiden olduğu kadar berrak mıdır?"];let moreAnswers={},moreText={},mmseVariant="standard",mmseAttentionMode="subtract";const mnaLFOptions=[[["Hayır",0],["Evet",1]],[["Evet",0],["Hayır",1]],[["Evet",0],["Hayır",1]],[["1 öğün",0],["2 öğün",1],["3 öğün",2]],[["0–1 evet",0],["2 evet",0.5],["3 evet",1]],[["Hayır",0],["Evet",1]],[["3 bardaktan az",0],["3–5 bardak",0.5],["5 bardaktan fazla",1]],[["Yardımcı olmadan yemek yiyemez",0],["Kendi kendine yiyebiliyor ama zorlanıyor",1],["Sorunsuz bir biçimde kendi kendine yiyor",2]],[["Kendisini iyi beslenmemiş olarak görüyor",0],["Kararsız",1],["Kendisinin beslenme sorunu olmadığını düşünüyor",2]],[["İyi değil",0],["Bilmiyor",0.5],["İyi",1],["Çok iyi",2]],[["21 cm’den az",0],["21–22 cm",0.5],["22 cm veya daha fazla",1]],[["31 cm’den az",0],["31 cm veya daha fazla",1]]];const eqOptions=[["Yürürken, hiç bir güçlük çekmiyorum","Yürürken bazı güçlüklerim oluyor","Yatalağım"],["Kendime bakmakta güçlük çekmiyorum","Kendi kendime yıkanırken veya giyinirken bazı güçlüklerim oluyor","Kendi kendime yıkanacak veya giyinebilecek durumda değilim"],["Olağan işlerimi yaparken herhangi bir güçlük çekmiyorum","Olağan işlerimi yaparken bazı güçlüklerim oluyor","Olağan işlerimi yapabilecek durumda değilim"],["Ağrı veya rahatsızlığım yok","Orta derecede ağrı veya rahatsızlığım var","Aşırı derecede ağrı veya rahatsızlığım var"],["Endişeli veya moral bozukluğu içinde değilim","Orta derecede endişeliyim veya moralim bozuk","Aşırı derecede endişeliyim veya moralim çok bozuk"]];const extraIds=["height","weight","hgs","gait","tug","sppb","chair","mmse","gds","clock","meds","notes"];
@@ -1241,11 +1296,19 @@ function sectionResets(){document.querySelectorAll("#fullFields>section,#section
   const painSlider=$("clinical_4_13");
   if(painSlider?.type==="range"){painSlider.value="5";const value=$("painVASValue");if(value)value.textContent="— / 10";}
   delete moreText.clinical_4_14;
-  for(const i of [0,1,2,3,4,5,6,8,9,15,19])delete moreText["clinical_5_"+i];
+  for(const i of [0,1,2,3,4,5,6,7,8,9,15,16,17,18,19])delete moreText["clinical_5_"+i];
+  delete moreText.urinaryNocturiaFrequency;
+  bphNames.forEach((_,i)=>delete moreText["bphSymptom_"+i]);
+  delete moreText.clinical_4_16;
+  const ipss=$("clinical_4_16");if(ipss)ipss.value="";
+  const result=$(".urinary-ipss-result");if(result)result.textContent="IPSS: Henüz girilmedi";
   const rbdPanel=$("rbdSymptoms");
   if(rbdPanel){rbdPanel.hidden=true;const count=$("rbdSymptomCount");if(count)count.textContent="0 / 3";}
-  const urinaryType=$("clinical_5_19")?.closest(".extra-field");
-  if(urinaryType)urinaryType.hidden=true;
+  for(const i of [16,17,18,19]){
+   const fld=$("clinical_5_"+i)?.closest(".extra-field");if(fld)fld.hidden=true;
+  }
+  const noct=$("urinaryNocturiaFrequency")?.closest(".extra-field");if(noct)noct.hidden=true;
+  sec.querySelectorAll(".urinary-bph-symptom button").forEach(b=>b.setAttribute("aria-pressed","false"));
   syncPainSource();
   sec.querySelectorAll(".pain-legacy-note,.pain-vas-legacy,.clinical-legacy-note").forEach(note=>note.remove());
  }if(sec.dataset.clinicalIndex==="2"){
@@ -2418,6 +2481,149 @@ function rbdSymptomSelected(i){
 function rbdSymptomCount(){
  return [1,2,3].filter(rbdSymptomSelected).length;
 }
+
+/* Tab 4, urinary assessment. Keep all original answer keys and IPSS entry. */
+const bphNames=["Kesik kesik idrar","İdrar debisinde azalma","İdrarı başlatmada güçlük",
+ "İşeme sırasında ıkınma","Tam boşaltamama hissi","İşeme sonrası damlama",
+ "Ani idrar sıkışması"];
+function urinaryExtras(){
+ return [["Noktüri sıklığı (kez/gece)",moreText.urinaryNocturiaFrequency],
+  ...bphNames.map((v,i)=>[v,moreText["bphSymptom_"+i]])];
+}
+function formatUrinaryFollowups(topic,fields,ipssField,makeBinary){
+ const grid=topic.querySelector(".clinical-topic-grid");
+ const active=()=>moreText.clinical_5_15==="Var";
+ const rangeValues=["1–3","4–6","7–10"];
+ const category=v=>{
+  const str=String(v??"").trim();
+  if(rangeValues.includes(str))return str;
+  if(!/^\d+$/.test(str))return "";
+  const n=Number(str);
+  return n>=1&&n<=3?rangeValues[0]:n>=4&&n<=6?rangeValues[1]:n>=7&&n<=10?rangeValues[2]:"";
+ };
+ const choice=(field,key,options,label)=>{
+  const prev=String(moreText[key]??"").trim(),old=field.querySelector(".simple-choice,textarea,input,select");
+  if(label){const l=field.querySelector("label");if(l){l.textContent=label;l.removeAttribute("for");}}
+  const group=document.createElement("div");group.id=key;group.className="clinical-toggle-buttons";
+  group.setAttribute("role","group");group.setAttribute("aria-label",label);
+  group.innerHTML=options.map(v=>'<button type="button" data-urinary-option="'+safe(v)+
+   '" aria-pressed="'+(moreText[key]===v)+'">'+safe(v)+'</button>').join("");
+  if(old)old.replaceWith(group);else field.appendChild(group);
+  group.addEventListener("click",e=>{
+   const b=e.target.closest("[data-urinary-option]");if(!b)return;
+   moreText[key]=b.dataset.urinaryOption;
+   group.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+   field.querySelector(".clinical-legacy-note")?.remove();
+   summarize();writeKGDDraft();
+  });
+  if(prev&&!options.includes(prev)){
+   const note=document.createElement("small");note.className="clinical-legacy-note";
+   note.textContent="Önceki kayıt: "+prev;group.after(note);
+  }
+  return group;
+ };
+ const duration=fields[16],frequency=fields[17],therapy=fields[18],types=fields[19],noct=fields[7];
+ const priorDuration=String(moreText.clinical_5_16??"").trim().toLocaleLowerCase("tr-TR");
+ if(priorDuration==="akut")moreText.clinical_5_16="Akut";
+ else if(priorDuration==="kronik")moreText.clinical_5_16="Kronik";
+ choice(duration,"clinical_5_16",["Akut","Kronik"],"İnkontinans: Akut / Kronik");
+ const prevFreq=category(moreText.clinical_5_17);
+ if(prevFreq)moreText.clinical_5_17=prevFreq;
+ choice(frequency,"clinical_5_17",rangeValues,"İnkontinans sıklığı (kez/gün)");
+ const priorNoct=String(moreText.clinical_5_7??"").trim();
+ if(priorNoct&&!["Evet","Hayır","Var","Yok"].includes(priorNoct)){
+  moreText.clinical_5_7="Var";
+  if(!moreText.urinaryNocturiaFrequency)moreText.urinaryNocturiaFrequency=category(priorNoct)||priorNoct;
+ }
+ const noctFreq=document.createElement("div");noctFreq.className="extra-field nocturia-frequency";
+ noctFreq.innerHTML="<label>Noktüri sıklığı (kez/gece)</label>";
+ const nCategory=category(moreText.urinaryNocturiaFrequency);
+ if(nCategory)moreText.urinaryNocturiaFrequency=nCategory;
+ choice(noctFreq,"urinaryNocturiaFrequency",rangeValues,"Noktüri sıklığı (kez/gece)");
+ const syncNoct=()=>{noctFreq.hidden=moreText.clinical_5_7!=="Var"};
+ makeBinary(7,["Yok","Var"],"Noktüri",value=>{
+  if(value==="Yok"){
+   delete moreText.urinaryNocturiaFrequency;
+   noctFreq.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed","false"));
+   noctFreq.querySelector(".clinical-legacy-note")?.remove();
+  }
+  syncNoct();
+ });
+
+ const bph=document.createElement("section");bph.className="urinary-bph";
+ bph.innerHTML='<h4>BPH ile ilişkili olabilen alt üriner sistem belirtileri</h4>'+
+  '<p>Belirtiler çoklu seçilebilir. Bu bulgular tek başına BPH tanısı koydurmaz.</p>';
+ const bphGrid=document.createElement("div");bphGrid.className="urinary-bph-grid";
+ bphNames.forEach((label,i)=>{
+  const key="bphSymptom_"+i,card=document.createElement("div");
+  card.className="urinary-bph-symptom";
+  const span=document.createElement("span");span.textContent=label;
+  const b=document.createElement("button");b.type="button";b.textContent="Var";
+  b.setAttribute("aria-label",label);b.setAttribute("aria-pressed",String(moreText[key]==="Var"));
+  b.addEventListener("click",()=>{
+   if(b.getAttribute("aria-pressed")==="true"){
+    delete moreText[key];b.setAttribute("aria-pressed","false");
+   }else{moreText[key]="Var";b.setAttribute("aria-pressed","true");}
+   summarize();writeKGDDraft();
+  });
+  card.append(span,b);bphGrid.appendChild(card);
+ });
+ bph.appendChild(bphGrid);
+
+ // The original clinical_4_16 IPSS total is moved here, not duplicated.
+ ipssField.classList.add("urinary-ipss");
+ const label=ipssField.querySelector("label");label.textContent="IPSS toplam puanı (0–35)";
+ label.htmlFor="clinical_4_16";
+ const old=ipssField.querySelector("textarea,input");
+ const input=document.createElement("input");input.type="number";
+ input.id="clinical_4_16";input.className="structured-input";
+ input.min="0";input.max="35";input.step="1";input.inputMode="numeric";
+ input.placeholder="0–35";input.value=moreText.clinical_4_16??"";
+ old.replaceWith(input);
+ const result=document.createElement("output");result.className="urinary-ipss-result";
+ result.setAttribute("aria-live","polite");
+ const score=()=>{
+  const val=String(moreText.clinical_4_16??"").trim(),n=Number(val);
+  result.textContent=!val?"IPSS: Henüz girilmedi":
+   !Number.isInteger(n)||n<0||n>35?"IPSS 0–35 arası tam sayı olmalıdır":
+   "IPSS: "+n+"/35 — "+(n===0?"Semptom yok":n<=7?"Hafif":n<=19?"Orta":"Şiddetli");
+ };
+ input.addEventListener("input",()=>{
+  if(input.value.trim())moreText.clinical_4_16=input.value;
+  else delete moreText.clinical_4_16;
+  score();summarize();writeKGDDraft();
+ });
+ score();
+ const guide=document.createElement("details");guide.className="urinary-ipss-guide";
+ guide.innerHTML='<summary>IPSS nasıl değerlendirilir? (7 belirti + yaşam kalitesi)</summary>'+
+  '<p>Son 1 ay için <b>7 belirtinin</b> her biri 0–5 puanlanır: tam boşaltamama, '+
+  'sık idrara çıkma (iki saatten kısa aralık), kesik idrar, sıkışma, zayıf akım, '+
+  'ıkınma ve noktüri. İlk 6 soruda <b>0 hiç</b>, <b>1 beşte birden az</b>, '+
+  '<b>2 yarıdan az</b>, <b>3 yaklaşık yarısı</b>, <b>4 yarıdan fazla</b>, '+
+  '<b>5 hemen her zaman</b> anlamına gelir. Noktüri sorusunda 0, 1, 2, 3, 4, '+
+  '5 veya daha fazla gece kalkışı sırasıyla 0–5 puandır.</p>'+
+  '<p>7 sorunun toplamı <b>0–35</b>: <b>0–7 hafif</b>, <b>8–19 orta</b>, '+
+  '<b>20–35 şiddetli</b> (0 semptom yok). Ayrı yaşam kalitesi sorusu '+
+  '<b>0–6</b> olarak puanlanır ve toplam skora <b>eklenmez</b>.</p>'+
+  '<p>IPSS, alt üriner sistem belirtilerinin şiddetini ölçer; tek başına BPH tanısı koydurmaz. '+
+  '<a href="https://uroweb.org/guidelines/management-of-non-neurogenic-male-luts/chapter/diagnostic-evaluation" target="_blank" rel="noopener">EAU kılavuzu</a></p>';
+ ipssField.append(result,guide);
+ grid.replaceChildren(fields[15],duration,types,frequency,therapy,noct,noctFreq,bph,ipssField);
+ const sync=()=>{
+  const isActive=active();
+  [duration,types,frequency,therapy].forEach(field=>field.hidden=!isActive);
+  syncNoct();
+ };
+ topic.syncUrinaryDetails=sync;
+ topic.clearUrinaryDetails=()=>{
+  for(const key of ["clinical_5_16","clinical_5_17","clinical_5_19"]){
+   delete moreText[key];
+   const c=$(key);c?.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed","false"));
+   c?.closest(".extra-field")?.querySelector(".clinical-legacy-note")?.remove();
+  }
+ };
+ sync();
+}
 function formatSleepAndUrinaryFields(sleepTopic,urinaryTopic,symptomFields){
  const makeBinary=(i,options,label,onSelection)=>{
   const key="clinical_5_"+i,field=symptomFields[i];
@@ -2547,9 +2753,7 @@ function formatSleepAndUrinaryFields(sleepTopic,urinaryTopic,symptomFields){
   legacy.className="clinical-legacy-note";legacy.textContent="Önceki kayıt: "+typeRaw;
   typeGroup.after(legacy);
  }
- const syncUrinary=()=>{
-  typeField.hidden=moreText.clinical_5_15!=="Var";
- };
+ const syncUrinary=()=>{urinaryTopic.syncUrinaryDetails?.();};
  typeGroup.addEventListener("click",event=>{
   const button=event.target.closest("[data-urinary-type]");if(!button)return;
   button.setAttribute("aria-pressed",String(button.getAttribute("aria-pressed")!=="true"));
@@ -2562,12 +2766,13 @@ function formatSleepAndUrinaryFields(sleepTopic,urinaryTopic,symptomFields){
  });
  makeBinary(15,["Yok","Var"],"Üriner inkontinans",value=>{
   if(value==="Yok"){
-   delete moreText[typeKey];
+   urinaryTopic.clearUrinaryDetails?.();
    typeGroup.querySelectorAll("button").forEach(button=>button.setAttribute("aria-pressed","false"));
    typeField.querySelector(".clinical-legacy-note")?.remove();
   }
   syncUrinary();
  });
+ formatUrinaryFollowups(urinaryTopic,symptomFields,$("clinical_4_16").closest(".extra-field"),makeBinary);
  syncUrinary();
 }
 function reorderClinicalSections(){
@@ -2899,7 +3104,7 @@ item("3. Fiziksel Aktivite ve Düşmeler",[
  ["Son 1 yılda hastane yatış sayısı",moreText.activityHospitalCount1],
  ["Son 3 yılda hastane yatış sayısı",moreText.activityHospitalCount3]
 ]);
-item("4. Ağrı, Uyku Kalitesi ve Boşaltım",[...comprehensive[4][1].slice(11,15).map((label,k)=>[label,lookup(4,k+11)]),...comprehensive[4][1].slice(16,19).map((label,k)=>[label,lookup(4,k+16)]),...clinical(5),["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null]]);
+item("4. Ağrı, Uyku Kalitesi ve Boşaltım",[...comprehensive[4][1].slice(11,15).map((label,k)=>[label,lookup(4,k+11)]),...comprehensive[4][1].slice(16,19).map((label,k)=>[label,lookup(4,k+16)]),...clinical(5),["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null],...urinaryExtras()]);
 item("5. Beslenme",[...comprehensive[4][1].slice(0,11).map((label,i)=>[label,lookup(4,i)]),[comprehensive[4][1][15],lookup(4,15)]]);
 const scaleGroup=(title,ids)=>{
   const pairs=[];
@@ -3069,7 +3274,7 @@ function compactKGDStep(i,inline=false){
    const total=n!==null&&complete?"MNA toplam: "+kgdMNATotalScore():null;
    return simple("Beslenme Değerlendirmesi (MNA)",[...clinicalLines(4,[0,1,2,3,4,5,6,7,8,9,10,15]),["MNA-SF",s?s.replace(/^MNA-SF: /,""):null],["MNA-LF",lf?lf.replace(/^MNA-LF ek: /,""):null],["MNA toplam",total?total.replace(/^MNA toplam: /,""):null]]);
  }
- if(i===4)return simple("Ağrı, Uyku Kalitesi ve Boşaltım",[...clinicalLines(4,[11,12,13,14,16,17,18]),...comprehensive[5][1].map((lab,j)=>[lab,field(5,j)]),["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null]]);
+ if(i===4)return simple("Ağrı, Uyku Kalitesi ve Boşaltım",[...clinicalLines(4,[11,12,13,14,16,17,18]),...comprehensive[5][1].map((lab,j)=>[lab,field(5,j)]),["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null],...urinaryExtras()]);
  if(i===5)return simple("Yaşam Aktiviteleri ve Kalitesi",[
      ["GYA",scale("adl",adl)?.replace(/^GYA: /,"")],
      ["EGYA",scale("iadl",iadl)?.replace(/^EGYA: /,"")],
@@ -3286,7 +3491,8 @@ function kgdDetailedPrintStep(step){
  if(step===3)return kgdDetailedClinical(4,[11,12,13,14],"Kronik Ağrı ve Verbal Analog Skalası (VAS)")+
    kgdDetailedClinical(4,[16,17,18],"Uyku Yakınmaları")+
    kgdDetailedClinical(5,null,"Ağrı, Uyku Kalitesi ve Boşaltım")+
-   kgdDetailedBlock("RUDB Semptomları",[["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null]]);
+   kgdDetailedBlock("RUDB Semptomları",[["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null]])+
+   kgdDetailedBlock("Üriner Bulgular",urinaryExtras());
  if(step===4){
   const mnaLF=moreScore("additional_0_",12);
   return kgdDetailedClinical(4,[0,1,2,3,4,5,6,7,8,9,10,15],"Beslenme Soruları")+
