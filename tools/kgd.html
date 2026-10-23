@@ -3177,14 +3177,31 @@ function currentMedications(){
  const legacy=String(moreText.clinical_6_19||"").trim();
  return legacy?legacy.split(/\r?\n/).map(v=>v.replace(/^\s*\d+[.)]\s*/,"").trim()):[""];
 }
+/* Tab 2: each distinct extra diagnosis is one additional condition.
+   Separate names with commas, semicolons, or line breaks. */
+function otherHistoryDiseases(source=moreText.clinical_6_18){
+ const raw=String(source??"");
+ const seen=new Set(),entries=[];
+ raw.split(/[\r\n,;]+/).forEach(part=>{
+  const name=part.trim().replace(/^(?:\d+\s*[.)\-:]|[-•*])\s*/u,"").trim();
+  const normalized=name.toLocaleLowerCase("tr-TR").replace(/\s+/g," ");
+  if(!name||/^(?:yok|hayır|yoktur|bilinmiyor|yok\s*(?:tur)?|diğer hastalık yok)$/iu.test(normalized)||seen.has(normalized))return;
+  seen.add(normalized);entries.push(name);
+ });
+ return entries;
+}
 function syncHistoryCounts(){
- const n=historyDiagnoses.reduce((total,i)=>total+(moreText["clinical_6_"+i]==="Evet"?1:0),0);
+ const selected=historyDiagnoses.reduce((total,i)=>total+(moreText["clinical_6_"+i]==="Evet"?1:0),0);
+ const extras=otherHistoryDiseases();
+ const n=selected+extras.length;
  const meds=currentMedications().filter(v=>v.trim().length>0);
  moreText.clinical_6_2=String(n);
  moreText.clinical_6_1=String(meds.length);
  for(const [id,count] of [["clinical_6_2",n],["clinical_6_1",meds.length]]){const el=document.getElementById(id);if(el)el.value=String(count)}
  const note=document.getElementById("diseaseCountNote");
- if(note)note.textContent=historyDiagnoses.filter(i=>moreText["clinical_6_"+i]==="Hayır"||moreText["clinical_6_"+i]==="Evet").length+" / "+historyDiagnoses.length+" hastalık sorusu yanıtlandı";
+ if(note)note.textContent=historyDiagnoses.filter(i=>moreText["clinical_6_"+i]==="Hayır"||moreText["clinical_6_"+i]==="Evet").length+" / "+historyDiagnoses.length+
+  " hastalık sorusu yanıtlandı · Diğer hastalık sayısı: "+extras.length+
+  " (virgül, noktalı virgül veya alt satırla ayırınız)";
 }
 function renderMedicationRows(){
  const target=document.getElementById("medicationRows");if(!target)return;
@@ -4685,6 +4702,27 @@ function renderA4(){
 function emailOnly(){const scores=[];for(const q of forms){let values=q.items.map((_,i)=>$(q.id+"_"+i)?.value||"");if(values.every(x=>x!==""))scores.push(q.tr+": "+scaleTotal(q,values)+"/"+q.max)}const gd=gdsScore();if(gd!==null)scores.push("GDS-30: "+gd+"/30");if(!confirm("Sadece anonim toplam puanlarla e-posta uygulaması açılsın mı? Hasta kimliği, notları ve cevaplar eklenmez."))return;const href="mailto:itfgeriatri2000@gmail.com?subject="+encodeURIComponent("Anonim KGD puan özeti")+"&body="+encodeURIComponent(scores.join("\n")||"Tamamlanan ölçek bulunmuyor");location.href=href}
 function gdsScore(){const arr=Array.from({length:30},(_,i)=>moreAnswers["gds30_"+i]);if(arr.some(x=>x===undefined))return null;const reverse=new Set([0,4,6,10,12,15,21,26,28,29]);return arr.reduce((n,v,i)=>n+(reverse.has(i)?(v==="0"?1:0):(v==="1"?1:0)),0)}
 function meaning(s,score){if(s.id==="frail")return score===0?"Normal":score<3?"pre-frail":"frail";if(s.id==="mna")return score<=7?"malnütrisyon":score<=11?"malnütrisyon riski":"normal";if(s.id==="sarcf")return score>=4?"Pozitif tarama":"Negatif tarama";if(s.id==="sof")return score===0?"Normal":score===1?"pre-frail":"frail";if(s.id==="adl"||s.id==="iadl")return score===s.max?"Bağımsız / Independent":"Bazı alanlarda yardım ihtiyacı / Assistance in some domains";return""}
+/* KGD final overview only: translate response indices to their clinical
+   Yes/No meaning. Do not modify stored values, item weights, or scale totals. */
+function kgdOverviewScaleResponse(form,index,value){
+ if(value===undefined||value===null||String(value).trim()==="")return "__";
+ const score=scaleItemScore(form,index,value);
+ if(!Number.isFinite(score))return "__";
+ let yes;
+ if(form.id==="adl"||form.id==="iadl"){
+  // Yes = independent on this item; IADL has several options worth 1 point.
+  yes=score===1;
+ }else if(form.id==="frail"){
+  // Yes = risk factor present (score 1).
+  yes=score===1;
+ }else if(form.id==="sof"){
+  // SOF item 3 asks about feeling energetic, and is reverse-coded.
+  yes=index===2?score===0:score===1;
+ }else{
+  return String(value)+" puan";
+ }
+ return (yes?"Evet":"Hayır")+" ("+score+" puan)";
+}
 function fullKGDOverview(){
 const field=(value)=>value===undefined||value===null||String(value).trim()===""?"__":String(value);
 const lookup=(j,i)=>moreText["clinical_"+j+"_"+i];
@@ -4728,7 +4766,8 @@ const scaleGroup=(title,ids)=>{
     const ready=values.every(v=>v!=="");
     pairs.push([f.tr,ready?scaleTotal(f,values)+"/"+f.max+" ("+meaning(f,scaleTotal(f,values))+")":"__"]);
     if(id==="frail")pairs.push(["FRAIL — İşaretlenen Hastalıklar",frailSelected.size?[...frailSelected].sort((a,b)=>a-b).map(i=>frailDiseases[i]).join(", "):frailNone?"Hiçbiri":"__"]);
-    f.items.forEach((label,i)=>pairs.push([(i+1)+". "+label,values[i]===""?"__":String(values[i])+" puan"]));
+    f.items.forEach((label,i)=>pairs.push([(i+1)+". "+label,
+      kgdOverviewScaleResponse(f,i,values[i])]));
   }
   item(title,pairs);
 };
@@ -4865,7 +4904,7 @@ function compactKGDStep(i,inline=false){
    ]);
  }
  if(i===1){
-   const answered=historyDiagnoses.some(k=>present(field(6,k)));
+   const answered=historyDiagnoses.some(k=>present(field(6,k)))||otherHistoryDiseases().length>0;
    const pairs=[
     ["Hastalık Sayısı",answered?field(6,2):null],
     ["İlaç Sayısı",currentMedications().some(x=>x.trim())?field(6,1):null],
