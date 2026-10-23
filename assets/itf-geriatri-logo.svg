@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" role="img" aria-labelledby="logoTitle logoDesc">
+<title id="logoTitle">İstanbul Tıp Fakültesi Geriatri Bilim Dalı</title>
+<desc id="logoDesc">Koyu yeşil dairesel üniversite amblemi; ortasında kemik etrafını saran güçlü bir sarmaşık ve yapraklar.</desc>
+<defs><path id="topArc" d="M 74,300 A 226,226 0 0 1 526,300"/><path id="bottomArc" d="M 41,300 A 259,259 0 0 0 559,300"/></defs>
+<circle cx="300" cy="300" r="288" fill="#fff" stroke="#07432d" stroke-width="13"/>
+<circle cx="300" cy="300" r="272" fill="none" stroke="#07432d" stroke-width="2"/>
+<circle cx="300" cy="300" r="211" fill="#fff" stroke="#07432d" stroke-width="10"/>
+<g fill="#073b2a" font-family="Arial,DejaVu Sans,sans-serif" font-weight="900" letter-spacing="0.6">
+<text font-size="38" text-anchor="middle"><textPath href="#topArc" startOffset="50%">İSTANBUL TIP FAKÜLTESİ</textPath></text>
+<text font-size="39" text-anchor="middle"><textPath href="#bottomArc" startOffset="50%">GERİATRİ BİLİM DALI</textPath></text>
+</g>
+<circle cx="45" cy="300" r="8" fill="#07432d"/><circle cx="555" cy="300" r="8" fill="#07432d"/>
+<path d="M282 169 C272 157 259 157 249 166 C232 179 241 194 255 203 C265 210 266 222 266 238 L266 370 C266 392 253 408 249 420 C241 442 263 451 277 439 C289 430 295 429 300 431 C305 429 311 430 323 439 C337 451 359 442 351 420 C347 408 334 392 334 370 L334 238 C334 222 335 210 345 203 C359 194 368 179 351 166 C341 157 328 157 318 169 C307 178 293 178 282 169Z" fill="#e4e8d8" stroke="#0a4b35" stroke-width="7" stroke-linejoin="round"/>
+<path d="M285 216 L285 377 Q285 411 272 424" fill="none" stroke="#fff" stroke-width="8" opacity="0.9" stroke-linecap="round"/>
+<path d="M270 450 C232 410 252 372 313 346 C371 319 362 272 289 249 C216 226 225 186 268 163" fill="none" stroke="#07432d" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M330 434 C365 399 352 367 321 347" fill="none" stroke="#477e57" stroke-width="10" stroke-linecap="round"/>
+<g fill="none" stroke="#0a4b35" stroke-linecap="round" stroke-linejoin="round">
+<path d="M288 248 Q238 244 199 204" stroke-width="11"/>
+<path d="M288 251 Q346 227 382 192" stroke-width="11"/>
+<path d="M346 305 Q390 293 414 272" stroke-width="11"/>
+<path d="M280 365 Q228 355 206 316" stroke-width="10"/>
+<path d="M297 352 Q332 343 365 375" stroke-width="10"/>
+<path d="M247 401 Q202 419 186 394" stroke-width="8"/>
+</g>
+<g fill="#0c5138">
+<path d="M200 205 C161 204 145 173 141 139 C184 151 205 175 200 205Z"/>
+<path d="M235 229 C200 231 172 246 152 280 C205 283 237 260 235 229Z" fill="#527f59"/>
+<path d="M381 193 C382 144 404 132 433 122 C436 167 418 192 381 193Z"/>
+<path d="M405 272 C439 237 463 243 480 251 C466 290 443 302 405 272Z" fill="#527f59"/>
+<path d="M207 315 C178 292 150 305 137 335 C170 350 197 342 207 315Z"/>
+<path d="M364 375 C392 353 424 355 442 378 C422 405 388 405 364 375Z" fill="#527f59"/>
+<path d="M190 395 C162 367 132 369 120 384 C140 413 164 417 190 395Z"/>
+<path d="M282 187 C284 157 272 138 257 126 C240 157 253 179 282 187Z" fill="#527f59"/>
+<path d="M331 219 C315 188 330 162 348 149 C363 187 353 208 331 219Z" fill="#527f59"/>
+</g>
+</svg>
