@@ -2145,6 +2145,23 @@
  .kgd-reset-dialog-actions button{width:auto;flex:1 1 170px;margin:0}
  .wizard-footer #wizardClear{border-color:#c4aa9c;background:#fff7ed;color:#734c2c}
 }
+
+/* Autosave versus explicitly saved section: separate from completion level. */
+@media screen{
+ .kgd-workspace .wizard-tabs .wizard-status-wrapper{
+  display:flex;flex-direction:column;align-items:flex-end;gap:3px;
+  flex:none;margin-left:auto;min-width:0
+ }
+ .kgd-workspace .wizard-tabs .wizard-save-label{
+  font-size:.64rem;line-height:1.25;font-weight:700;white-space:nowrap
+ }
+ .kgd-workspace .wizard-tabs .wizard-save-label.is-autosave{color:#697687}
+ .kgd-workspace .wizard-tabs .wizard-save-label.is-confirmed{color:#236c46}
+ .kgd-workspace .wizard-tabs button[aria-current="step"] .wizard-save-label.is-autosave{color:#dde6ed}
+ .kgd-workspace .wizard-tabs button[aria-current="step"] .wizard-save-label.is-confirmed{color:#bcf1ce}
+ .kgd-workspace .wizard-tabs .wizard-status-wrapper .wizard-state{margin-left:0}
+ .wizard-footer #wizardClear:disabled{display:none}
+}
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><div class="kgd-workspace" id="kgdWorkspace"><aside class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite">Geçici taslak hazırlanıyor…</div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><div class="wizard-mobile-jump"><label for="wizardMobileSelect">Bölüm seçiniz</label><select id="wizardMobileSelect" aria-label="KGD bölüm seçimi"></select></div>
 <button type="button" id="wizardClearAll" class="wizard-reset-all">Bütün KGD'yi Sıfırla</button>
 <dialog class="kgd-reset-dialog" id="kgdResetDialog" aria-labelledby="kgdResetDialogTitle" aria-describedby="kgdResetDialogText">
@@ -5098,7 +5115,7 @@ out+='<p><strong>'+safe(t.completed)+': '+complete+'/'+forms.length+'</strong></
 
 /* Temporary draft: scoped to this tab, never sent to any remote service. */
 const KGD_DRAFT_KEY="itf_kgd_session_draft_v1";
-let wizardStep=0,wizardReady=false,draftEnabled=false,draftScales={},draftSavedAt="";
+let wizardStep=0,wizardReady=false,draftEnabled=false,draftScales={},draftSavedAt="",draftConfirmedSteps={};
 const wizardGroups=[
 {tr:"Sosyal Öykü",q:['#fullFields > [data-clinical-index="0"]'],report:[0]},
 {tr:"Özgeçmiş, Soygeçmiş, Alışkanlıklar ve İlaçlar",q:['#fullFields > [data-clinical-index="6"]'],report:[1]},
@@ -5569,7 +5586,7 @@ function renderWizardStepPrint(step){
 function selectedScaleValues(){const picked={};for(const f of forms){picked[f.id]=f.items.map((_,i)=>$(f.id+"_"+i)?.value??"")}return picked}
 function applyScaleValues(picked){if(!picked||typeof picked!=="object")return;for(const f of forms){const values=picked[f.id];if(!Array.isArray(values))continue;f.items.forEach((_,i)=>{const sel=$(f.id+"_"+i);if(!sel||(f.id==="frail"&&i===3))return;const v=String(values[i]??"");if([...sel.options].some(o=>o.value===v))sel.value=v})}enhanceChoices();const frailGrid=$("frail_3")?.closest(".item")?.querySelector(".choice-grid");if(frailGrid)frailGrid.hidden=true;document.querySelectorAll("#sections .choice-grid button").forEach(btn=>{const sel=btn.closest(".item")?.querySelector("select");if(sel)btn.setAttribute("aria-pressed",String(sel.value!==""&&sel.value===btn.dataset.value))})}
 function readKGDDraft(){try{const raw=sessionStorage.getItem(KGD_DRAFT_KEY);if(!raw)return null;const data=JSON.parse(raw);return data&&[1,2,3,4].includes(data.version)&&data.text&&data.answers?data:null}catch(e){return null}}
-function restoreKGDDraft(data){if(!data)return;moreText=Object.assign({},data.text);moreAnswers=Object.assign({},data.answers);frailSelected.clear();for(const n of data.diseases||[])if(Number.isInteger(n)&&n>=0&&n<11)frailSelected.add(n);frailNone=data.noDiseases===true;mmseVariant=data.mmseVariant==="uneducated"?"uneducated":"standard";mmseAttentionMode=data.mmseAttentionMode==="world"?"world":"subtract";draftScales=data.scales||{};const oldStep=Number.isInteger(data.step)?data.step:0;const legacyStep=data.version===1?(oldStep>2?oldStep-1:oldStep===2?1:oldStep):oldStep;const oldToNew=[0,1,2,3,4,5,6,3,5,7,8,9,10];const priorStep=data.version===3?oldStep:data.version===4?oldStep:(oldToNew[legacyStep]??0);const nextStep=data.version===4?priorStep:priorStep===3?4:priorStep===4?3:priorStep;wizardStep=Math.min(wizardGroups.length-1,Math.max(0,nextStep));draftSavedAt=data.savedAt||""}
+function restoreKGDDraft(data){if(!data)return;moreText=Object.assign({},data.text);moreAnswers=Object.assign({},data.answers);frailSelected.clear();for(const n of data.diseases||[])if(Number.isInteger(n)&&n>=0&&n<11)frailSelected.add(n);frailNone=data.noDiseases===true;mmseVariant=data.mmseVariant==="uneducated"?"uneducated":"standard";mmseAttentionMode=data.mmseAttentionMode==="world"?"world":"subtract";draftScales=data.scales||{};draftConfirmedSteps=data.confirmedSteps&&typeof data.confirmedSteps==="object"?data.confirmedSteps:{};const oldStep=Number.isInteger(data.step)?data.step:0;const legacyStep=data.version===1?(oldStep>2?oldStep-1:oldStep===2?1:oldStep):oldStep;const oldToNew=[0,1,2,3,4,5,6,3,5,7,8,9,10];const priorStep=data.version===3?oldStep:data.version===4?oldStep:(oldToNew[legacyStep]??0);const nextStep=data.version===4?priorStep:priorStep===3?4:priorStep===4?3:priorStep;wizardStep=Math.min(wizardGroups.length-1,Math.max(0,nextStep));draftSavedAt=data.savedAt||""}
 function stepElements(i){return wizardGroups[i].q.flatMap(q=>Array.from(document.querySelectorAll(q)))}
 function everyWizardElement(){const nodes=[...document.querySelectorAll("#fullFields > section,#sections > section,#extraScales > section,#fullGds > section"),document.getElementById("physicalSection"),$("summary"),$("finalActions")];return [...new Set(nodes.filter(Boolean))]}
 /* KGD navigation completion: primary answered questions determine the tick.
@@ -5680,6 +5697,31 @@ function wizardStepProgress(index){
  return {state:flags.length&&count===flags.length?"complete":
   answeredForProgress||otherData?"partial":"empty",count,total:flags.length};
 }
+
+/* An explicitly confirmed save is distinguished from the always-on
+   sessionStorage autosave. The signature describes this tab's live answers
+   without putting any clinical content in navigation labels. */
+function kgdStepSignature(index){
+ const nodes=stepElements(index);
+ const values=[];
+ nodes.forEach((section,group)=>{
+  section.querySelectorAll("input,select,textarea").forEach((node,i)=>{
+   if(node.type==="hidden"||node.disabled||node.readOnly||!node.id&& !node.name)return;
+   values.push([group,"field",node.id||node.name||i,
+    node.type==="checkbox"||node.type==="radio"?Boolean(node.checked):
+    String(node.value??"")]);
+  });
+  section.querySelectorAll('button[aria-pressed]').forEach((node,i)=>{
+   if(node.disabled)return;
+   values.push([group,"choice",i,node.getAttribute("aria-pressed")]);
+  });
+ });
+ return JSON.stringify(values);
+}
+function kgdStepConfirmed(index){
+ return Object.prototype.hasOwnProperty.call(draftConfirmedSteps,index)&&
+  draftConfirmedSteps[index]===kgdStepSignature(index);
+}
 function renderWizardTabs(){
  if(!wizardReady)return;
  const statuses=wizardGroups.map((_,i)=>wizardStepProgress(i));
@@ -5691,9 +5733,13 @@ function renderWizardTabs(){
    '" aria-current="'+(i===wizardStep?"step":"false")+'">'+
    '<span class="wizard-count">'+(i+1)+'</span>'+
    '<span class="wizard-tab-name">'+safe(group.tr)+'</span>'+
-   '<span class="wizard-state wizard-state-'+state+'" title="'+labels[state]+
+   '<span class="wizard-status-wrapper"><span class="wizard-state wizard-state-'+state+'" title="'+labels[state]+
    '" aria-label="'+labels[state]+'"><span aria-hidden="true">'+symbols[state]+
-   '</span><span class="wizard-state-text">'+labels[state]+'</span></span></button>';
+   '</span><span class="wizard-state-text">'+labels[state]+'</span></span>'+
+   (i<10&&state!=="empty"?
+    '<span class="wizard-save-label '+(kgdStepConfirmed(i)?"is-confirmed":"is-autosave")+'">'+
+    (kgdStepConfirmed(i)?"✓ Kaydedildi":"↻ Otomatik taslak")+'</span>':"")+
+   '</span></button>';
  }).join("");
  const mobile=$("wizardMobileSelect");
  if(mobile){
@@ -5710,18 +5756,69 @@ function renderWizardTabs(){
  const back=$("wizardBack"),next=$("wizardNext");
  back.disabled=wizardStep===0;next.disabled=wizardStep===wizardGroups.length-1;
  back.textContent="← Önceki";next.textContent="Kaydet ve Devam Et →";
- $("wizardSave").textContent="Taslağı Kaydet";
+ $("wizardSave").textContent=kgdStepConfirmed(wizardStep)?"✓ Taslak Kaydedildi":"Taslağı Kaydet";
  $("wizardCopySectionSummary").textContent="Özet Metnini Kopyala";
  $("wizardPrintSection").hidden=wizardStep===wizardGroups.length-1;
  $("wizardCopySectionSummary").hidden=wizardStep===wizardGroups.length-1;
  $("wizardPrintSectionDetailed").hidden=wizardStep===wizardGroups.length-1;
- $("wizardClear").textContent="Geçici Taslağı Sil";
+ $("wizardClear").textContent="Bu Sekmeyi Sıfırla";
+ $("wizardClear").disabled=wizardStep===wizardGroups.length-1;
 }
 function showWizardStep(i,scroll=false){if(!wizardReady)return;wizardStep=Math.min(wizardGroups.length-1,Math.max(0,i));const visible=new Set(stepElements(wizardStep));for(const el of everyWizardElement())el.classList.toggle("wizard-hidden",!visible.has(el));renderWizardTabs();const current=$("wizardTabs")?.querySelector('[aria-current="step"]');if(current&&window.innerWidth>1100)current.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});if(scroll)$("kgdWorkspaceContent").scrollIntoView({block:"start",behavior:"smooth"})}
-function displayDraftStatus(ok){const target=$("wizardSaveStatus");if(!target)return;target.dataset.error=String(!ok);target.textContent=ok?("Bu sekmede kaydedildi · ")+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):("Kaydedilemedi! Yenilerseniz veriler kaybolabilir.")}
-function writeKGDDraft(){if(!draftEnabled)return false;const payload={version:4,savedAt:new Date().toISOString(),step:wizardStep,text:moreText,answers:moreAnswers,scales:selectedScaleValues(),diseases:[...frailSelected],noDiseases:frailNone,mmseVariant,mmseAttentionMode};try{sessionStorage.setItem(KGD_DRAFT_KEY,JSON.stringify(payload));draftSavedAt=payload.savedAt;displayDraftStatus(true);renderWizardTabs();return true}catch(e){displayDraftStatus(false);return false}}
-function navigateKGD(i){writeKGDDraft();showWizardStep(i,true);writeKGDDraft()}
-function initKGDWizard(){wizardReady=true;const tabs=$("wizardTabs");tabs.onclick=e=>{const button=e.target.closest("[data-wizard-step]");if(button)navigateKGD(Number(button.dataset.wizardStep))};$("wizardMobileSelect").onchange=e=>navigateKGD(Number(e.target.value));$("wizardBack").onclick=()=>navigateKGD(wizardStep-1);$("wizardNext").onclick=()=>navigateKGD(wizardStep+1);$("wizardSave").onclick=()=>writeKGDDraft();$("wizardPrintSection").onclick=()=>printKGD(wizardStep,"summary");$("wizardCopySectionSummary").onclick=()=>copyKGDSectionSummary(wizardStep);$("wizardPrintSectionDetailed").onclick=()=>printKGD(wizardStep,"detailed");$("wizardClear").onclick=()=>{if(!confirm("Bu sekmedeki geçici taslağın tamamı silinsin mi? Bu işlem geri alınamaz."))return;try{sessionStorage.removeItem(KGD_DRAFT_KEY)}catch(e){}draftEnabled=false;location.reload()};document.addEventListener("input",e=>{if(!e.target.closest(".wizard-shell,.wizard-footer"))writeKGDDraft()});document.addEventListener("change",e=>{if(!e.target.closest(".wizard-shell,.wizard-footer"))writeKGDDraft()});document.addEventListener("click",e=>{if(e.target.closest("#fullFields button,#sections button,#extraScales button,#fullGds button,#physicalSection button"))writeKGDDraft()});window.addEventListener("pagehide",()=>writeKGDDraft());showWizardStep(wizardStep);draftEnabled=true;writeKGDDraft()}
+function displayDraftStatus(ok){
+ const target=$("wizardSaveStatus");if(!target)return;
+ target.dataset.error=String(!ok);
+ target.textContent=!ok?"Kaydedilemedi! Yenilerseniz veriler kaybolabilir.":
+  (kgdStepConfirmed(wizardStep)?"✓ Kullanıcı kaydı onaylandı · ":"Otomatik taslak kaydedildi · ")+
+  new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+}
+function writeKGDDraft(confirmCurrent=false){
+ if(!draftEnabled)return false;
+ const previous=draftConfirmedSteps[wizardStep];
+ if(confirmCurrent&&wizardStep<10)draftConfirmedSteps[wizardStep]=kgdStepSignature(wizardStep);
+ const payload={version:4,savedAt:new Date().toISOString(),step:wizardStep,
+  text:moreText,answers:moreAnswers,scales:selectedScaleValues(),
+  diseases:[...frailSelected],noDiseases:frailNone,mmseVariant,mmseAttentionMode,
+  confirmedSteps:draftConfirmedSteps};
+ try{
+  sessionStorage.setItem(KGD_DRAFT_KEY,JSON.stringify(payload));
+  draftSavedAt=payload.savedAt;displayDraftStatus(true);renderWizardTabs();return true;
+ }catch(e){
+  if(confirmCurrent){
+   if(previous===undefined)delete draftConfirmedSteps[wizardStep];
+   else draftConfirmedSteps[wizardStep]=previous;
+  }
+  displayDraftStatus(false);renderWizardTabs();return false;
+ }
+}
+function navigateKGD(i,confirmCurrent=false){
+ writeKGDDraft(confirmCurrent);
+ showWizardStep(i,true);
+ writeKGDDraft();
+}
+
+function resetCurrentKGDTab(){
+ if(wizardStep>=wizardGroups.length-1)return;
+ const name=wizardGroups[wizardStep].tr;
+ if(!confirm('"'+name+'" sekmesinin bütün yanıtları sıfırlanacak. Bu sekmeyi sıfırlamak istiyor musunuz?'))return;
+ const sections=[...new Set(stepElements(wizardStep))];
+ sections.forEach(sec=>resetKGDSection(sec,false));
+ // Forms selected by the tab may contain conditional extra state outside
+ // their input elements; remove manual confirmation for this tab.
+ delete draftConfirmedSteps[wizardStep];
+ writeKGDDraft();
+ renderWizardTabs();
+}
+function resetEntireKGD(){
+ draftEnabled=false;
+ try{sessionStorage.removeItem(KGD_DRAFT_KEY)}catch(e){}
+ draftConfirmedSteps={};
+ location.reload();
+}
+function initKGDWizard(){wizardReady=true;const tabs=$("wizardTabs");tabs.onclick=e=>{const button=e.target.closest("[data-wizard-step]");if(button)navigateKGD(Number(button.dataset.wizardStep))};$("wizardMobileSelect").onchange=e=>navigateKGD(Number(e.target.value));$("wizardBack").onclick=()=>navigateKGD(wizardStep-1);$("wizardNext").onclick=()=>navigateKGD(wizardStep+1,true);$("wizardSave").onclick=()=>writeKGDDraft(true);$("wizardPrintSection").onclick=()=>printKGD(wizardStep,"summary");$("wizardCopySectionSummary").onclick=()=>copyKGDSectionSummary(wizardStep);$("wizardPrintSectionDetailed").onclick=()=>printKGD(wizardStep,"detailed");$("wizardClear").onclick=()=>resetCurrentKGDTab();
+ $("wizardClearAll").onclick=()=>{const dialog=$("kgdResetDialog");if(typeof dialog.showModal==="function")dialog.showModal();else if(confirm("Bütün KGD'yi sıfırlıyorsunuz. Emin misiniz?"))resetEntireKGD()};
+ $("kgdResetCancel").onclick=()=>$("kgdResetDialog").close();
+ $("kgdResetConfirm").onclick=()=>resetEntireKGD();document.addEventListener("input",e=>{if(!e.target.closest(".wizard-shell,.wizard-footer"))writeKGDDraft()});document.addEventListener("change",e=>{if(!e.target.closest(".wizard-shell,.wizard-footer"))writeKGDDraft()});document.addEventListener("click",e=>{if(e.target.closest("#fullFields button,#sections button,#extraScales button,#fullGds button,#physicalSection button"))writeKGDDraft()});window.addEventListener("pagehide",()=>writeKGDDraft());showWizardStep(wizardStep);draftEnabled=true;writeKGDDraft()}
 $("printFinal").onclick=()=>printKGD(null,"summary");$("printFinalDetailed").onclick=()=>printKGD(null,"detailed");$("emailFinal").onclick=emailOnly;
 const loadedKGDDraft=readKGDDraft();restoreKGDDraft(loadedKGDDraft);render();applyScaleValues(draftScales);fullRender();reorderClinicalSections();installEqHealthVAS();syncMNAAnthropometry();initMNAControls();summarize();initKGDWizard();
 
