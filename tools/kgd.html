@@ -5811,7 +5811,7 @@ function renderWizardTabs(){
  const back=$("wizardBack"),next=$("wizardNext");
  back.disabled=wizardStep===0;next.disabled=wizardStep===wizardGroups.length-1;
  back.textContent="← Önceki";next.textContent="Kaydet ve Devam Et →";
- $("wizardSave").textContent=kgdStepConfirmed(wizardStep)?"✓ Taslak Kaydedildi":"Taslağı Kaydet";
+ $("wizardSave").textContent="Taslağı Kaydet";
  $("wizardCopySectionSummary").textContent="Özet Metnini Kopyala";
  $("wizardPrintSection").hidden=wizardStep===wizardGroups.length-1;
  $("wizardCopySectionSummary").hidden=wizardStep===wizardGroups.length-1;
@@ -5823,14 +5823,19 @@ function showWizardStep(i,scroll=false){if(!wizardReady)return;wizardStep=Math.m
 let wizardSaveToastTimer=null;
 function displayDraftStatus(ok,manual=false){
  const target=$("wizardSaveStatus");if(!target)return;
+ // Routine autosaves remain silent and never dismiss an active manual-save toast.
+ if(ok&&!manual){
+  if(target.dataset.manualToast==="true"&&!target.hidden)return;
+  target.hidden=true;target.textContent="";return;
+ }
  if(wizardSaveToastTimer!==null)clearTimeout(wizardSaveToastTimer);
  wizardSaveToastTimer=null;
- if(ok&&!manual){target.hidden=true;target.textContent="";return;}
  target.dataset.error=String(!ok);
+ target.dataset.manualToast=String(ok&&manual);
  target.textContent=ok?"✓ Kaydedildi":"Kaydedilemedi! Bu oturumdaki veriler korunamayabilir.";
  target.hidden=false;
  if(ok)wizardSaveToastTimer=setTimeout(()=>{
-  target.hidden=true;target.textContent="";wizardSaveToastTimer=null;
+  target.hidden=true;target.textContent="";target.dataset.manualToast="false";wizardSaveToastTimer=null;
  },2200);
 }
 function writeKGDDraft(confirmCurrent=false){
