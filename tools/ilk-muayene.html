@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Online İlk Muayene Formu | İTF Geriatri</title>
+<meta name="description" content="İstanbul Tıp Fakültesi Geriatri Bilim Dalı dört sayfalık çevrimiçi hasta ilk muayene formu.">
+<link rel="icon" href="../assets/itf-geriatri-logo.webp" type="image/webp">
+<link rel="stylesheet" href="ilk-muayene.css">
+<script defer src="ilk-muayene.js"></script>
+</head><body>
+<header><div class="topbar"><a class="back" href="../index.html">← İTF Geriatri Ana Sayfa</a><a class="back" href="../hekimler.html">Hekimler ve Araştırmacılar ↗</a></div>
+<h1>Online İlk Muayene Formu</h1><p>İstanbul Tıp Fakültesi · İç Hastalıkları Anabilim Dalı · Geriatri Bilim Dalı</p></header>
+<main><div class="notice"><strong>Geliştirme sürümü — kişisel sağlık verilerine dikkat:</strong> Bu sayfa henüz onaylı bir hastane bilgi sistemi değildir. Yanıtlar sunucuya gönderilmez; geçici taslak yalnızca bu tarayıcı sekmesinde saklanır ve sekme kapatıldığında silinebilir. Kurumsal onay olmadan gerçek hastalara ait tanımlayıcı bilgi girmeyiniz. Kaydı korumak için <strong>Yazdır / PDF</strong> seçeneğini kullanabilirsiniz.</div>
+<div class="workspace">
+<aside class="side" aria-label="İlk muayene formu sekmeleri">
+<h2>Muayene Formu · 4 Sayfa</h2>
+<div class="tabs" role="tablist" aria-orientation="vertical">
+<button class="tab" type="button" id="tab0" role="tab" aria-controls="page0" aria-selected="true" data-progress="empty"><span class="num">1</span><span class="tab-label">Başvuru ve Anamnez<span class="tab-state">— Boş</span></span></button>
+<button class="tab" type="button" id="tab1" role="tab" aria-controls="page1" aria-selected="false" data-progress="empty"><span class="num">2</span><span class="tab-label">Özgeçmiş ve Koruyucu Hekimlik<span class="tab-state">— Boş</span></span></button>
+<button class="tab" type="button" id="tab2" role="tab" aria-controls="page2" aria-selected="false" data-progress="empty"><span class="num">3</span><span class="tab-label">Sistem, Biliş ve Duygudurum<span class="tab-state">— Boş</span></span></button>
+<button class="tab" type="button" id="tab3" role="tab" aria-controls="page3" aria-selected="false" data-progress="empty"><span class="num">4</span><span class="tab-label">Fizik Muayene ve Ön Tanılar<span class="tab-state">— Boş</span></span></button>
+</div>
+<div class="menu-actions">
+<button type="button" class="action main" id="save">Taslağı Kaydet</button>
+<button type="button" class="action" id="print">Dört Sayfayı Yazdır / PDF</button>
+<button type="button" class="action" id="resetPage">Bu Sekmeyi Sıfırla</button>
+<button type="button" class="action danger" id="resetAll">Bütün Formu Sıfırla</button>
+</div>
+<p class="mini-note">Sarı: doldurulmaya başlandı. Yeşil: sekme tamamlandı olarak işaretlendi. Boş alanlar değerlendirilmedi anlamına gelir; “Normal” kabul edilmez.</p>
+</aside>
+<div class="content" id="content"><div id="pages">
+<section class="page" id="page0" role="tabpanel" aria-labelledby="tab0"></section>
+<section class="page" id="page1" role="tabpanel" aria-labelledby="tab1" hidden></section>
+<section class="page" id="page2" role="tabpanel" aria-labelledby="tab2" hidden></section>
+<section class="page" id="page3" role="tabpanel" aria-labelledby="tab3" hidden></section>
+</div><nav class="prevnext" aria-label="Sekme geçişi"><button class="action" id="prev" type="button">← Önceki Sekme</button><button class="action" id="markComplete" type="button">✓ Sekmeyi Tamamla</button><button class="action main" id="next" type="button">Sonraki Sekme →</button><span class="saved-note">Otomatik geçici kayıt etkin.</span></nav></div>
+</div></main><div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body></html>
