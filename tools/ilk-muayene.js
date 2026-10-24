@@ -110,7 +110,7 @@ function refreshTabs(){
 function go(i){
  step=Math.max(0,Math.min(3,i));
  for(let j=0;j<4;j++){byId("page"+j).hidden=j!==step;byId("page"+j).setAttribute("aria-hidden",String(j!==step));}
- refreshTabs();byId("content").scrollIntoView({behavior:"instant",block:"start"});
+ refreshTabs();byId("content").scrollIntoView({behavior:"auto",block:"start"});
 }
 function toast(message,bad=false){
  const el=byId("toast");clearTimeout(toastTimer);
@@ -146,9 +146,11 @@ function initialize(){
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
  byId("save").addEventListener("click",()=>save(true));
  byId("print").addEventListener("click",()=>{save();window.print();});
+ window.addEventListener("beforeprint",()=>document.querySelectorAll("textarea[data-field]").forEach(el=>{el.dataset.previousHeight=el.style.height||"";el.style.height=el.scrollHeight+"px";}));
+ window.addEventListener("afterprint",()=>document.querySelectorAll("textarea[data-field]").forEach(el=>{el.style.height=el.dataset.previousHeight||"";delete el.dataset.previousHeight;}));
  byId("resetPage").addEventListener("click",resetPage);
  byId("resetAll").addEventListener("click",resetAll);
- byId("markComplete").addEventListener("click",()=>{confirmed[step]=signature(step);save();toast("✓ Sekme tamamlandı");});
+ byId("markComplete").addEventListener("click",()=>{if(!pageHasData(step)){toast("Önce bu sekmede değerlendirme bilgisi giriniz",true);return;}confirmed[step]=signature(step);save();toast("✓ Sekme tamamlandı");});
  byId("pages").addEventListener("input",()=>save());
  byId("pages").addEventListener("change",()=>save());
  window.addEventListener("pagehide",()=>save());
