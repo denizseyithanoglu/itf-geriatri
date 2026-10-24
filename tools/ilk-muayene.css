@@ -158,3 +158,15 @@ button.action.danger:hover{background:#ffebe7}
  .summary-sheet .summary-empty{font-style:italic;color:#555}
  .summary-sheet .summary-note{font-size:8px;color:#555;margin-top:14px;border-top:1px solid #bbb;padding-top:5px}
 }
+
+/* Long preselected history catalog stays accessible but out of the way. */
+.medical-history-disclosure{border:1px solid #cadce8;border-radius:8px;margin-bottom:12px;overflow:hidden}
+.medical-history-disclosure summary{list-style-position:inside;cursor:pointer;padding:10px 12px;background:#f3f8fc;color:#265778;font-size:.84rem;font-weight:750;min-height:44px}
+.medical-history-disclosure summary:hover{background:#e8f3fa}
+.medical-history-disclosure summary span{font-weight:650;color:#327354}
+.history-catalog-content{padding:12px}
+@media print{
+ .medical-history-disclosure{border:none;margin-bottom:3px}
+ .medical-history-disclosure summary{font-size:8px;min-height:0;background:#f4f4f4;padding:3px}
+ .history-catalog-content{padding:4px}
+}
