@@ -140,6 +140,10 @@ function refreshTabs(){
   t.querySelector(".tab-state").textContent=done?"✓ Sekme tamamlandı":has?"◐ Devam ediyor":"— Boş";
  }
  byId("prev").disabled=step===0;byId("next").disabled=step===3;
+ byId("printSummary").textContent=(step+1)+". Sekme Özetini Yazdır / PDF";
+ byId("resetPage").textContent=(step+1)+". Sekmeyi Sıfırla";
+ byId("printSummaryBottom").textContent="🖨 "+(step+1)+". Sekme Özeti";
+ byId("resetPageBottom").textContent="↺ "+(step+1)+". Sekmeyi Sıfırla";
  byId("markComplete").textContent=confirmed[step]===signature(step)?"✓ Tamamlandı":"✓ Sekmeyi Tamamla";
 }
 function go(i){
@@ -173,6 +177,85 @@ function resetAll(){
  confirmed={};try{sessionStorage.removeItem(STORE);}catch(e){}
  go(0);refreshTabs();toast("Tüm form sıfırlandı");
 }
+
+function formatSummaryValue(raw,type){
+ const s=String(raw??"").trim();
+ if(type==="date"&&/^\d{4}-\d{2}-\d{2}$/.test(s)){const [y,m,d]=s.split("-");return d+"."+m+"."+y;}
+ return s;
+}
+function summarizedBlockItems(block){
+ const items=[];
+ block.querySelectorAll(".dynamic-entry,.checknote,.field").forEach(item=>{
+  if(item.classList.contains("field")&&item.closest(".dynamic-entry"))return;
+  if(item.classList.contains("dynamic-entry")){
+   const bits=Array.from(item.querySelectorAll(".field")).map(field=>{
+    const input=field.querySelector("[data-field]");
+    const value=formatSummaryValue(input?.value,input?.type);
+    return value?(field.querySelector("label")?.textContent.trim()+": "+value):null;
+   }).filter(Boolean);
+   if(bits.length)items.push(item.querySelector(".entry-title").textContent+" — "+bits.join(" · "));
+  }else if(item.classList.contains("checknote")){
+   const checkbox=item.querySelector('input[type="checkbox"]');
+   const value=item.querySelector(".note-input")?.value.trim()||"";
+   if(!checkbox?.checked&&!value)return;
+   let label=item.querySelector(".check-head span")?.textContent.trim()||"Bulgu";
+   const group=item.closest(".group")?.querySelector("h4")?.textContent.trim();
+   if(group)label=group+" — "+label;
+   if(checkbox.checked)items.push(label+(value?": "+value:""));
+   else items.push(label+" (yalnızca not): "+value);
+  }else if(item.classList.contains("field")){
+   const label=(item.querySelector(":scope > label, :scope > .field-label")?.textContent||"").trim();
+   const radios=Array.from(item.querySelectorAll('input[type="radio"]'));
+   if(radios.length){
+    const checked=radios.find(input=>input.checked);
+    if(checked)items.push(label+": "+checked.value);
+   }else{
+    const values=Array.from(item.querySelectorAll("[data-field]")).map(input=>
+     formatSummaryValue(input.value,input.type)).filter(Boolean);
+    if(values.length)items.push((label||"Bilgi")+": "+values.join(" · "));
+   }
+  }
+ });
+ return items;
+}
+function makeSummaryNode(tag,txt,cls=""){
+ const node=document.createElement(tag);node.textContent=txt;
+ if(cls)node.className=cls;return node;
+}
+function buildPrintSummary(i){
+ const sheet=byId("summaryPrintSheet");sheet.replaceChildren();
+ sheet.appendChild(makeSummaryNode("h1",(i+1)+". Sekme Özeti — "+LABELS[i]));
+ sheet.appendChild(makeSummaryNode("p","İTF Geriatri · Online İlk Muayene Formu · "+new Date().toLocaleString("tr-TR"),"summary-subtitle"));
+ const meta=document.createElement("div");meta.className="summary-meta";
+ const name=byId("ad")?.value.trim(),protocol=byId("proto")?.value.trim(),date=byId("basvuru")?.value;
+ if(name)meta.appendChild(makeSummaryNode("span","Hasta: "+name));
+ if(protocol)meta.appendChild(makeSummaryNode("span","Protokol: "+protocol));
+ if(date)meta.appendChild(makeSummaryNode("span","Başvuru: "+formatSummaryValue(date,"date")));
+ if(meta.children.length)sheet.appendChild(meta);
+ let total=0;
+ byId("page"+i).querySelectorAll(".block").forEach(block=>{
+  const items=summarizedBlockItems(block);
+  if(!items.length)return;
+  total+=items.length;
+  const section=document.createElement("section");
+  section.appendChild(makeSummaryNode("h2",block.querySelector("h3")?.textContent||"Değerlendirme"));
+  const ul=document.createElement("ul");
+  for(const value of items)ul.appendChild(makeSummaryNode("li",value));
+  section.appendChild(ul);sheet.appendChild(section);
+ });
+ if(!total)sheet.appendChild(makeSummaryNode("p","Bu sekmede henüz girilmiş değerlendirme bulunmuyor.","summary-empty"));
+ sheet.appendChild(makeSummaryNode("p","Yalnızca işaretlenen veya bilgi girilen alanlar listelenmiştir. Listelenmeyen bulgular normal veya negatif kabul edilmemelidir.","summary-note"));
+}
+function printOneSummary(){
+ save();
+ buildPrintSummary(step);
+ document.body.classList.add("printing-summary");
+ window.print();
+}
+function printWholeForm(){
+ save();document.body.classList.remove("printing-summary");window.print();
+}
+
 function initialize(){
  build();
  let restored;
@@ -196,11 +279,19 @@ function initialize(){
  byId("prev").addEventListener("click",()=>{save();go(step-1);save();});
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
  byId("save").addEventListener("click",()=>save(true));
- byId("print").addEventListener("click",()=>{save();window.print();});
+ byId("print").addEventListener("click",printWholeForm);
+ byId("printSummary").addEventListener("click",printOneSummary);
+ byId("printSummaryBottom").addEventListener("click",printOneSummary);
  window.addEventListener("beforeprint",()=>document.querySelectorAll("textarea[data-field]").forEach(el=>{el.dataset.previousHeight=el.style.height||"";el.style.height=el.scrollHeight+"px";}));
- window.addEventListener("afterprint",()=>document.querySelectorAll("textarea[data-field]").forEach(el=>{el.style.height=el.dataset.previousHeight||"";delete el.dataset.previousHeight;}));
+ window.addEventListener("afterprint",()=>{
+  document.querySelectorAll("textarea[data-field]").forEach(el=>{el.style.height=el.dataset.previousHeight||"";delete el.dataset.previousHeight;});
+  document.body.classList.remove("printing-summary");
+  byId("summaryPrintSheet").replaceChildren();
+ });
  byId("resetPage").addEventListener("click",resetPage);
+ byId("resetPageBottom").addEventListener("click",resetPage);
  byId("resetAll").addEventListener("click",resetAll);
+ byId("resetAllBottom").addEventListener("click",resetAll);
  byId("markComplete").addEventListener("click",()=>{if(!pageHasData(step)){toast("Önce bu sekmede değerlendirme bilgisi giriniz",true);return;}confirmed[step]=signature(step);save();toast("✓ Sekme tamamlandı");});
  byId("pages").addEventListener("click",event=>{
   const add=event.target.closest("[data-add-entry]");
