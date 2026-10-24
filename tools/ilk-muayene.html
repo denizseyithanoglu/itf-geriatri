@@ -20,8 +20,9 @@
 </div>
 <div class="menu-actions">
 <button type="button" class="action main" id="save">Taslağı Kaydet</button>
+<button type="button" class="action" id="printSummary">Bu Sekmenin Özetini Yazdır / PDF</button>
 <button type="button" class="action" id="print">Dört Sayfayı Yazdır / PDF</button>
-<button type="button" class="action" id="resetPage">Bu Sekmeyi Sıfırla</button>
+<button type="button" class="action" id="resetPage">1. Sekmeyi Sıfırla</button>
 <button type="button" class="action danger" id="resetAll">Bütün Formu Sıfırla</button>
 </div>
 <p class="mini-note">Sarı: doldurulmaya başlandı. Yeşil: sekme tamamlandı olarak işaretlendi. Boş alanlar değerlendirilmedi anlamına gelir; “Normal” kabul edilmez.</p>
@@ -31,6 +32,6 @@
 <section class="page" id="page1" role="tabpanel" aria-labelledby="tab1" hidden></section>
 <section class="page" id="page2" role="tabpanel" aria-labelledby="tab2" hidden></section>
 <section class="page" id="page3" role="tabpanel" aria-labelledby="tab3" hidden></section>
-</div><nav class="prevnext" aria-label="Sekme geçişi"><button class="action" id="prev" type="button">← Önceki Sekme</button><button class="action" id="markComplete" type="button">✓ Sekmeyi Tamamla</button><button class="action main" id="next" type="button">Sonraki Sekme →</button><span class="saved-note">Otomatik geçici kayıt etkin.</span></nav></div>
-</div></main><div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</div><div class="tab-actions" aria-label="Açık sekme işlemleri"><button type="button" class="action" id="printSummaryBottom">🖨 Bu Sekmenin Özeti</button><button type="button" class="action" id="resetPageBottom">↺ Sekmeyi Sıfırla</button><button type="button" class="action danger" id="resetAllBottom">Bütün Formu Sıfırla</button></div><nav class="prevnext" aria-label="Sekme geçişi"><button class="action" id="prev" type="button">← Önceki Sekme</button><button class="action" id="markComplete" type="button">✓ Sekmeyi Tamamla</button><button class="action main" id="next" type="button">Sonraki Sekme →</button><span class="saved-note">Otomatik geçici kayıt etkin.</span></nav></div>
+</div></main><article id="summaryPrintSheet" class="summary-sheet" aria-label="Sekme özeti yazdırma alanı"></article><div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </body></html>
