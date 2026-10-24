@@ -111,3 +111,50 @@ button.action.danger:hover{background:#ffebe7}
  .symptom-columns .checklist{gap:0}
  .page{position:relative}
 }
+
+/* Compact, repeatable condition and medication cards */
+.entry-section{min-width:0}
+.entry-list{display:grid;gap:8px}
+.entry-empty{margin:3px 0 11px;color:#718391;font-size:.79rem;font-style:italic}
+.entry-empty[hidden]{display:none!important}
+.dynamic-entry{background:#f7fbfd;border:1px solid #c9dbe7;border-left:3px solid #71a6bb;border-radius:9px;padding:9px 12px}
+.entry-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.entry-title{font-size:.83rem;color:#265477}
+.entry-remove{color:#8d4542;border:1px solid #dfb9b5;background:#fffafa;border-radius:7px;font-weight:700;font-size:.72rem;min-height:30px;padding:3px 9px}
+.entry-remove:hover{background:#ffece9}
+.entry-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(150px,1fr);gap:8px}
+.entry-fields.entry-med{grid-template-columns:minmax(0,1.4fr) minmax(90px,1fr) minmax(110px,1fr) minmax(0,1fr)}
+.entry-fields .field{gap:2px}
+.entry-fields .field input{min-height:37px;padding:6px 8px;font-size:.85rem}
+.entry-buttons{margin-top:10px;display:flex;justify-content:flex-end}
+.entry-add{min-width:136px}
+.tab-actions{display:flex;align-items:center;flex-wrap:wrap;gap:7px;padding:10px 0;margin:4px 0;border-top:1px solid #d4e2ec}
+.tab-actions .action{font-size:.76rem;min-height:38px;padding:7px 10px}
+.summary-sheet{display:none}
+@media(max-width:760px){.entry-fields.entry-med{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:525px){
+ .entry-fields,.entry-fields.entry-med{grid-template-columns:1fr}
+ .entry-add{width:100%}
+ .tab-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tab-actions .action:last-child{grid-column:span 2}
+}
+@media print {
+ .dynamic-entry{border:1px solid #aaa;border-radius:0;padding:3px 5px;background:white;break-inside:avoid}
+ .entry-list{gap:3px}
+ .entry-header{margin-bottom:2px}.entry-title{font-size:8px}
+ .entry-fields{gap:3px}
+ .entry-fields .field input{min-height:19px;font-size:8px;padding:2px 4px}
+ .entry-remove,.entry-add,.entry-buttons,.entry-empty,.tab-actions{display:none!important}
+ .summary-sheet{display:none!important}
+ body.printing-summary main{display:none!important}
+ body.printing-summary .summary-sheet{display:block!important;width:auto;margin:0;padding:0;font:10px/1.36 Arial,sans-serif;color:#111}
+ .summary-sheet h1{font-size:16px;margin:0 0 6px}
+ .summary-sheet .summary-subtitle{color:#404040;font-size:9px;margin:0 0 12px;border-bottom:1px solid #aaa;padding-bottom:6px}
+ .summary-sheet .summary-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:10px;margin-bottom:10px}
+ .summary-sheet section{break-inside:avoid;margin-bottom:10px}
+ .summary-sheet h2{font-size:11px;background:#eee;border-bottom:1px solid #aaa;padding:4px 6px;margin:0 0 5px}
+ .summary-sheet ul{padding-left:17px;margin:0;list-style:disc}
+ .summary-sheet li{margin:0 0 3px;white-space:pre-wrap;overflow-wrap:anywhere}
+ .summary-sheet .summary-empty{font-style:italic;color:#555}
+ .summary-sheet .summary-note{font-size:8px;color:#555;margin-top:14px;border-top:1px solid #bbb;padding-top:5px}
+}
