@@ -26,8 +26,8 @@ function twoColumns(arr,prefix){return '<div class="symptom-columns" style="grid
  '<div class="checklist">'+group.map((label,j)=>check(label,prefix+'_'+i+'_'+j)).join('')+'</div>').join('')+'</div>';}
 
 const ENTRY_META={
- diagnosis:{container:"diagnosisList",prefix:"diag",fields:[["name","Hastalık / Tanı","text"],["date","Tanı tarihi","date"]]},
- medication:{container:"medicationList",prefix:"med",fields:[["name","İlaç adı","text"],["dose","Doz","text"],["frequency","Kullanım sıklığı","text"],["note","Ek not","text"]]}
+ diagnosis:{container:"diagnosisList",prefix:"diag",fields:[["name","Hastalık / Tanı","text"],["date","Tanı yılı / tarih bilgisi","text"]]},
+ medication:{container:"medicationList",prefix:"med",fields:[["name","İlaç adı","text"],["dose","Doz","text"],["frequency","Kullanım sıklığı","text"],["date","Başlangıç yılı / tarih bilgisi","text"],["note","Ek not","text"]]}
 };
 function makeEntry(type,explicitId=null){
  const conf=ENTRY_META[type];if(!conf)return;
@@ -49,6 +49,13 @@ function updateEntryNumbers(type){
  const rows=Array.from(list.querySelectorAll(".dynamic-entry"));
  rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1)+". "+(type==="diagnosis"?"Hastalık / Tanı":"İlaç");});
  const empty=list.parentElement.querySelector(".entry-empty");if(empty)empty.hidden=rows.length!==0;
+ const filled=rows.filter(row=>row.querySelector('input[id$="_name"]')?.value.trim()).length;
+ const count=byId(type==="diagnosis"?"diagnosisCount":"medicationCount");
+ if(count)count.textContent=String(filled);
+ rows.forEach((row,i)=>{
+  const remove=row.querySelector("[data-remove-entry]");
+  if(remove){remove.hidden=i===0;remove.disabled=i===0;}
+ });
 }
 function removeEntries(type){
  byId(ENTRY_META[type].container).replaceChildren();updateEntryNumbers(type);
@@ -58,30 +65,58 @@ function entrySection(type){
  const noun=type==="diagnosis"?"Hastalık":"İlaç",id=ENTRY_META[type].container;
  return '<div class="entry-section"><div id="'+id+'" class="entry-list"></div>'+
  '<p class="entry-empty">Henüz '+noun.toLocaleLowerCase("tr-TR")+' eklenmedi.</p>'+
- '<div class="entry-buttons"><button class="action entry-add" type="button" data-add-entry="'+type+'">+ '+noun+' Ekle</button></div></div>';
+ '<div class="entry-buttons"><button class="action entry-add" type="button" data-add-entry="'+type+'">+ '+noun+' Ekle</button></div>'+
+ '<div class="entry-stat"><span>'+noun+' Sayısı</span><output id="'+(type==="diagnosis"?"diagnosisCount":"medicationCount")+'">0</output></div></div>';
 }
 
 function build(){
  byId("page0").innerHTML=
   '<div class="page-title"><h2>1. Hasta İlk Değerlendirme Formu</h2><small>İTF.HB.FR.168 • Sayfa 1/4</small></div>'+
   block("Başvuru ve Hasta Bilgileri",
-   '<div class="fields">'+
-   f("ad","Adı Soyadı")+
-   f("basvuru","Başvuru Tarihi","date")+
-   f("proto","Protokol No")+
-   f("dogumyeri","Doğum Yeri")+
-   f("dogumyili","Doğum Yılı","number","","örn. 1947")+
-   f("meslegi","Mesleği")+
-   f("boy","Boy (cm)","number","","cm")+
-   f("kilo","Kilo (kg)","number","","kg")+
-   radio("cinsiyet","Cinsiyet",["Erkek","Kadın"])+
-   area("adres","Adres","span2",2)+
-   f("telefon","Telefon","tel")+'</div>')+
+   '<div class="patient-info">'+
+    '<div class="patient-row patient-row-primary">'+
+     f("ad","Adı Soyadı")+
+     f("basvuru","Başvuru Tarihi","date")+
+     f("proto","Protokol No")+
+     f("tc","T.C. Kimlik No","text","","11 haneli")+
+    '</div>'+
+    '<div class="patient-row patient-row-demography">'+
+     f("dogumyeri","Doğum Yeri")+
+     '<div class="field">'+
+      '<label for="dogumtarihi">Doğum Tarihi (Gün / Ay / Yıl)</label>'+
+      '<input data-field id="dogumtarihi" type="date" lang="tr-TR" autocomplete="bday">'+
+      '<input id="dogumyili" data-field type="hidden" value="">'+
+      '<span class="legacy-birth-hint" id="legacyBirthHint" hidden></span>'+
+     '</div>'+
+     '<div class="field field-calculated"><label for="yas">Yaş</label><input data-field id="yas" type="text" readonly aria-label="Otomatik hesaplanan yaş" placeholder="—"></div>'+
+     '<div class="field gender-field"><span class="field-label" id="genderTitle">Cinsiyet</span>'+
+      '<div class="gender-options" role="group" aria-labelledby="genderTitle">'+
+       '<label class="gender-choice female"><input data-field type="radio" name="cinsiyet" value="Kadın"><span class="gender-symbol" aria-hidden="true">♀</span> Kadın</label>'+
+       '<label class="gender-choice male"><input data-field type="radio" name="cinsiyet" value="Erkek"><span class="gender-symbol" aria-hidden="true">♂</span> Erkek</label>'+
+      '</div>'+
+     '</div>'+
+    '</div>'+
+    '<div class="patient-row patient-row-metrics">'+
+     f("meslegi","Mesleği")+
+     '<div class="field"><label for="egitim">Eğitim Durumu</label><select id="egitim" data-field>'+
+       '<option value="">Seçiniz</option><option>Okuryazar Değil</option><option>Okuryazar</option>'+
+       '<option>İlkokul</option><option>Ortaokul</option><option>Lise</option>'+
+       '<option>Ön Lisans</option><option>Lisans</option><option>Yüksek Lisans</option><option>Doktora</option>'+
+      '</select></div>'+
+     f("boy","Boy (cm)","number","","cm")+
+     f("kilo","Kilo (kg)","number","","kg")+
+     '<div class="field field-calculated"><label for="bki">BKİ (kg/m²)</label><input id="bki" data-field type="text" readonly aria-label="Otomatik hesaplanan beden kitle indeksi" placeholder="—"></div>'+
+    '</div>'+
+    '<div class="patient-row patient-row-contact">'+
+     area("adres","Adres","",2)+
+     f("telefon","Telefon No","tel")+
+    '</div>'+
+   '</div>')+
   block("Tanılar ve Hastalıklar",entrySection("diagnosis"))+
+  block("Kullandığı İlaçlar",entrySection("medication"))+
   block("Anamnez",'<div class="fields two">'+
    area("sikayetler","Şikayetleri","span2",4)+area("hikaye","Hikayesi","span2",5)+
-   f("hekim","Değerlendiren Hekim (Kaşe / İmza)")+'</div>')+
-  block("Kullandığı İlaçlar",entrySection("medication"));
+   f("hekim","Değerlendiren Hekim")+'</div>');
  byId("page1").innerHTML=
   '<div class="page-title"><h2>2. Özgeçmiş ve Koruyucu Hekimlik</h2><small>İTF.HB.FR.168 • Sayfa 2/4</small></div>'+
   block("Özgeçmiş",
