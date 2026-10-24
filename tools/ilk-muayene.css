@@ -101,3 +101,13 @@ button.action.danger:hover{background:#ffebe7}
  .diagnoses{gap:2px}.diagnoses input{border:0;border-bottom:1px dotted #aaa;border-radius:0;padding:3px;font-size:8px}
  .print-foot{display:block;position:absolute;bottom:0;left:0;right:0;font-size:7px;text-align:right;color:#444;border-top:1px solid #bbb;padding-top:2px}
 }
+/* Preserve the paper form's side-by-side symptom columns. */
+.symptom-columns{display:grid;gap:9px;align-items:start;min-width:0}
+.symptom-columns .checklist{display:flex;flex-direction:column;gap:5px;min-width:0}
+@media(min-width:681px) and (max-width:1000px){.symptom-columns{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:680px){.symptom-columns{grid-template-columns:minmax(0,1fr)!important}}
+@media print{
+ .symptom-columns{gap:4px}
+ .symptom-columns .checklist{gap:0}
+ .page{position:relative}
+}
