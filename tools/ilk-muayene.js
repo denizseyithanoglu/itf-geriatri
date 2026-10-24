@@ -6,7 +6,7 @@ let step=0,confirmed={},toastTimer,entrySequence=0;
 const byId=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function f(id,label,type="text",cls="",placeholder=""){
- return '<div class="field '+cls+'"><label for="'+id+'">'+esc(label)+'</label><input data-field id="'+id+'" type="'+type+'" placeholder="'+esc(placeholder)+'" autocomplete="off"></div>';
+ return '<div class="field '+cls+'"><label for="'+id+'">'+esc(label)+'</label><input data-field id="'+id+'" type="'+type+'"'+(type==="number"?' step="any" inputmode="decimal"':"")+' placeholder="'+esc(placeholder)+'" autocomplete="off"></div>';
 }
 function area(id,label,cls="",rows=3){return '<div class="field '+cls+'"><label for="'+id+'">'+esc(label)+'</label><textarea data-field id="'+id+'" rows="'+rows+'" autocomplete="off"></textarea></div>';}
 function block(title,html){return '<section class="block"><h3>'+esc(title)+'</h3><div class="block-inner">'+html+'</div></section>';}
