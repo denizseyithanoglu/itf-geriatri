@@ -84,7 +84,9 @@ function build(){
   block("Kullandığı İlaçlar",entrySection("medication"));
  byId("page1").innerHTML=
   '<div class="page-title"><h2>2. Özgeçmiş ve Koruyucu Hekimlik</h2><small>İTF.HB.FR.168 • Sayfa 2/4</small></div>'+
-  block("Özgeçmiş",grouped(DATA.history,"oz")+
+  block("Özgeçmiş",
+   '<details class="medical-history-disclosure" id="historyCatalog"><summary>Basılı formdaki hastalık seçeneklerini göster <span id="historyCount"></span></summary>'+
+   '<div class="history-catalog-content">'+grouped(DATA.history,"oz")+'</div></details>'+
    '<div class="group"><h4>İşitme Cihazı</h4>'+radio("isitmeCihazi","Kullanım durumu",["Var","Yok","Var ama kullanmıyor"])+'</div>'+
    area("ameliyat","Ameliyat Öyküsü","",3))+
   block("Soygeçmiş",checks(DATA.family,"aile","two"))+
@@ -140,6 +142,12 @@ function refreshTabs(){
   t.querySelector(".tab-state").textContent=done?"✓ Sekme tamamlandı":has?"◐ Devam ediyor":"— Boş";
  }
  byId("prev").disabled=step===0;byId("next").disabled=step===3;
+ const historyCount=byId("historyCount");
+ if(historyCount){
+  const selected=Array.from(byId("historyCatalog").querySelectorAll(".checknote")).filter(box=>
+   box.querySelector('input[type="checkbox"]')?.checked||box.querySelector(".note-input")?.value.trim()).length;
+  historyCount.textContent=selected?"("+selected+" kayıtlı bulgu)":"";
+ }
  byId("printSummary").textContent=(step+1)+". Sekme Özetini Yazdır / PDF";
  byId("resetPage").textContent=(step+1)+". Sekmeyi Sıfırla";
  byId("printSummaryBottom").textContent="🖨 "+(step+1)+". Sekme Özeti";
@@ -282,9 +290,13 @@ function initialize(){
  byId("print").addEventListener("click",printWholeForm);
  byId("printSummary").addEventListener("click",printOneSummary);
  byId("printSummaryBottom").addEventListener("click",printOneSummary);
- window.addEventListener("beforeprint",()=>document.querySelectorAll("textarea[data-field]").forEach(el=>{el.dataset.previousHeight=el.style.height||"";el.style.height=el.scrollHeight+"px";}));
+ window.addEventListener("beforeprint",()=>{
+  const catalog=byId("historyCatalog");if(catalog){catalog.dataset.wasOpen=String(catalog.open);catalog.open=true;}
+  document.querySelectorAll("textarea[data-field]").forEach(el=>{el.dataset.previousHeight=el.style.height||"";el.style.height=el.scrollHeight+"px";});
+ });
  window.addEventListener("afterprint",()=>{
   document.querySelectorAll("textarea[data-field]").forEach(el=>{el.style.height=el.dataset.previousHeight||"";delete el.dataset.previousHeight;});
+  const catalog=byId("historyCatalog");if(catalog&&catalog.dataset.wasOpen!==undefined){catalog.open=catalog.dataset.wasOpen==="true";delete catalog.dataset.wasOpen;}
   document.body.classList.remove("printing-summary");
   byId("summaryPrintSheet").replaceChildren();
  });
