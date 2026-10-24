@@ -78,7 +78,7 @@ function build(){
      f("ad","Adı Soyadı")+
      f("basvuru","Başvuru Tarihi","date")+
      f("proto","Protokol No")+
-     f("tc","T.C. Kimlik No","text","","11 haneli")+
+     '<div class="field"><label for="tc">T.C. Kimlik No</label><input id="tc" data-field type="text" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" autocomplete="off" placeholder="11 haneli"></div>'+
     '</div>'+
     '<div class="patient-row patient-row-demography">'+
      f("dogumyeri","Doğum Yeri")+
@@ -150,6 +150,42 @@ function build(){
   block("Ön Tanılar",
    '<div class="fields two">'+Array.from({length:10},(_,i)=>f('ontani_'+i,(i+1)+'. Ön Tanı')).join('')+'</div>');
 }
+
+function localToday(){
+ const d=new Date();return [String(d.getFullYear()).padStart(4,"0"),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+}
+function updateDerivedFields(){
+ const birth=byId("dogumtarihi")?.value||"";
+ const visit=byId("basvuru")?.value||localToday();
+ let age="";
+ if(/^\d{4}-\d{2}-\d{2}$/.test(birth)&&/^\d{4}-\d{2}-\d{2}$/.test(visit)){
+  const [by,bm,bd]=birth.split("-").map(Number);
+  const [vy,vm,vd]=visit.split("-").map(Number);
+  const bdObj=new Date(by,bm-1,bd);
+  const vdObj=new Date(vy,vm-1,vd);
+  if(bdObj.getFullYear()===by&&bdObj.getMonth()===bm-1&&bdObj.getDate()===bd&&vdObj>=bdObj){
+   age=String(vy-by-((vm<bm||(vm===bm&&vd<bd))?1:0));
+  }
+ }
+ byId("yas").value=age;
+ const height=Number(String(byId("boy")?.value||"").replace(",","."));
+ const weight=Number(String(byId("kilo")?.value||"").replace(",","."));
+ byId("bki").value=Number.isFinite(height)&&Number.isFinite(weight)&&height>0&&weight>0?
+  (weight/Math.pow(height/100,2)).toFixed(2).replace(".",","):"";
+ const legacy=byId("dogumyili"),hint=byId("legacyBirthHint");
+ if(birth&&legacy.value)legacy.value="";
+ hint.hidden=!!birth||!legacy.value.trim();
+ if(!hint.hidden)hint.textContent="Önceki taslaktan doğum yılı: "+legacy.value+" (gün ve ay eksik)";
+}
+function refreshEntryCounts(){
+ updateEntryNumbers("diagnosis");updateEntryNumbers("medication");
+}
+function initializeFirstPageDefaults(){
+ if(!byId("basvuru").value)byId("basvuru").value=localToday();
+ for(const type of ["diagnosis","medication"])if(!entryIds(type).length)makeEntry(type);
+ updateDerivedFields();refreshEntryCounts();
+}
+
 function fieldsOnPage(i){return Array.from(byId("page"+i).querySelectorAll("[data-field]"));}
 function readData(){
  const result={};
@@ -168,7 +204,10 @@ function hydrate(values){
  }
 }
 function signature(i){return JSON.stringify(fieldsOnPage(i).map(el=>[el.id||el.name+"::"+el.value,el.type==="checkbox"||el.type==="radio"?el.checked:el.value]));}
-function pageHasData(i){return fieldsOnPage(i).some(el=>el.type==="checkbox"||el.type==="radio"?el.checked:el.value.trim()!=="");}
+function pageHasData(i){return fieldsOnPage(i).some(el=>{
+ if(el.id==="basvuru"||el.readOnly)return false;
+ return el.type==="checkbox"||el.type==="radio"?el.checked:String(el.value||"").trim()!=="";
+});}
 function refreshTabs(){
  for(let i=0;i<4;i++){
   const t=byId("tab"+i),done=confirmed[i]===signature(i),has=pageHasData(i);
@@ -210,13 +249,14 @@ function save(manual=false){
 function resetPage(){
  if(!confirm((step+1)+". sekmedeki bütün yanıtlar silinecek. Emin misiniz?"))return;
  fieldsOnPage(step).forEach(el=>{if(el.type==="checkbox"||el.type==="radio")el.checked=false;else el.value="";});
- if(step===0){removeEntries("diagnosis");removeEntries("medication");}
+ if(step===0){removeEntries("diagnosis");removeEntries("medication");initializeFirstPageDefaults();}
  delete confirmed[step];save();toast("Sekme sıfırlandı");
 }
 function resetAll(){
  if(!confirm("Bütün İlk Muayene Formu sıfırlanacak. Tüm sekmelerdeki yanıtlar silinecek. Emin misiniz?"))return;
  document.querySelectorAll("[data-field]").forEach(el=>{if(el.type==="checkbox"||el.type==="radio")el.checked=false;else el.value="";});
  removeEntries("diagnosis");removeEntries("medication");
+ initializeFirstPageDefaults();
  confirmed={};try{sessionStorage.removeItem(STORE);}catch(e){}
  go(0);refreshTabs();toast("Tüm form sıfırlandı");
 }
@@ -253,9 +293,11 @@ function summarizedBlockItems(block){
     const checked=radios.find(input=>input.checked);
     if(checked)items.push(label+": "+checked.value);
    }else{
-    const values=Array.from(item.querySelectorAll("[data-field]")).map(input=>
+    const values=Array.from(item.querySelectorAll('[data-field]:not([type="hidden"])')).map(input=>
      formatSummaryValue(input.value,input.type)).filter(Boolean);
     if(values.length)items.push((label||"Bilgi")+": "+values.join(" · "));
+    if(item.querySelector("#dogumyili")?.value.trim()&&!byId("dogumtarihi")?.value)
+     items.push("Önceki taslaktan doğum yılı (gün ve ay bilinmiyor): "+byId("dogumyili").value.trim());
    }
   }
  });
@@ -318,6 +360,7 @@ function initialize(){
   hydrate(old);confirmed={};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }
+ initializeFirstPageDefaults();
  for(let i=0;i<4;i++)byId("tab"+i).addEventListener("click",()=>{save();go(i);save();});
  byId("prev").addEventListener("click",()=>{save();go(step-1);save();});
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
@@ -349,8 +392,11 @@ function initialize(){
    card.remove();updateEntryNumbers(type);save();toast("Kayıt silindi");
   }
  });
- byId("pages").addEventListener("input",()=>save());
- byId("pages").addEventListener("change",()=>save());
+ byId("pages").addEventListener("input",event=>{
+  if(event.target.id==="tc")event.target.value=event.target.value.replace(/\D/g,"").slice(0,11);
+  updateDerivedFields();refreshEntryCounts();save();
+ });
+ byId("pages").addEventListener("change",()=>{updateDerivedFields();refreshEntryCounts();save();});
  window.addEventListener("pagehide",()=>save());
  go(step);
 }
