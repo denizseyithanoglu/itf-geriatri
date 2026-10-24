@@ -2,7 +2,7 @@
 const DATA={"history":[["Göz",["Katarakt","Glokom","Makular Dejenerasyon"]],["Kardiyovasküler",["KAH","MI","Bypass Öyküsü","Hipertansiyon","Aritmi","Kalp Yetmezliği"]],["Üriner",["Böbrek Hastalığı","Prostat Hastalığı","Sık İYE"]],["Pulmoner",["Bronşiyal Astım","KOAH"]],["Gastrointestinal",["Peptik Ülser","Karaciğer Hastalığı","Kolelitiyazis"]],["Lokomotor",["Osteoartrit","Osteoporoz","Fraktür"]],["Nöro-Psikiyatrik",["SVO","Parkinson","Epilepsi","Demans","Depresyon"]],["Endokrin",["Hipertiroidi","Hipotiroidi","Guatr","DM"]],["Diğer",["Kanser","Alerji","Dişler"]]],"family":["Demans","Hipertansiyon","DM","SVO","Depresyon","Hiperlipidemi","KAH","Annede Osteoporoz","Annede Kalça Kırığı (patolojik/osteoporotik/hafif travma ile)"],"vaccines":["İnfluenza","Pnömokok (PPSV / PCV)","Tetanoz - difteri - asüler boğmaca (Tdap)","Herpes Zoster"],"screens":["Mamografi","GGK","Rektosigmoidoskopi","Kolonoskopi","sPSA / PSA","Kemik Mineral Yoğunluk Ölçümü (T skorları)","Pap Smear","Abdominal US (AAA Taraması)"],"symptoms":[["Halsizlik","Kilo Kaybı","Ateş","İştahsızlık","Ağrı","Baş Ağrısı","Bel Ağrısı","Eklem Ağrısı","Ağrının Şiddeti (0–10)","Baş Dönmesi","Göğüs Ağrısı","Çarpıntı","Ortopne","Öksürük","Nefes Darlığı","PND","Balgam","Hemoptizi","Protez Öyküsü","Kalça Dışı Kırık"],["Cinsel İlişki","Empotans","Erektil Disfonksiyon","Ejekülasyon Sorunu","Üriner İnkontinans","Kaç Kez","Sıkışma","Stres (Öksürme, Ikınma)","Gece","BPH Semptomları","Kesik Kesik İdrar","Sık İdrar","Çatallanma","Tam Boşaltamama Hissi","İdrar Debisinde Azalma","Yürüme Sorunu","Baston Kullanımı","Düşme Öyküsü","Kalça-Femur Kırığı","Dekübit Riski"],["Kasık Ağrısı","Dizüri","Tremor","Noktüri","Polidipsi","Poliüri","Dispepsi","Boyda Kısalma","Fekal İnkontinans","İnatçı Kabızlık","Sık İshal","Kusma","Bulantı","Gaz","Şişkinlik","Karın Ağrısı","Memede Kitle","Memede Akıntı","Memede Ağrı","Diğer"]],"cognition":[["İlaç Takibinde Zorlanma","Hobilere İlgide Azalma","Kelime Bulma Güçlüğü","İsimleri Unutma","İnsanları Karıştırma","Torun Adları","Gazete, Kitap, TV Takibinde Sorun","Eşya Kaybetme"],["Hesap, Alışveriş","Aynı Konuları Tekrar Tekrar Sorma","Yeni Olayları Hatırlayamama","Kişilik Değişikliği","Yolları Karıştırma","Kaybolma","Adresleri Unutma","Evde Odaları Karıştırma","Afazi","Apraksi","Agnozi"]],"behavior":["Halüsinasyon","Sanrı","Anksiyete","Ajitasyon","Uyku Sorunu","Amaçsız Gezinme"],"mood":["Uyku Süresi","Uykuyu Başlatmada Güçlük","Uykuyu Sürdürmede Güçlük","Uyanma Sebebi","Sık Ağlama","İsteksizlik","Can Sıkıntısı","Somatik Yakınmalarda Artış","Ölüm İsteği","İntihar Düşüncesi"],"exam":[["Genel Durum",["Şuur","Kooperasyon","Oryantasyon","Ödem","İkter","Siyanoz","LA","Solukluk"]],["Baş ve Boyun",["Pupiller","Ağız İçi","LAP","Karotis Üfürümü","Tiroid"]],["Kardiyovasküler Sistem",["Sağ Kol Tansiyon","Sol Kol Tansiyon","Ortostatik Hipotansiyon","Nabız","S1","S2","Ek Ses","Üfürüm","Boyun Venöz Dolgunluk","Pretibial Ödem","Nabızlar"]],["Solunum Sistemi",["Ral","Ronküs","Siyanoz","Solunum Sayısı"]],["Batın",["Hepatomegali","Splenomegali","Traube Alanı","Asit","Hassasiyet","Defans","Rebound","Kitle"]],["Meme Muayenesi",["Aksiller LAP","Meme Muayenesi"]],["Lokomotor Sistem",["Ekstremite Uzunluğu Simetrisi","Deformite","Hareket Kısıtlılığı","Artrit","Artralji"]]],"neuro":[["Motor",["Üst Ekstremite","Alt Ekstremite"]],["Duyu",["Yüzeyel","Derin"]],["Patolojik Refleksler",["Mayerson","Palmomental Refleks","Yakalama Refleksi","Babinski (Taban Deri Refleksi)","Romberg"]],["Ekstrapiramidal Bulgular",["Bradikinezi","Rijidite","Alt Beden Yarısı Parkinsonizmi","İstirahat Tremoru","Postural Tremor","İntentional Tremor","Postural İnstabilite"]],["Göz Hareketleri",["Horizontal Bakış Kısıtlılığı","Vertikal Bakış Kısıtlılığı","Nistagmus"]],["Serebellar Testler",["Disdiadokinezi","Ataksi","Dizartri","Ardışık Hareketler"]]]};
 const STORE="itf_ilk_muayene_v1_session";
 const LABELS=["Başvuru ve Anamnez","Özgeçmiş ve Koruyucu Hekimlik","Sistem, Biliş ve Duygudurum","Fizik Muayene ve Ön Tanılar"];
-let step=0,confirmed={},toastTimer;
+let step=0,confirmed={},toastTimer,entrySequence=0;
 const byId=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function f(id,label,type="text",cls="",placeholder=""){
@@ -24,6 +24,43 @@ function radio(name,label,choices){
 function datedRows(items,prefix){return '<div class="fields two">'+items.map((text,i)=>'<div class="field"><label>'+esc(text)+'</label><div class="inline-pair"><input data-field type="date" id="'+prefix+'_'+i+'_date" aria-label="'+esc(text)+' uygulama veya tarama tarihi"><input data-field type="text" id="'+prefix+'_'+i+'_result" placeholder="Sonuç / not" aria-label="'+esc(text)+' sonuç veya not"></div></div>').join('')+'</div>';}
 function twoColumns(arr,prefix){return '<div class="symptom-columns" style="grid-template-columns:repeat('+arr.length+',minmax(0,1fr))">'+arr.map((group,i)=>
  '<div class="checklist">'+group.map((label,j)=>check(label,prefix+'_'+i+'_'+j)).join('')+'</div>').join('')+'</div>';}
+
+const ENTRY_META={
+ diagnosis:{container:"diagnosisList",prefix:"diag",fields:[["name","Hastalık / Tanı","text"],["date","Tanı tarihi","date"]]},
+ medication:{container:"medicationList",prefix:"med",fields:[["name","İlaç adı","text"],["dose","Doz","text"],["frequency","Kullanım sıklığı","text"],["note","Ek not","text"]]}
+};
+function makeEntry(type,explicitId=null){
+ const conf=ENTRY_META[type];if(!conf)return;
+ const id=explicitId===null?++entrySequence:Number(explicitId);
+ if(!Number.isSafeInteger(id)||id<1)return;
+ entrySequence=Math.max(id,entrySequence);
+ const list=byId(conf.container);if(list.querySelector('[data-entry-id="'+id+'"]'))return;
+ const row=document.createElement("div");row.className="dynamic-entry";
+ row.dataset.entryType=type;row.dataset.entryId=String(id);
+ row.innerHTML='<div class="entry-header"><strong class="entry-title"></strong>'+
+ '<button type="button" class="entry-remove" data-remove-entry aria-label="Kaydı sil">✕ Sil</button></div>'+
+ '<div class="entry-fields '+(type==="medication"?"entry-med":"")+'">'+
+ conf.fields.map(([field,label,inputType])=>'<div class="field"><label for="'+conf.prefix+'_'+id+'_'+field+'">'+esc(label)+'</label>'+
+ '<input id="'+conf.prefix+'_'+id+'_'+field+'" data-field type="'+inputType+'" autocomplete="off" placeholder="'+(field==="name"?(type==="diagnosis"?"Hastalık adı":"İlaç adı"):"")+'"></div>').join("")+'</div>';
+ list.appendChild(row);updateEntryNumbers(type);
+}
+function updateEntryNumbers(type){
+ const list=byId(ENTRY_META[type].container);
+ const rows=Array.from(list.querySelectorAll(".dynamic-entry"));
+ rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1)+". "+(type==="diagnosis"?"Hastalık / Tanı":"İlaç");});
+ const empty=list.parentElement.querySelector(".entry-empty");if(empty)empty.hidden=rows.length!==0;
+}
+function removeEntries(type){
+ byId(ENTRY_META[type].container).replaceChildren();updateEntryNumbers(type);
+}
+function entryIds(type){return Array.from(byId(ENTRY_META[type].container).querySelectorAll(".dynamic-entry")).map(row=>Number(row.dataset.entryId));}
+function entrySection(type){
+ const noun=type==="diagnosis"?"Hastalık":"İlaç",id=ENTRY_META[type].container;
+ return '<div class="entry-section"><div id="'+id+'" class="entry-list"></div>'+
+ '<p class="entry-empty">Henüz '+noun.toLocaleLowerCase("tr-TR")+' eklenmedi.</p>'+
+ '<div class="entry-buttons"><button class="action entry-add" type="button" data-add-entry="'+type+'">+ '+noun+' Ekle</button></div></div>';
+}
+
 function build(){
  byId("page0").innerHTML=
   '<div class="page-title"><h2>1. Hasta İlk Değerlendirme Formu</h2><small>İTF.HB.FR.168 • Sayfa 1/4</small></div>'+
@@ -40,13 +77,11 @@ function build(){
    radio("cinsiyet","Cinsiyet",["Erkek","Kadın"])+
    area("adres","Adres","span2",2)+
    f("telefon","Telefon","tel")+'</div>')+
-  block("Tanılar (her yeni tanı ile tarihini yazınız)",
-   '<div class="diagnoses"><div class="head">Tanı</div><div class="head">Tanı tarihi</div>'+
-    Array.from({length:10},(_,i)=>'<input data-field id="tani_'+i+'" aria-label="'+(i+1)+'. tanı" placeholder="'+(i+1)+'. tanı"><input data-field id="tanitarih_'+i+'" aria-label="'+(i+1)+'. tanı tarihi" type="date">').join('')+'</div>')+
+  block("Tanılar ve Hastalıklar",entrySection("diagnosis"))+
   block("Anamnez",'<div class="fields two">'+
    area("sikayetler","Şikayetleri","span2",4)+area("hikaye","Hikayesi","span2",5)+
-   area("ilaclar","Aldığı İlaçlar (isim, doz, kullanım sıklığı)","span2",5)+
-   f("hekim","Değerlendiren Hekim (Kaşe / İmza)")+'</div>');
+   f("hekim","Değerlendiren Hekim (Kaşe / İmza)")+'</div>')+
+  block("Kullandığı İlaçlar",entrySection("medication"));
  byId("page1").innerHTML=
   '<div class="page-title"><h2>2. Özgeçmiş ve Koruyucu Hekimlik</h2><small>İTF.HB.FR.168 • Sayfa 2/4</small></div>'+
   block("Özgeçmiş",grouped(DATA.history,"oz")+
@@ -120,7 +155,7 @@ function toast(message,bad=false){
 }
 function save(manual=false){
  try{
-  sessionStorage.setItem(STORE,JSON.stringify({version:1,values:readData(),confirmed,active:step,savedAt:new Date().toISOString()}));
+  sessionStorage.setItem(STORE,JSON.stringify({version:2,values:readData(),entries:{diagnosis:entryIds("diagnosis"),medication:entryIds("medication")},confirmed,active:step,savedAt:new Date().toISOString()}));
   if(manual)toast("✓ Geçici taslak kaydedildi");
  }catch(e){if(manual)toast("Kaydedilemedi: tarayıcı depolaması kullanılamıyor",true);}
  refreshTabs();
@@ -128,11 +163,13 @@ function save(manual=false){
 function resetPage(){
  if(!confirm((step+1)+". sekmedeki bütün yanıtlar silinecek. Emin misiniz?"))return;
  fieldsOnPage(step).forEach(el=>{if(el.type==="checkbox"||el.type==="radio")el.checked=false;else el.value="";});
+ if(step===0){removeEntries("diagnosis");removeEntries("medication");}
  delete confirmed[step];save();toast("Sekme sıfırlandı");
 }
 function resetAll(){
  if(!confirm("Bütün İlk Muayene Formu sıfırlanacak. Tüm sekmelerdeki yanıtlar silinecek. Emin misiniz?"))return;
  document.querySelectorAll("[data-field]").forEach(el=>{if(el.type==="checkbox"||el.type==="radio")el.checked=false;else el.value="";});
+ removeEntries("diagnosis");removeEntries("medication");
  confirmed={};try{sessionStorage.removeItem(STORE);}catch(e){}
  go(0);refreshTabs();toast("Tüm form sıfırlandı");
 }
@@ -140,7 +177,21 @@ function initialize(){
  build();
  let restored;
  try{restored=JSON.parse(sessionStorage.getItem(STORE)||"null");}catch(e){restored=null;}
- if(restored?.version===1){hydrate(restored.values);confirmed=restored.confirmed||{};step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;}
+ if(restored?.version===2){
+  for(const type of ["diagnosis","medication"])(restored.entries?.[type]||[]).slice(0,200).forEach(id=>makeEntry(type,id));
+  hydrate(restored.values);confirmed=restored.confirmed||{};
+  step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
+ }else if(restored?.version===1){
+  const old=restored.values||{};
+  for(let i=0;i<10;i++)if((old["tani_"+i]||"").trim()||old["tanitarih_"+i]){
+   makeEntry("diagnosis");
+   const id=entrySequence;byId("diag_"+id+"_name").value=old["tani_"+i]||"";
+   byId("diag_"+id+"_date").value=old["tanitarih_"+i]||"";
+  }
+  if((old.ilaclar||"").trim()){makeEntry("medication");byId("med_"+entrySequence+"_name").value=old.ilaclar;}
+  hydrate(old);confirmed={};
+  step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
+ }
  for(let i=0;i<4;i++)byId("tab"+i).addEventListener("click",()=>{save();go(i);save();});
  byId("prev").addEventListener("click",()=>{save();go(step-1);save();});
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
@@ -151,6 +202,15 @@ function initialize(){
  byId("resetPage").addEventListener("click",resetPage);
  byId("resetAll").addEventListener("click",resetAll);
  byId("markComplete").addEventListener("click",()=>{if(!pageHasData(step)){toast("Önce bu sekmede değerlendirme bilgisi giriniz",true);return;}confirmed[step]=signature(step);save();toast("✓ Sekme tamamlandı");});
+ byId("pages").addEventListener("click",event=>{
+  const add=event.target.closest("[data-add-entry]");
+  if(add){makeEntry(add.dataset.addEntry);save();return;}
+  const remove=event.target.closest("[data-remove-entry]");
+  if(remove){
+   const card=remove.closest(".dynamic-entry"),type=card.dataset.entryType;
+   card.remove();updateEntryNumbers(type);save();toast("Kayıt silindi");
+  }
+ });
  byId("pages").addEventListener("input",()=>save());
  byId("pages").addEventListener("change",()=>save());
  window.addEventListener("pagehide",()=>save());
