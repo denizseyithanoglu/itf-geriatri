@@ -20,6 +20,7 @@
 </div>
 <div class="menu-actions">
 <button type="button" class="action main" id="save">Taslağı Kaydet</button>
+<button type="button" class="action" id="wholeSummary">Bütün Form Özeti</button>
 <button type="button" class="action" id="print">Bütün Formu Yazdır</button>
 <button type="button" class="action danger" id="resetAll">Bütün Formu Sıfırla</button>
 </div>
@@ -40,6 +41,13 @@
 <button type="button" class="action danger" id="resetPageBottom">Sekmeyi Sıfırla</button>
 </nav></div>
 </div></main><article id="summaryPrintSheet" class="summary-sheet" aria-label="Sekme özeti yazdırma alanı"></article><div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<dialog id="wholeSummaryDialog" class="whole-summary-dialog" aria-labelledby="wholeSummaryTitle">
+<div class="whole-summary-top"><h2 id="wholeSummaryTitle">Bütün Form Özeti</h2><button type="button" class="action" id="wholeSummaryClose" aria-label="Özeti kapat">Kapat</button></div>
+<p class="summary-modal-note">Dört sekmede girilen bilgiler görüntülenir. Boş bırakılan alanlar normal veya negatif kabul edilmez.</p>
+<div class="whole-summary-body" id="wholeSummaryBody" tabindex="0"></div>
+<div class="whole-summary-actions"><button class="action" type="button" id="wholeSummaryCopy">Özeti Kopyala</button>
+<button class="action main" type="button" id="wholeSummaryPrint">Özeti Yazdır / PDF</button></div>
+</dialog>
 <dialog id="resetConfirmDialog" class="reset-dialog" aria-labelledby="resetDialogTitle" aria-describedby="resetDialogDescription">
 <div class="reset-dialog-icon" aria-hidden="true">!</div>
 <h2 id="resetDialogTitle">Sıfırlama işlemi</h2>
