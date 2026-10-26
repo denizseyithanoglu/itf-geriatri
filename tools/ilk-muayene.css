@@ -590,6 +590,7 @@ button.action.danger:hover{background:#ffebe7}
  }
  .menu-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
  .menu-actions .action{min-height:52px;padding:6px;font-size:.73rem}
+ .menu-actions .action:last-child{grid-column:auto}
 }
 @media screen and (max-width:460px){
  .block-heading{padding:7px 8px;gap:6px}
@@ -597,6 +598,7 @@ button.action.danger:hover{background:#ffebe7}
  .reset-section{padding:4px 7px;min-height:34px;font-size:.67rem}
  .menu-actions{grid-template-columns:1fr}
  .menu-actions .action{min-height:40px;font-size:.81rem}
+ .menu-actions .action:last-child{grid-column:1 / -1}
 }
 @media print{
  .reset-section,.section-navigation{display:none!important}
