@@ -80,7 +80,8 @@ function twoColumns(arr,prefix){return '<div class="symptom-columns" style="grid
 const ENTRY_META={
  diagnosis:{container:"diagnosisList",prefix:"diag",fields:[["name","Hastalık / Tanı","text"],["date","Tanı yılı / tarih","text"]]},
  medication:{container:"medicationList",prefix:"med",fields:[["name","İlaç adı","text"],["dose","Doz ve Kullanım Sıklığı","text"]]},
- surgery:{container:"surgeryList",prefix:"surg",fields:[["name","Geçirdiği ameliyat","text"],["date","Tarih / Yıl","text"]]}
+ surgery:{container:"surgeryList",prefix:"surg",fields:[["name","Geçirdiği ameliyat","text"],["date","Tarih / Yıl","text"]]},
+ preliminary:{container:"preliminaryList",prefix:"prelim",fields:[["name","Ön Tanı","text"]]}
 };
 function makeEntry(type,explicitId=null,sourceOption=""){
  const conf=ENTRY_META[type];if(!conf)return;
@@ -94,7 +95,7 @@ function makeEntry(type,explicitId=null,sourceOption=""){
  const fields=conf.fields.map(([field,label,inputType])=>{
   return '<div class="field entry-field-'+field+'"><label for="'+conf.prefix+'_'+id+'_'+field+'">'+esc(label)+'</label>'+
   '<input id="'+conf.prefix+'_'+id+'_'+field+'" data-field type="'+inputType+'" autocomplete="off"'+
-  ' placeholder="'+(field==="name"?(type==="diagnosis"?"Tanı / hastalık":type==="medication"?"İlaç adı":"Ameliyat adı"):field==="date"?"Yıl / tarih / Hatırlamıyor":field==="dose"?"örn. 2x1000 mg veya 1x10/40 mg":"")+'"></div>';
+  ' placeholder="'+(field==="name"?(type==="diagnosis"?"Tanı / hastalık":type==="medication"?"İlaç adı":type==="preliminary"?"Ön tanı":"Ameliyat adı"):field==="date"?"Yıl / tarih / Hatırlamıyor":field==="dose"?"örn. 2x1000 mg veya 1x10/40 mg":"")+'"></div>';
  }).join("");
  row.innerHTML='<div class="entry-body"><strong class="entry-title" aria-label="Kayıt numarası"></strong>'+
  '<div class="entry-fields '+(type==="medication"?"entry-med":type==="surgery"?"entry-surgery":"")+'">'+
@@ -109,7 +110,7 @@ function updateEntryNumbers(type){
  const empty=list.parentElement.querySelector(".entry-empty");if(empty)empty.hidden=rows.length!==0;
  const filled=rows.filter(row=>row.querySelector('input[id$="_name"]')?.value.trim()).length;
  const selected=type==="diagnosis"?selectedHistory().length:0;
- const count=byId(type==="diagnosis"?"diagnosisCount":type==="medication"?"medicationCount":"surgeryCount");
+ const count=byId(type==="diagnosis"?"diagnosisCount":type==="medication"?"medicationCount":type==="surgery"?"surgeryCount":null);
  if(count)count.textContent=String(filled+selected);
  rows.forEach((row,i)=>{
   const remove=row.querySelector("[data-remove-entry]");
@@ -150,6 +151,13 @@ function entrySection(type){
  '<div class="entry-footer"><div class="entry-stat"><span>'+noun+' Sayısı</span><output id="'+output+'">0</output></div>'+
  '<div class="entry-buttons">'+toggle+
  '<button class="action entry-add" type="button" data-add-entry="'+type+'">+ '+noun+' Ekle</button></div></div></div>';
+}
+function preliminarySection(){
+ return '<div class="preliminary-entry-section">'+
+  '<div class="preliminary-column-heading"><span></span><strong>Ön Tanı</strong><span></span></div>'+
+  '<div id="preliminaryList" class="entry-list preliminary-list"></div>'+
+  '<div class="entry-buttons preliminary-actions"><button class="action entry-add" data-add-entry="preliminary" type="button">+ Ön Tanı Ekle</button></div>'+
+  '</div>';
 }
 function printInstitutionHeader(page){
  return '<div class="print-institution-header" aria-hidden="true">'+
@@ -236,8 +244,7 @@ function build(){
    '<div id="medicationPrintList" class="compact-print-list" aria-hidden="true"></div>')+
   block("Anamnez",'<div class="fields two">'+
    area("sikayetler","Şikayetleri","span2",2)+
-   area("hikaye","Hikayesi","span2",7)+
-   f("hekim","Değerlendiren Hekim")+'</div>');
+   area("hikaye","Hikayesi","span2",7)+'</div>');
  byId("page1").innerHTML=printInstitutionHeader(2)+
   '<div class="page-title"><h2>2. Soygeçmiş, Alışkanlıklar ve Koruyucu Hekimlik</h2><small>İTF.HB.FR.168 • Sayfa 2/4</small></div>'+
   block("Soygeçmiş",checks(DATA.family,"aile","two"))+
@@ -299,8 +306,8 @@ function build(){
    grouped(DATA.neuro.slice(0,2),"nr")+
    '<div class="fields two">'+area("kraniyal","Kraniyal Sinirler","",2)+area("dtr","Derin Tendon Refleksleri","",2)+'</div>'+
    grouped(DATA.neuro.slice(2),"nrd"))+
-  block("Ön Tanılar",
-   '<div class="fields two">'+Array.from({length:10},(_,i)=>f('ontani_'+i,(i+1)+'. Ön Tanı')).join('')+'</div>');
+  block("Ön Tanılar",preliminarySection())+
+  block("Değerlendiren Hekim",f("hekim","Değerlendiren Hekim"));
 }
 
 function localToday(){
@@ -439,6 +446,7 @@ function dynamicList(type){
    const date=byId("surg_"+id+"_date")?.value.trim()||"";
    return name+" ("+(date||"Tarih belirtilmedi")+")";
   }
+  if(type==="preliminary")return name;
   const dose=byId(meta.prefix+"_"+id+"_dose")?.value.trim()||"";
   return name+(dose?" "+dose:"");
  }).filter(Boolean);
@@ -527,7 +535,7 @@ function refreshEntryCounts(){
 }
 function initializeFirstPageDefaults(){
  if(!byId("basvuru").value)byId("basvuru").value=localToday();
- for(const type of ["diagnosis","medication","surgery"])if(!entryIds(type).length)makeEntry(type);
+ for(const type of ["diagnosis","medication","surgery","preliminary"])if(!entryIds(type).length)makeEntry(type);
  updateDerivedFields();refreshEntryCounts();
 }
 
@@ -614,8 +622,9 @@ function saveFeedback(message,kind="success"){
 function save(manual=false){
  let saved=false;
  try{
-  sessionStorage.setItem(STORE,JSON.stringify({version:5,values:readData(),entries:{
-   diagnosis:entryIds("diagnosis"),medication:entryIds("medication"),surgery:entryIds("surgery")
+  sessionStorage.setItem(STORE,JSON.stringify({version:6,values:readData(),entries:{
+   diagnosis:entryIds("diagnosis"),medication:entryIds("medication"),surgery:entryIds("surgery"),
+   preliminary:entryIds("preliminary")
   },surgerySources:surgeryLinks(),riskOverrides,confirmed,active:step,savedAt:new Date().toISOString()}));
   saved=true;
  }catch(error){
@@ -678,6 +687,7 @@ function resetSection(section){
  if(section.querySelector("#diagnosisList")){removeEntries("diagnosis");makeEntry("diagnosis");}
  if(section.querySelector("#medicationList")){removeEntries("medication");makeEntry("medication");}
  if(section.querySelector("#surgeryList")){removeEntries("surgery");makeEntry("surgery");syncSurgeryDateInputs();}
+ if(section.querySelector("#preliminaryList")){removeEntries("preliminary");makeEntry("preliminary");}
  if(section.querySelector("#osteoParent"))riskOverrides={};
  if(section.querySelector("#basvuru"))initializeFirstPageDefaults();
  updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
@@ -699,6 +709,7 @@ function resetPage(){
    initializeFirstPageDefaults();
   }
   if(current===1)riskOverrides={};
+  if(current===3){removeEntries("preliminary");makeEntry("preliminary");}
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
   delete confirmed[current];
   save();
@@ -713,7 +724,7 @@ function resetAll(){
    else if(el.tagName==="SELECT")el.selectedIndex=0;
    else el.value="";
   });
-  for(const type of ["diagnosis","medication","surgery"])removeEntries(type);
+  for(const type of ["diagnosis","medication","surgery","preliminary"])removeEntries(type);
   confirmed={};riskOverrides={};
   initializeFirstPageDefaults();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
   try{sessionStorage.removeItem(STORE);}catch(error){}
@@ -729,6 +740,10 @@ function formatSummaryValue(raw,type){
  return s;
 }
 function summarizedBlockItems(block){
+ if(block.querySelector("#preliminaryList")){
+  const values=dynamicList("preliminary");
+  return values.length?["Ön Tanılar: "+values.join(", ")]:[];
+ }
  if(block.querySelector("#surgeryList")){
   const values=dynamicList("surgery"),note=byId("surgeryGeneralNote")?.value.trim()||"";
   return ["Geçirdiği Ameliyatlar: "+(values.join(", ")||"Kayıt yok"),"Ameliyat sayısı: "+values.length,
@@ -1006,7 +1021,7 @@ function initialize(){
    const card=remove.closest(".dynamic-entry"),type=card.dataset.entryType;
    if(type==="surgery"&&card.dataset.surgerySource){const choice=byId(card.dataset.surgerySource);if(choice)choice.checked=false;}
    card.remove();
-   if(type==="surgery"&&!entryIds("surgery").length)makeEntry("surgery");
+   if((type==="surgery"||type==="preliminary")&&!entryIds(type).length)makeEntry(type);
    refreshEntryCounts();save();toast("Kayıt silindi");
   }
  });
