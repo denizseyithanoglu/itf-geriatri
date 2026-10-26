@@ -178,6 +178,10 @@ function build(){
    historyOptionList()+
    area("diagnosisGeneralNote","Hastalıklar – Genel Ek Açıklama","",2)+
    '<div id="diagnosisPrintList" class="compact-print-list" aria-hidden="true"></div>')+
+  block("Ameliyat Öyküsü",
+   '<div class="surgery-check">'+check("Koroner bypass öyküsü","oz_1_2")+'</div>'+
+   area("ameliyat","Geçirdiği ameliyatlar (varsa işlem ve yılı)", "",2)+
+   '<p class="field-help">Ameliyatlar hastalık sayısına dahil edilmez; aktif hastalık varsa tanılar arasında ayrıca belirtiniz.</p>')+
   block("Alerjiler, Alışkanlıklar, Dişler ve Yardımcı Araçlar",
    '<div class="supplementary-rows">'+
     '<div class="supplementary-row">'+selectField("alerji","Alerji",["Yok","Var"],"alerjiNot")+'</div>'+
@@ -191,10 +195,6 @@ function build(){
     '<div class="supplementary-row">'+selectField("gozluk","Gözlük",["Yok","Var"],"gozlukNot")+'</div>'+
     '<div class="supplementary-row">'+selectField("isitmeCihazi","İşitme Cihazı",["Yok","Var","Var ama kullanmıyor"],"isitmeNot")+'</div>'+
    '</div>')+
-  block("Ameliyat Öyküsü",
-   '<div class="surgery-check">'+check("Koroner bypass öyküsü","oz_1_2")+'</div>'+
-   area("ameliyat","Geçirdiği ameliyatlar (varsa işlem ve yılı)", "",2)+
-   '<p class="field-help">Ameliyatlar hastalık sayısına dahil edilmez; aktif hastalık varsa tanılar arasında ayrıca belirtiniz.</p>')+
   block("Kullandığı İlaçlar",
    entrySection("medication")+
    area("medicationGeneralNote","İlaçlar – Genel Ek Not","",2)+
