@@ -654,15 +654,12 @@ function save(manual=false){
 function requestReset(title,description,action){
  const dialog=byId("resetConfirmDialog");
  if(!dialog||typeof dialog.showModal!=="function"){
-  if(window.confirm(title+": "+description+"\nDevam etmek istiyor musunuz?")&&
-     window.confirm("SON ONAY: Bu verileri kalıcı olarak sıfırlamayı kabul ediyor musunuz?"))action();
+  if(window.confirm(title+": "+description+"\nSıfırlamayı onaylıyor musunuz?"))action();
   return;
  }
  if(dialog.open)dialog.close();
  byId("resetDialogTitle").textContent=title;
  byId("resetDialogDescription").textContent=description;
- byId("resetStageOne").hidden=false;
- byId("resetStageTwo").hidden=true;
  pendingResetAction=action;
  dialog.showModal();
 }
@@ -671,13 +668,7 @@ function setupResetDialog(){
  if(!dialog)return;
  const cancel=()=>{pendingResetAction=null;if(dialog.open)dialog.close();};
  byId("resetCancelFirst").addEventListener("click",cancel);
- byId("resetCancelSecond").addEventListener("click",cancel);
  byId("resetContinue").addEventListener("click",()=>{
-  byId("resetStageOne").hidden=true;
-  byId("resetStageTwo").hidden=false;
-  byId("resetConfirmFinal").focus();
- });
- byId("resetConfirmFinal").addEventListener("click",()=>{
   const action=pendingResetAction;
   pendingResetAction=null;
   if(dialog.open)dialog.close();
