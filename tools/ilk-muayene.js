@@ -425,23 +425,40 @@ function resetAll(){
 
 function formatSummaryValue(raw,type){
  const s=String(raw??"").trim();
- if(type==="date"&&/^\d{4}-\d{2}-\d{2}$/.test(s)){const [y,m,d]=s.split("-");return d+"."+m+"."+y;}
+ if(/^\d{4}-\d{2}-\d{2}$/.test(s)){const [y,m,d]=s.split("-");return d+"."+m+"."+y;}
  return s;
 }
 function summarizedBlockItems(block){
- if(block.querySelector("#diagnosisList"))return ["Tanılar ve Hastalıklar: "+(diagnosisNames().join(", ")||"Kayıt yok"),"Hastalık sayısı: "+diagnosisNames().length];
- if(block.querySelector("#medicationList"))return ["İlaçlar: "+(dynamicList("medication").join(", ")||"Kayıt yok"),"İlaç sayısı: "+dynamicList("medication").length];
+ if(block.querySelector("#diagnosisList")){
+  const values=diagnosisNames();
+  return ["Tanılar ve Hastalıklar: "+(values.join(", ")||"Kayıt yok"),"Hastalık sayısı: "+values.length];
+ }
+ if(block.querySelector("#medicationList")){
+  const values=dynamicList("medication");
+  return ["Kullandığı İlaçlar: "+(values.join(", ")||"Kayıt yok"),"İlaç sayısı: "+values.length];
+ }
  const items=[];
- block.querySelectorAll(".dynamic-entry,.checknote,.field").forEach(item=>{
+ block.querySelectorAll(".checknote,.preventive-item,.risk-row,.risk-choice,.field").forEach(item=>{
   if(item.closest("[data-sex-only][hidden], #menopozDetail[hidden]"))return;
-  if(item.classList.contains("field")&&item.closest(".dynamic-entry"))return;
-  if(item.classList.contains("dynamic-entry")){
-   const bits=Array.from(item.querySelectorAll(".field")).map(field=>{
-    const input=field.querySelector("[data-field]");
-    const value=formatSummaryValue(input?.value,input?.type);
-    return value?(field.querySelector("label")?.textContent.trim()+": "+value):null;
+  if(item.classList.contains("field")&&item.closest(".dynamic-entry,.risk-row,.preventive-item"))return;
+  if(item.classList.contains("preventive-item")){
+   if(item.querySelector(".preventive-two"))return;
+   const title=item.querySelector(".preventive-title")?.textContent.trim()||"Tarama";
+   const text=Array.from(item.querySelectorAll(".preventive-fields input")).map(input=>{
+    const value=formatSummaryValue(input.value,input.type);
+    const label=input.closest(".field")?.querySelector("label")?.textContent.trim()||"Bilgi";
+    return value?label+": "+value:"";
    }).filter(Boolean);
-   if(bits.length)items.push(item.querySelector(".entry-title").textContent+" — "+bits.join(" · "));
+   if(text.length)items.push(title+" — "+text.join("; "));
+  }else if(item.classList.contains("risk-row")){
+   const checkbox=item.querySelector('input[type="checkbox"]');
+   const title=item.querySelector(".risk-choice")?.textContent.trim()||"Osteoporoz";
+   const note=item.querySelector('.field input')?.value.trim()||"";
+   if(checkbox?.checked||note)items.push(title+": "+(checkbox?.checked?"Var":"Not girildi")+(note?" ("+note+")":""));
+  }else if(item.classList.contains("risk-choice")){
+   if(item.closest(".risk-row"))return;
+   const checkbox=item.querySelector('input[type="checkbox"]');
+   if(checkbox?.checked)items.push(item.textContent.trim());
   }else if(item.classList.contains("checknote")){
    const checkbox=item.querySelector('input[type="checkbox"]');
    const value=item.querySelector(".note-input")?.value.trim()||"";
@@ -449,8 +466,7 @@ function summarizedBlockItems(block){
    let label=item.querySelector(".check-head span")?.textContent.trim()||"Bulgu";
    const group=item.closest(".group")?.querySelector("h4")?.textContent.trim();
    if(group)label=group+" — "+label;
-   if(checkbox.checked)items.push(label+(value?": "+value:""));
-   else items.push(label+" (yalnızca not): "+value);
+   items.push(label+(checkbox?.checked?"": " (yalnızca not)")+(value?": "+value:""));
   }else if(item.classList.contains("field")){
    const label=(item.querySelector(":scope > label, :scope > .field-label")?.textContent||"").trim();
    const radios=Array.from(item.querySelectorAll('input[type="radio"]'));
@@ -458,8 +474,8 @@ function summarizedBlockItems(block){
     const checked=radios.find(input=>input.checked);
     if(checked)items.push(label+": "+checked.value);
    }else{
-    const values=Array.from(item.querySelectorAll('[data-field]:not([type="hidden"])')).map(input=>
-     formatSummaryValue(input.value,input.type)).filter(Boolean);
+    const values=Array.from(item.querySelectorAll('[data-field]:not([type="hidden"])'))
+     .map(input=>formatSummaryValue(input.value,input.type)).filter(Boolean);
     if(values.length)items.push((label||"Bilgi")+": "+values.join(" · "));
     if(item.querySelector("#dogumyili")?.value.trim()&&!byId("dogumtarihi")?.value)
      items.push("Önceki taslaktan doğum yılı (gün ve ay bilinmiyor): "+byId("dogumyili").value.trim());
