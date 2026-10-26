@@ -40,7 +40,10 @@ function selectField(id,label,options,noteId=null){
 function historyOptionList(){
  return '<details class="medical-history-disclosure" id="historyCatalog">'+
  '<summary>Özgeçmişteki hastalıkları seçin <span id="historyCount"></span></summary>'+
- '<div class="history-catalog-content">'+grouped(DATA.history,"oz")+'</div></details>';
+ '<div class="history-catalog-content">'+
+ DATA.history.map((group,i)=>'<div class="group"><h4>'+esc(group[0])+'</h4><div class="bullets">'+
+  group[1].map((name,j)=>i===1&&j===2?"":check(name,"oz_"+i+"_"+j)).join("")+'</div></div>').join("")+
+ '</div></details>';
 }
 function riskQuestion(id,label){
  return '<div class="risk-row"><label class="risk-choice" for="'+id+'"><input type="checkbox" id="'+id+'" data-field> '+esc(label)+'</label>'+
@@ -165,6 +168,7 @@ function build(){
     '<div class="supplementary-row">'+radio("isitmeCihazi","İşitme Cihazı",["Var","Yok","Var ama kullanmıyor"])+f("isitmeNot","Açıklama")+'</div>'+
    '</div>')+
   block("Ameliyat Öyküsü",
+   '<div class="surgery-check">'+check("Koroner bypass öyküsü","oz_1_2")+'</div>'+
    area("ameliyat","Geçirdiği ameliyatlar (varsa işlem ve yılı)", "",2)+
    '<p class="field-help">Ameliyatlar hastalık sayısına dahil edilmez; aktif hastalık varsa tanılar arasında ayrıca belirtiniz.</p>')+
   block("Kullandığı İlaçlar",
