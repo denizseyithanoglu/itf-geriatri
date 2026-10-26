@@ -27,7 +27,11 @@ function f(id,label,type="text",cls="",placeholder=""){
  return '<div class="field '+cls+'"><label for="'+id+'">'+esc(label)+'</label><input data-field id="'+id+'" type="'+type+'"'+(type==="number"?' step="any" inputmode="decimal"':"")+' placeholder="'+esc(placeholder)+'" autocomplete="off"></div>';
 }
 function area(id,label,cls="",rows=3){return '<div class="field '+cls+'"><label for="'+id+'">'+esc(label)+'</label><textarea data-field id="'+id+'" rows="'+rows+'" autocomplete="off"></textarea></div>';}
-function block(title,html){return '<section class="block"><h3>'+esc(title)+'</h3><div class="block-inner">'+html+'</div></section>';}
+function block(title,html){
+ return '<section class="block"><div class="block-heading"><h3>'+esc(title)+'</h3>'+
+ '<button type="button" class="reset-section" data-reset-section aria-label="'+esc(title)+' bölümünü sıfırla" title="Yalnızca bu bölümdeki yanıtları sil">Bölümü Sıfırla</button></div>'+
+ '<div class="block-inner">'+html+'</div></section>';
+}
 function checks(list,prefix,layout=""){return '<div class="bullets '+layout+'">'+list.map((name,i)=>check(name,prefix+'_'+i)).join("")+'</div>';}
 function check(label,key){
  return '<div class="checknote"><label class="check-head" for="'+key+'"><input type="checkbox" id="'+key+'" data-field> <span>'+esc(label)+'</span></label><input class="note-input" type="text" id="'+key+'_note" data-field aria-label="'+esc(label)+' — açıklama" placeholder="Not / bulgu..." autocomplete="off"></div>';
@@ -573,11 +577,9 @@ function refreshTabs(){
   const selected=checkedDiseases().length;
   historyCount.textContent=selected?"("+selected+" kayıtlı bulgu)":"";
  }
- byId("printSummary").textContent=(step+1)+". Sekme Özetini Yazdır / PDF";
- byId("resetPage").textContent=(step+1)+". Sekmeyi Sıfırla";
- byId("printSummaryBottom").textContent="🖨 "+(step+1)+". Sekme Özeti";
- byId("resetPageBottom").textContent="↺ "+(step+1)+". Sekmeyi Sıfırla";
- byId("markComplete").textContent=confirmed[step]===signature(step)?"✓ Tamamlandı":"✓ Sekmeyi Tamamla";
+ byId("printSummaryBottom").textContent="Sekme Özeti Yazdır";
+ byId("resetPageBottom").textContent="Sekmeyi Sıfırla";
+ byId("markComplete").textContent="Sekmeyi Kaydet ve Geç";
 }
 function go(i){
  step=Math.max(0,Math.min(3,i));
@@ -596,6 +598,37 @@ function save(manual=false){
   if(manual)toast("✓ Geçici taslak kaydedildi");
  }catch(e){if(manual)toast("Kaydedilemedi: tarayıcı depolaması kullanılamıyor",true);}
  refreshTabs();
+}
+function resetSection(section){
+ if(!section||!section.classList.contains("block"))return;
+ const title=section.querySelector(".block-heading h3")?.textContent.trim()||"Bu bölüm";
+ if(!confirm('“'+title+'” bölümündeki bilgiler silinecek. Emin misiniz?'))return;
+ // Remove only the selected block's answers; leave all other sections untouched.
+ section.querySelectorAll("[data-field]").forEach(el=>{
+  if(el.type==="checkbox"||el.type==="radio")el.checked=false;
+  else if(el.tagName==="SELECT")el.selectedIndex=0;
+  else el.value="";
+ });
+ if(section.querySelector("#diagnosisList")){
+  removeEntries("diagnosis");
+  makeEntry("diagnosis");
+ }
+ if(section.querySelector("#medicationList")){
+  removeEntries("medication");
+  makeEntry("medication");
+ }
+ if(section.querySelector("#surgeryList")){
+  removeEntries("surgery");
+  makeEntry("surgery");
+  syncSurgeryDateInputs();
+ }
+ if(section.querySelector("#osteoParent"))riskOverrides={};
+ if(section.querySelector("#basvuru"))initializeFirstPageDefaults();
+ // Maintain derived risk flags and accurate totals after clearing a section.
+ updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
+ delete confirmed[step];
+ save();
+ toast("✓ "+title+" bölümü sıfırlandı");
 }
 function resetPage(){
  if(!confirm((step+1)+". sekmedeki bütün yanıtlar silinecek. Emin misiniz?"))return;
@@ -754,7 +787,6 @@ function initialize(){
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
  byId("save").addEventListener("click",()=>save(true));
  byId("print").addEventListener("click",printWholeForm);
- byId("printSummary").addEventListener("click",printOneSummary);
  byId("printSummaryBottom").addEventListener("click",printOneSummary);
  window.addEventListener("beforeprint",()=>{
   updateCompactPrintLists();
@@ -767,12 +799,18 @@ function initialize(){
   document.body.classList.remove("printing-summary");
   byId("summaryPrintSheet").replaceChildren();
  });
- byId("resetPage").addEventListener("click",resetPage);
  byId("resetPageBottom").addEventListener("click",resetPage);
  byId("resetAll").addEventListener("click",resetAll);
- byId("resetAllBottom").addEventListener("click",resetAll);
- byId("markComplete").addEventListener("click",()=>{if(!pageHasData(step)){toast("Önce bu sekmede değerlendirme bilgisi giriniz",true);return;}confirmed[step]=signature(step);save();toast("✓ Sekme tamamlandı");});
+ byId("markComplete").addEventListener("click",()=>{
+  const current=step,filled=pageHasData(current);
+  if(filled)confirmed[current]=signature(current);else delete confirmed[current];
+  save();
+  if(current<3){go(current+1);save();toast(filled?"✓ Sekme kaydedildi ve sonraki sekmeye geçildi":"Boş sekme geçildi; tamamlandı olarak işaretlenmedi");}
+  else toast(filled?"✓ Son sekme kaydedildi":"Son sekme boş olarak bırakıldı");
+ });
  byId("pages").addEventListener("click",event=>{
+  const reset=event.target.closest("[data-reset-section]");
+  if(reset){resetSection(reset.closest(".block"));return;}
   const catalogToggle=event.target.closest("[data-toggle-disease-list]");
   if(catalogToggle){const catalog=byId("historyCatalog");catalog.open=!catalog.open;syncHistoryPicker();return;}
   const surgeryToggle=event.target.closest("[data-toggle-surgery-list]");
