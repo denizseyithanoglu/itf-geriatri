@@ -325,3 +325,80 @@ button.action.danger:hover{background:#ffebe7}
  .print-institution-text .form-heading{font-size:12px;font-weight:800;margin-top:4px}
  .print-institution-number{font-size:8px;text-align:right;min-width:68px;line-height:1.6}
 }
+
+/* Integrated diseases and compact numbered medications */
+.entry-body{display:grid;grid-template-columns:27px minmax(0,1fr) 52px;align-items:center;gap:8px}
+.entry-body .entry-title{font-size:.94rem;color:#2c5570;text-align:center;font-weight:800}
+.entry-body .entry-fields{min-width:0}
+.entry-body .entry-fields.entry-med{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
+.entry-body .entry-field-note{grid-column:1 / -1}
+.entry-body .entry-field-note input{height:32px;min-height:32px}
+.entry-body .entry-remove{min-width:50px;min-height:32px;padding:4px 7px}
+.entry-body .entry-remove[hidden]{visibility:hidden!important;display:block!important}
+.field-help{font-size:.77rem;color:#556f7e;margin:4px 0 10px;line-height:1.5}
+.supplementary-rows{display:grid;gap:7px}
+.supplementary-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);align-items:end;gap:9px;padding:7px 10px;background:#f7fafc;border:1px solid #e1eaf1;border-radius:7px}
+.supplementary-row .radio-line label{padding:5px 9px}
+.habit-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.habit-columns>div{display:grid;gap:10px;align-content:start}
+.habit-columns .radio-line{margin:0}
+.preventive-subsection{margin-top:10px}
+.preventive-subsection:first-child{margin-top:0}
+.preventive-subsection h4{font-size:.98rem;color:#214e71;margin:0 0 9px;border-bottom:1px solid #c9dce9;padding:4px 0 7px}
+.preventive-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.preventive-item{border:1px solid #dce6ed;background:#fcfefe;border-radius:8px;padding:8px 10px;min-width:0}
+.preventive-title{font-size:.83rem;font-weight:800;color:#244b68;margin-bottom:6px}
+.preventive-fields{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.5fr);gap:6px}
+.preventive-fields .field label{font-size:.7rem}
+.preventive-fields .field input{min-height:36px;font-size:.82rem}
+.preventive-two{display:grid;gap:7px}
+.preventive-two .preventive-item{background:#fff;padding:6px}
+.sex-only[hidden],#menopozDetail[hidden]{display:none!important}
+.sex-only .preventive-item+.preventive-item{margin-top:9px}
+.risk-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.risk-row{display:grid;grid-template-columns:1fr;gap:3px;border:1px solid #dce7ed;background:#fbfefd;border-radius:8px;padding:9px}
+.risk-row .field{min-width:0}
+.risk-row .field label{font-size:.69rem;color:#668192}
+.risk-row .field input{min-height:34px}
+.risk-choice{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:750;color:#294a62;cursor:pointer}
+.risk-choice input{accent-color:#2c6988;width:19px;height:19px;flex-shrink:0}
+.female-menopause{background:#fff3f8;border:1px solid #e6bad0;border-radius:8px;padding:11px;margin:10px 0}
+.female-menopause .field{max-width:220px;margin-top:7px}
+.compact-print-list{display:none}
+@media(max-width:760px){
+ .supplementary-row,.habit-columns,.preventive-grid,.risk-list{grid-template-columns:1fr}
+ .entry-body .entry-fields.entry-med{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .entry-body{grid-template-columns:22px minmax(0,1fr) 42px;gap:5px}
+ .entry-body .entry-remove{min-width:40px;padding:4px}
+}
+@media(max-width:430px){
+ .entry-body .entry-fields.entry-med{grid-template-columns:1fr}
+ .entry-body .entry-field-note{grid-column:1}
+ .preventive-fields{grid-template-columns:1fr}
+}
+@media print{
+ .entry-section,.medical-history-disclosure{display:none!important}
+ .compact-print-list{display:block!important;font-size:8px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;padding:5px 7px}
+ .field-help{font-size:7px;margin:3px 0}
+ .supplementary-row{display:grid;grid-template-columns:1fr 1.5fr;gap:4px;padding:2px 4px;border:0;border-bottom:1px dotted #aaa;border-radius:0;background:#fff}
+ .supplementary-row .field input,.supplementary-row .field select{min-height:18px}
+ .habit-columns{grid-template-columns:1fr 1fr;gap:6px}
+ .habit-columns>div{gap:3px}
+ .preventive-grid{grid-template-columns:1fr 1fr;gap:3px}
+ .preventive-item{border-color:#ccc;border-radius:0;padding:3px}
+ .preventive-title{font-size:8px;margin:0 0 2px}
+ .preventive-fields{gap:2px}
+ .preventive-fields .field input{min-height:16px;font-size:7px}
+ .preventive-fields .field label{font-size:6.6px}
+ .preventive-subsection{margin:4px 0}
+ .preventive-subsection h4{font-size:9px;margin:0 0 2px;padding:0 0 2px}
+ .preventive-two{gap:2px}
+ .risk-list{grid-template-columns:1fr 1fr;gap:2px}
+ .risk-row{padding:2px 4px;border-radius:0;border-color:#ccc;gap:1px}
+ .risk-choice{font-size:7.5px;gap:3px}
+ .risk-choice input{width:10px;height:10px}
+ .risk-row .field input{min-height:15px}
+ .female-menopause{margin:3px 0;padding:3px;border-radius:0}
+ .female-menopause .field{margin-top:2px}
+ body.printing-summary .compact-print-list{display:none!important}
+}
