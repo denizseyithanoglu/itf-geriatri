@@ -403,13 +403,26 @@ function addSurgeryFromPicker(input){
  if(!input)return;
  const source=input.id;
  const list=byId("surgeryList");
- const existing=Array.from(list.querySelectorAll(".dynamic-entry")).find(r=>r.dataset.surgerySource===source);
+ const rows=Array.from(list.querySelectorAll(".dynamic-entry"));
+ const existing=rows.find(row=>row.dataset.surgerySource===source);
  if(input.checked){
   if(existing)return;
   const name=input.closest(".disease-option")?.querySelector(".disease-name")?.textContent.trim()||"Ameliyat";
-  makeEntry("surgery",null,source);
-  byId("surg_"+entrySequence+"_name").value=name;
- }else if(existing)existing.remove();
+  // Fill the initial blank line instead of leaving an empty numbered row above selected surgery.
+  let row=rows.find(item=>{
+   if(item.dataset.surgerySource)return false;
+   const id=item.dataset.entryId;
+   return !byId("surg_"+id+"_name")?.value.trim()&&
+    !byId("surg_"+id+"_date")?.value.trim()&&
+    !byId("surg_"+id+"_unknown")?.checked;
+  });
+  if(!row){makeEntry("surgery",null,source);row=list.querySelector('[data-entry-id="'+entrySequence+'"]');}
+  else row.dataset.surgerySource=source;
+  if(row)byId("surg_"+row.dataset.entryId+"_name").value=name;
+ }else if(existing){
+  existing.remove();
+  if(!entryIds("surgery").length)makeEntry("surgery");
+ }
  syncSurgeryDateInputs();refreshEntryCounts();
 }
 
@@ -776,7 +789,9 @@ function initialize(){
   if(remove){
    const card=remove.closest(".dynamic-entry"),type=card.dataset.entryType;
    if(type==="surgery"&&card.dataset.surgerySource){const choice=byId(card.dataset.surgerySource);if(choice)choice.checked=false;}
-   card.remove();refreshEntryCounts();save();toast("Kayıt silindi");
+   card.remove();
+   if(type==="surgery"&&!entryIds("surgery").length)makeEntry("surgery");
+   refreshEntryCounts();save();toast("Kayıt silindi");
   }
  });
  byId("historyCatalog").addEventListener("toggle",syncHistoryPicker);
