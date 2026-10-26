@@ -548,6 +548,18 @@ function readData(){
  });
  return result;
 }
+function migrateLegacyPreliminary(values){
+ const next={...(values||{})};
+ for(let i=0;i<10;i++){
+  const oldId="ontani_"+i,previous=String(next[oldId]||"").trim();
+  if(previous){
+   makeEntry("preliminary");
+   next["prelim_"+entrySequence+"_name"]=previous;
+  }
+  delete next[oldId];
+ }
+ return next;
+}
 function convertLegacySurgeryDates(values){
  const output={...(values||{})};
  for(const [key,checked] of Object.entries(output)){
@@ -941,19 +953,21 @@ function initialize(){
  build();
  let restored;
  try{restored=JSON.parse(sessionStorage.getItem(STORE)||"null");}catch(e){restored=null;}
- if([2,3,4,5].includes(restored?.version)){
+ if([2,3,4,5,6].includes(restored?.version)){
   for(const type of ["diagnosis","medication"])(restored.entries?.[type]||[]).slice(0,200).forEach(id=>makeEntry(type,id));
-  if(restored.version===5){
+  if(restored.version>=5){
    const links=Array.isArray(restored.surgerySources)?restored.surgerySources:[];
    (restored.entries?.surgery||[]).slice(0,200).forEach(id=>{
     const source=links.find(item=>Number(item.id)===Number(id))?.source||"";
     makeEntry("surgery",id,source);
    });
   }
+  if(restored.version===6)(restored.entries?.preliminary||[]).slice(0,200).forEach(id=>makeEntry("preliminary",id));
   const old=restored.version<4?migrateLegacyDraft(restored.values||{}):restored.values||{};
-  hydrate(restored.version===5?old:migrateBeforeV5(old));
+  const migrated=restored.version>=5?old:migrateBeforeV5(old);
+  hydrate(restored.version===6?migrated:migrateLegacyPreliminary(migrated));
   riskOverrides=restored.version>=3?restored.riskOverrides||{}:{};
-  confirmed=restored.version===5?restored.confirmed||{}:{};
+  confirmed=restored.version===6?restored.confirmed||{}:{};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }else if(restored?.version===1){
   const old=restored.values||{};
@@ -963,7 +977,7 @@ function initialize(){
    byId("diag_"+id+"_date").value=old["tanitarih_"+i]||"";
   }
   if((old.ilaclar||"").trim()){makeEntry("medication");byId("med_"+entrySequence+"_name").value=old.ilaclar;}
-  hydrate(migrateBeforeV5(migrateLegacyDraft(old)));confirmed={};
+  hydrate(migrateLegacyPreliminary(migrateBeforeV5(migrateLegacyDraft(old))));confirmed={};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }
  initializeFirstPageDefaults();
