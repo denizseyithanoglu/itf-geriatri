@@ -76,7 +76,7 @@ function updateEntryNumbers(type){
  rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1)+".";});
  const empty=list.parentElement.querySelector(".entry-empty");if(empty)empty.hidden=rows.length!==0;
  const filled=rows.filter(row=>row.querySelector('input[id$="_name"]')?.value.trim()).length;
- const checked=type==="diagnosis"?Array.from(byId("historyCatalog")?.querySelectorAll('.checknote input[type="checkbox"]')||[]).filter(el=>el.checked).length:0;
+ const checked=type==="diagnosis"?selectedHistory().length:0;
  const count=byId(type==="diagnosis"?"diagnosisCount":"medicationCount");
  if(count)count.textContent=String(filled+checked);
  rows.forEach((row,i)=>{
@@ -272,8 +272,73 @@ function updateDerivedFields(){
  hint.hidden=!!birth||!legacy.value.trim();
  if(!hint.hidden)hint.textContent="Önceki taslaktan doğum yılı: "+legacy.value+" (gün ve ay eksik)";
 }
+
+function sexValue(){return document.querySelector('input[name="cinsiyet"]:checked')?.value||"";}
+function updateSexSpecific(){
+ const gender=sexValue();
+ document.querySelectorAll("[data-sex-only]").forEach(el=>el.hidden=el.dataset.sexOnly!==gender);
+ const panel=byId("menopozDetail");
+ if(panel)panel.hidden=gender!=="Kadın"||!byId("menopozSwitch")?.checked;
+}
+function selectedRadio(name){return document.querySelector('input[name="'+name+'"]:checked')?.value||"";}
+function syncOsteoporosisRisk(){
+ const sources={
+  osteoParent:!!byId("aile_8")?.checked,
+  osteoSmoke:selectedRadio("sigaraDurum")==="Aktif kullanıyor",
+  osteoAlcohol:selectedRadio("alkolDurum")==="Var"
+ };
+ for(const [id,value] of Object.entries(sources)){
+  if(!riskOverrides[id]&&byId(id))byId(id).checked=value;
+ }
+}
+function selectedHistory(){
+ const catalog=byId("historyCatalog");if(!catalog)return [];
+ return Array.from(catalog.querySelectorAll(".checknote")).filter(item=>item.querySelector('input[type="checkbox"]')?.checked)
+  .map(item=>{
+   const name=item.querySelector(".check-head span")?.textContent.trim()||"Tanı";
+   const date=item.querySelector(".note-input")?.value.trim()||"";
+   return name+(date?" ("+date+")":"");
+  });
+}
+function dynamicList(type){
+ const meta=ENTRY_META[type],list=byId(meta.container);if(!list)return [];
+ return Array.from(list.querySelectorAll(".dynamic-entry")).map(row=>{
+  const id=row.dataset.entryId;
+  const name=byId(meta.prefix+"_"+id+"_name")?.value.trim()||"";
+  if(!name)return "";
+  if(type==="diagnosis"){
+   const date=byId(meta.prefix+"_"+id+"_date")?.value.trim()||"";
+   return name+(date?" ("+date+")":"");
+  }
+  const dose=byId(meta.prefix+"_"+id+"_dose")?.value.trim()||"";
+  const note=byId(meta.prefix+"_"+id+"_note")?.value.trim()||"";
+  return name+(dose?" "+dose:"")+(note?" — "+note:"");
+ }).filter(Boolean);
+}
+function diagnosisNames(){return [...selectedHistory(),...dynamicList("diagnosis")];}
+function updateCompactPrintLists(){
+ for(const [id,label,values,countLabel] of [
+  ["diagnosisPrintList","Hastalıklar",diagnosisNames(),"Hastalık sayısı"],
+  ["medicationPrintList","İlaçlar",dynamicList("medication"),"İlaç sayısı"]]){
+  const el=byId(id);if(el)el.textContent=label+": "+(values.length?values.join(", "):"Kayıt yok")+". "+countLabel+": "+values.length;
+ }
+}
+function migrateOldValues(values){
+ const out={...values};
+ if(out.oz_8_1===true&&!out.alerji)out.alerji="Var";
+ if(out.oz_8_1_note&&!out.alerjiNot)out.alerjiNot=out.oz_8_1_note;
+ if(out.oz_8_2===true&&!out.disDurumu)out.disDurumu="Diğer";
+ if(out.oz_8_2_note&&!out.disNot)out.disNot=out.oz_8_2_note;
+ for(const key of Object.keys(out)){
+  const match=key.match(/^med_(\d+)_frequency$/);if(!match||!String(out[key]||"").trim())continue;
+  const doseKey="med_"+match[1]+"_dose";
+  out[doseKey]=[out[doseKey],out[key]].filter(x=>String(x||"").trim()).join(" · ");
+ }
+ return out;
+}
+
 function refreshEntryCounts(){
- updateEntryNumbers("diagnosis");updateEntryNumbers("medication");
+ updateEntryNumbers("diagnosis");updateEntryNumbers("medication");updateCompactPrintLists();
 }
 function initializeFirstPageDefaults(){
  if(!byId("basvuru").value)byId("basvuru").value=localToday();
@@ -336,7 +401,7 @@ function toast(message,bad=false){
 }
 function save(manual=false){
  try{
-  sessionStorage.setItem(STORE,JSON.stringify({version:2,values:readData(),entries:{diagnosis:entryIds("diagnosis"),medication:entryIds("medication")},confirmed,active:step,savedAt:new Date().toISOString()}));
+  sessionStorage.setItem(STORE,JSON.stringify({version:3,values:readData(),entries:{diagnosis:entryIds("diagnosis"),medication:entryIds("medication")},riskOverrides,confirmed,active:step,savedAt:new Date().toISOString()}));
   if(manual)toast("✓ Geçici taslak kaydedildi");
  }catch(e){if(manual)toast("Kaydedilemedi: tarayıcı depolaması kullanılamıyor",true);}
  refreshTabs();
