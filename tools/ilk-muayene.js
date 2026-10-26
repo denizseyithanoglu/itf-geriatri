@@ -449,7 +449,11 @@ function updateCompactPrintLists(){
   ["diagnosisPrintList","Hastalıklar",diagnosisNames(),"Hastalık sayısı"],
   ["medicationPrintList","İlaçlar",dynamicList("medication"),"İlaç sayısı"],
   ["surgeryPrintList","Ameliyatlar",dynamicList("surgery"),"Ameliyat sayısı"]]){
-  const el=byId(id);if(el)el.textContent=label+": "+(values.length?values.join(", "):"Kayıt yok")+". "+countLabel+": "+values.length;
+  const el=byId(id);
+  if(el)el.textContent=values.length?
+   label+": "+values.join(", ")+". "+countLabel+": "+values.length:
+   (id==="diagnosisPrintList"?"Hastalık: Yok":id==="medicationPrintList"?"İlaç: Yok":"Ameliyat: Yok")+
+   ". "+countLabel+": 0";
  }
 }
 function migrateOldValues(values){
@@ -732,11 +736,13 @@ function summarizedBlockItems(block){
  }
  if(block.querySelector("#diagnosisList")){
   const values=diagnosisNames(),note=byId("diagnosisGeneralNote")?.value.trim()||"";
-  return ["Tanılar ve Hastalıklar: "+(values.join(", ")||"Kayıt yok"),"Hastalık sayısı: "+values.length,...(note?["Genel açıklama: "+note]:[])];
+  return [values.length?"Tanılar ve Hastalıklar: "+values.join(", "):"Hastalık: Yok",
+   "Hastalık sayısı: "+values.length,...(note?["Genel açıklama: "+note]:[])];
  }
  if(block.querySelector("#medicationList")){
   const values=dynamicList("medication"),note=byId("medicationGeneralNote")?.value.trim()||"";
-  return ["Kullandığı İlaçlar: "+(values.join(", ")||"Kayıt yok"),"İlaç sayısı: "+values.length,...(note?["Ek not: "+note]:[])];
+  return [values.length?"Kullandığı İlaçlar: "+values.join(", "):"İlaç: Yok",
+   "İlaç sayısı: "+values.length,...(note?["Ek not: "+note]:[])];
  }
  const items=[];
  block.querySelectorAll(".checknote,.preventive-item,.risk-row,.risk-choice,.field").forEach(item=>{
