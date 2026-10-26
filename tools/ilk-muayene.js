@@ -477,6 +477,19 @@ function migrateLegacyDraft(values){
  return out;
 }
 
+function migrateBeforeV5(values){
+ const out={...values};
+ if(out.dx_8_0===true){out.dx_8_1=true;out.dx_8_0=false;}
+ const text=String(out.ameliyat||"").trim();
+ if(text)out.surgeryGeneralNote=[out.surgeryGeneralNote,text].filter(Boolean).join("\n");
+ if(out.oz_1_2===true){
+  const src="surgeryPick_1";
+  makeEntry("surgery",null,src);
+  out[src]=true;out["surg_"+entrySequence+"_name"]=SURGERY_OPTIONS[1];
+  if(out.oz_1_2_note)out["surg_"+entrySequence+"_date"]=String(out.oz_1_2_note);
+ }
+ return out;
+}
 function refreshEntryCounts(){
  renderSelectedDiagnoses();
  for(const type of ["diagnosis","medication","surgery"])updateEntryNumbers(type);
@@ -545,7 +558,7 @@ function toast(message,bad=false){
 }
 function save(manual=false){
  try{
-  sessionStorage.setItem(STORE,JSON.stringify({version:4,values:readData(),entries:{diagnosis:entryIds("diagnosis"),medication:entryIds("medication")},riskOverrides,confirmed,active:step,savedAt:new Date().toISOString()}));
+  sessionStorage.setItem(STORE,JSON.stringify({version:5,values:readData(),entries:{diagnosis:entryIds("diagnosis"),medication:entryIds("medication"),surgery:entryIds("surgery")},surgerySources:surgeryLinks(),riskOverrides,confirmed,active:step,savedAt:new Date().toISOString()}));
   if(manual)toast("✓ Geçici taslak kaydedildi");
  }catch(e){if(manual)toast("Kaydedilemedi: tarayıcı depolaması kullanılamıyor",true);}
  refreshTabs();
@@ -553,7 +566,7 @@ function save(manual=false){
 function resetPage(){
  if(!confirm((step+1)+". sekmedeki bütün yanıtlar silinecek. Emin misiniz?"))return;
  fieldsOnPage(step).forEach(el=>{if(el.type==="checkbox"||el.type==="radio")el.checked=false;else el.value="";});
- if(step===0){removeEntries("diagnosis");removeEntries("medication");initializeFirstPageDefaults();}
+ if(step===0){for(const type of ["diagnosis","medication","surgery"])removeEntries(type);initializeFirstPageDefaults();}
  if(step===1)riskOverrides={};
  updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
  delete confirmed[step];save();toast("Sekme sıfırlandı");
@@ -561,7 +574,7 @@ function resetPage(){
 function resetAll(){
  if(!confirm("Bütün İlk Muayene Formu sıfırlanacak. Tüm sekmelerdeki yanıtlar silinecek. Emin misiniz?"))return;
  document.querySelectorAll("[data-field]").forEach(el=>{if(el.type==="checkbox"||el.type==="radio")el.checked=false;else el.value="";});
- removeEntries("diagnosis");removeEntries("medication");
+ for(const type of ["diagnosis","medication","surgery"])removeEntries(type);
  initializeFirstPageDefaults();riskOverrides={};updateSexSpecific();syncOsteoporosisRisk();
  confirmed={};try{sessionStorage.removeItem(STORE);}catch(e){}
  go(0);refreshTabs();toast("Tüm form sıfırlandı");
@@ -675,12 +688,19 @@ function initialize(){
  build();
  let restored;
  try{restored=JSON.parse(sessionStorage.getItem(STORE)||"null");}catch(e){restored=null;}
- if([2,3,4].includes(restored?.version)){
+ if([2,3,4,5].includes(restored?.version)){
   for(const type of ["diagnosis","medication"])(restored.entries?.[type]||[]).slice(0,200).forEach(id=>makeEntry(type,id));
-  const previous=restored.version===4?restored.values||{}:migrateLegacyDraft(restored.values||{});
-  hydrate(previous);
+  if(restored.version===5){
+   const links=Array.isArray(restored.surgerySources)?restored.surgerySources:[];
+   (restored.entries?.surgery||[]).slice(0,200).forEach(id=>{
+    const source=links.find(item=>Number(item.id)===Number(id))?.source||"";
+    makeEntry("surgery",id,source);
+   });
+  }
+  const old=restored.version<4?migrateLegacyDraft(restored.values||{}):restored.values||{};
+  hydrate(restored.version===5?old:migrateBeforeV5(old));
   riskOverrides=restored.version>=3?restored.riskOverrides||{}:{};
-  confirmed=restored.version===4?restored.confirmed||{}:{};
+  confirmed=restored.version===5?restored.confirmed||{}:{};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }else if(restored?.version===1){
   const old=restored.values||{};
@@ -690,11 +710,11 @@ function initialize(){
    byId("diag_"+id+"_date").value=old["tanitarih_"+i]||"";
   }
   if((old.ilaclar||"").trim()){makeEntry("medication");byId("med_"+entrySequence+"_name").value=old.ilaclar;}
-  hydrate(migrateLegacyDraft(old));confirmed={};
+  hydrate(migrateBeforeV5(migrateLegacyDraft(old)));confirmed={};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }
  initializeFirstPageDefaults();
- updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
+ updateSexSpecific();syncOsteoporosisRisk();syncSurgeryDateInputs();refreshEntryCounts();
  for(let i=0;i<4;i++)byId("tab"+i).addEventListener("click",()=>{save();go(i);save();});
  byId("prev").addEventListener("click",()=>{save();go(step-1);save();});
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
@@ -721,6 +741,8 @@ function initialize(){
  byId("pages").addEventListener("click",event=>{
   const catalogToggle=event.target.closest("[data-toggle-disease-list]");
   if(catalogToggle){const catalog=byId("historyCatalog");catalog.open=!catalog.open;syncHistoryPicker();return;}
+  const surgeryToggle=event.target.closest("[data-toggle-surgery-list]");
+  if(surgeryToggle){const catalog=byId("surgeryCatalog");catalog.open=!catalog.open;syncSurgeryPicker();return;}
   const deselect=event.target.closest("[data-unselect-disease]");
   if(deselect){
    const checkbox=byId(deselect.dataset.unselectDisease);
@@ -732,10 +754,12 @@ function initialize(){
   const remove=event.target.closest("[data-remove-entry]");
   if(remove){
    const card=remove.closest(".dynamic-entry"),type=card.dataset.entryType;
-   card.remove();updateEntryNumbers(type);save();toast("Kayıt silindi");
+   if(type==="surgery"&&card.dataset.surgerySource){const choice=byId(card.dataset.surgerySource);if(choice)choice.checked=false;}
+   card.remove();refreshEntryCounts();save();toast("Kayıt silindi");
   }
  });
  byId("historyCatalog").addEventListener("toggle",syncHistoryPicker);
+ byId("surgeryCatalog").addEventListener("toggle",syncSurgeryPicker);
  byId("pages").addEventListener("input",event=>{
   if(event.target.id==="tc")event.target.value=event.target.value.replace(/\D/g,"").slice(0,11);
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
@@ -743,6 +767,8 @@ function initialize(){
  });
  byId("pages").addEventListener("change",event=>{
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
+  if(event.target.matches("[data-surgery-choice]"))addSurgeryFromPicker(event.target);
+  if(event.target.id?.startsWith("surg_")&&event.target.id.endsWith("_unknown"))syncSurgeryDateInputs();
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
  });
  window.addEventListener("pagehide",()=>save());
