@@ -410,13 +410,15 @@ function resetPage(){
  if(!confirm((step+1)+". sekmedeki bütün yanıtlar silinecek. Emin misiniz?"))return;
  fieldsOnPage(step).forEach(el=>{if(el.type==="checkbox"||el.type==="radio")el.checked=false;else el.value="";});
  if(step===0){removeEntries("diagnosis");removeEntries("medication");initializeFirstPageDefaults();}
+ if(step===1)riskOverrides={};
+ updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
  delete confirmed[step];save();toast("Sekme sıfırlandı");
 }
 function resetAll(){
  if(!confirm("Bütün İlk Muayene Formu sıfırlanacak. Tüm sekmelerdeki yanıtlar silinecek. Emin misiniz?"))return;
  document.querySelectorAll("[data-field]").forEach(el=>{if(el.type==="checkbox"||el.type==="radio")el.checked=false;else el.value="";});
  removeEntries("diagnosis");removeEntries("medication");
- initializeFirstPageDefaults();
+ initializeFirstPageDefaults();riskOverrides={};updateSexSpecific();syncOsteoporosisRisk();
  confirmed={};try{sessionStorage.removeItem(STORE);}catch(e){}
  go(0);refreshTabs();toast("Tüm form sıfırlandı");
 }
@@ -427,8 +429,11 @@ function formatSummaryValue(raw,type){
  return s;
 }
 function summarizedBlockItems(block){
+ if(block.querySelector("#diagnosisList"))return ["Tanılar ve Hastalıklar: "+(diagnosisNames().join(", ")||"Kayıt yok"),"Hastalık sayısı: "+diagnosisNames().length];
+ if(block.querySelector("#medicationList"))return ["İlaçlar: "+(dynamicList("medication").join(", ")||"Kayıt yok"),"İlaç sayısı: "+dynamicList("medication").length];
  const items=[];
  block.querySelectorAll(".dynamic-entry,.checknote,.field").forEach(item=>{
+  if(item.closest("[data-sex-only][hidden], #menopozDetail[hidden]"))return;
   if(item.classList.contains("field")&&item.closest(".dynamic-entry"))return;
   if(item.classList.contains("dynamic-entry")){
    const bits=Array.from(item.querySelectorAll(".field")).map(field=>{
@@ -505,9 +510,11 @@ function initialize(){
  build();
  let restored;
  try{restored=JSON.parse(sessionStorage.getItem(STORE)||"null");}catch(e){restored=null;}
- if(restored?.version===2){
+ if(restored?.version===2||restored?.version===3){
   for(const type of ["diagnosis","medication"])(restored.entries?.[type]||[]).slice(0,200).forEach(id=>makeEntry(type,id));
-  hydrate(restored.values);confirmed=restored.confirmed||{};
+  hydrate(restored.version===2?migrateOldValues(restored.values||{}):restored.values||{});
+  riskOverrides=restored.version===3?restored.riskOverrides||{}:{};
+  confirmed=restored.version===3?restored.confirmed||{}:{};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }else if(restored?.version===1){
   const old=restored.values||{};
@@ -517,10 +524,11 @@ function initialize(){
    byId("diag_"+id+"_date").value=old["tanitarih_"+i]||"";
   }
   if((old.ilaclar||"").trim()){makeEntry("medication");byId("med_"+entrySequence+"_name").value=old.ilaclar;}
-  hydrate(old);confirmed={};
+  hydrate(migrateOldValues(old));confirmed={};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }
  initializeFirstPageDefaults();
+ updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
  for(let i=0;i<4;i++)byId("tab"+i).addEventListener("click",()=>{save();go(i);save();});
  byId("prev").addEventListener("click",()=>{save();go(step-1);save();});
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
@@ -529,6 +537,7 @@ function initialize(){
  byId("printSummary").addEventListener("click",printOneSummary);
  byId("printSummaryBottom").addEventListener("click",printOneSummary);
  window.addEventListener("beforeprint",()=>{
+  updateCompactPrintLists();
   const catalog=byId("historyCatalog");if(catalog){catalog.dataset.wasOpen=String(catalog.open);catalog.open=true;}
   document.querySelectorAll("textarea[data-field]").forEach(el=>{el.dataset.previousHeight=el.style.height||"";el.style.height=el.scrollHeight+"px";});
  });
@@ -554,9 +563,13 @@ function initialize(){
  });
  byId("pages").addEventListener("input",event=>{
   if(event.target.id==="tc")event.target.value=event.target.value.replace(/\D/g,"").slice(0,11);
-  updateDerivedFields();refreshEntryCounts();save();
+  if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
+  updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
  });
- byId("pages").addEventListener("change",()=>{updateDerivedFields();refreshEntryCounts();save();});
+ byId("pages").addEventListener("change",event=>{
+  if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
+  updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
+ });
  window.addEventListener("pagehide",()=>save());
  go(step);
 }
