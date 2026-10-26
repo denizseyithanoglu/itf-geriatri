@@ -467,3 +467,75 @@ button.action.danger:hover{background:#ffebe7}
  .entry-surgery,.surgery-catalog{display:none!important}
  .surgery-unknown-label{display:none!important}
 }
+
+/* Selected disease: number | diagnosis | free-form date | remove. */
+@media screen{
+ .selected-diagnosis{
+  display:grid;grid-template-columns:28px minmax(0,1.9fr) minmax(180px,.94fr) 34px;
+  align-items:center;gap:10px;min-height:60px;padding:8px 10px;
+  font-family:inherit;font-size:.83rem
+ }
+ .selected-diagnosis-name{overflow-wrap:anywhere;min-width:0}
+ .selected-diagnosis-date{display:flex;flex-direction:column;gap:3px;min-width:0}
+ .selected-diagnosis-date span{font-size:.73rem;font-weight:750;color:#345b73}
+ .selected-diagnosis-date input{
+  display:block;width:100%;min-width:0;min-height:37px;padding:6px 8px;
+  border:1px solid #adc3d1;border-radius:7px;background:#fff;
+  color:#243d50;font:inherit;font-size:.81rem
+ }
+ .selected-diagnosis-date input::placeholder{color:#8798a4}
+ .selected-diagnosis button{width:34px;height:36px;font:700 .9rem/1 system-ui,-apple-system,"Segoe UI",sans-serif}
+ /* Tobacco/alcohol should use the same sizing and typography as the other form controls. */
+ .supplementary-habits .habit-columns{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:16px
+ }
+ .supplementary-habits .habit-columns>div{display:grid;gap:8px;align-content:start}
+ .supplementary-habits .field-label{
+  display:block;margin-bottom:1px;font-size:.85rem;font-weight:750;color:#344e61
+ }
+ .supplementary-habits .radio-line{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;align-items:stretch;width:100%
+ }
+ .supplementary-habits .radio-line label{
+  display:flex;align-items:center;justify-content:flex-start;
+  box-sizing:border-box;min-width:0;width:100%;min-height:52px;height:100%;
+  gap:9px;padding:9px 12px;border:1px solid #c9dbe7;
+  border-radius:9px;background:#fff;color:#284b63;
+  font-family:inherit;font-size:.84rem;font-weight:680;line-height:1.35;
+  white-space:normal;word-break:normal;overflow-wrap:normal;cursor:pointer;
+  transition:background .15s,border-color .15s
+ }
+ .supplementary-habits .radio-line label:has(input:checked){
+  background:#e8f2fa;border-color:#4980ad;color:#1c517b;
+  box-shadow:inset 0 0 0 1px #91b9d8
+ }
+ .supplementary-habits .radio-line input[type="radio"]{
+  appearance:auto;display:block;flex:0 0 17px;
+  box-sizing:border-box;width:17px;height:17px;min-width:17px;min-height:17px;
+  padding:0;margin:0;accent-color:#27658d;transform:none
+ }
+ .supplementary-habits .radio-line label:has(input:focus-visible){
+  outline:3px solid #cf9623;outline-offset:2px
+ }
+ .supplementary-habits .field input{
+  font:inherit;font-size:.87rem;min-height:40px;width:100%
+ }
+}
+@media screen and (max-width:750px){
+ .selected-diagnosis{
+  grid-template-columns:24px minmax(0,1fr) 32px;
+  gap:7px;padding:8px
+ }
+ .selected-diagnosis .selected-diagnosis-date{
+  grid-column:2;grid-row:2
+ }
+ .selected-diagnosis>button{grid-column:3;grid-row:1}
+}
+@media screen and (max-width:450px){
+ .supplementary-habits .radio-line{gap:6px}
+ .supplementary-habits .radio-line label{padding:8px 6px;min-height:64px;gap:5px;font-size:.73rem}
+ .supplementary-habits .radio-line input[type="radio"]{
+  width:16px;height:16px;min-width:16px;min-height:16px;flex-basis:16px
+ }
+}
