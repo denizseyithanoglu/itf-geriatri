@@ -402,3 +402,48 @@ button.action.danger:hover{background:#ffebe7}
  .female-menopause .field{margin-top:2px}
  body.printing-summary .compact-print-list{display:none!important}
 }
+
+/* Compact diagnosis catalog: disease names and checkboxes only. */
+.disease-catalog{display:block;margin:13px 0 14px;background:#fff;border:1px solid #c5d9e8;border-radius:9px}
+.disease-catalog>summary{min-height:39px;padding:9px 12px;font-size:.8rem;background:#eef5f9}
+.disease-catalog>.history-catalog-content{padding:10px 12px;display:grid;gap:11px}
+.disease-group{min-width:0;border:1px solid #d6e3e9;border-radius:8px;margin:0;padding:8px 10px 11px}
+.disease-group legend{font-weight:800;font-size:.85rem;color:#234f70;padding:0 6px}
+.disease-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px 9px}
+.disease-option{display:flex;align-items:flex-start;gap:8px;font-size:.8rem;line-height:1.28;color:#2b465b;padding:6px 7px;border:1px solid transparent;border-radius:6px;cursor:pointer}
+.disease-option:hover{background:#f2f8fc;border-color:#d9eaf3}
+.disease-option:has(input:checked){background:#eaf5ef;border-color:#bad9c7;color:#1c593d;font-weight:730}
+.disease-option input{width:18px;height:18px;flex:0 0 auto;accent-color:#24714c;margin:0}
+.disease-option input:focus-visible{outline:3px solid #cf9623;outline-offset:2px}
+.disease-name{min-width:0;overflow-wrap:anywhere}
+.selected-diagnoses{display:grid;gap:5px;margin-bottom:8px}
+.selected-diagnoses[hidden]{display:none!important}
+.selected-diagnosis{display:grid;grid-template-columns:27px minmax(0,1fr) 33px;gap:9px;align-items:center;border-radius:7px;border:1px solid #c4dcca;background:#f0faf3;padding:7px 8px;font-size:.84rem;color:#1c5639;line-height:1.35}
+.selected-number{color:#2c5570;text-align:center;font-size:.94rem}
+.selected-diagnosis button{border:0;border-radius:5px;background:transparent;color:#a04238;font-size:.8rem;min-height:31px;cursor:pointer}
+.selected-diagnosis button:hover{background:#ffe9e5}
+.entry-footer .entry-buttons{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.entry-footer .entry-buttons .entry-catalog-toggle,.entry-footer .entry-buttons .entry-add{width:190px;max-width:100%;min-height:42px;min-width:0;margin:0;white-space:normal;line-height:1.25;font-size:.77rem}
+.entry-footer .entry-buttons .entry-catalog-toggle{border-color:#8bb2ca;background:#edf6fb}
+.entry-footer .entry-buttons .entry-catalog-toggle.is-open{background:#dcecf7;border-color:#6c9dbb}
+.entry-section+ .disease-catalog{margin-top:12px}
+.supplementary-habits{padding:10px 12px;background:#f8fbfe;border:1px solid #dce7ee;border-radius:8px}
+.supplementary-habits h4{font-size:.86rem;font-weight:800;color:#234f70;margin:0 0 8px}
+.block .entry-section+ .field{margin-top:11px}
+.block .entry-section+ .disease-catalog+ .field{margin-top:12px}
+@media(max-width:1050px){
+ .disease-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .entry-footer .entry-buttons .entry-catalog-toggle,.entry-footer .entry-buttons .entry-add{width:160px}
+}
+@media(max-width:650px){
+ .disease-options{grid-template-columns:1fr}
+ .entry-footer .entry-buttons{flex:1 1 100%;justify-content:stretch;gap:8px}
+ .entry-footer .entry-buttons .entry-catalog-toggle,.entry-footer .entry-buttons .entry-add{width:auto;flex:1;min-height:48px}
+ .disease-catalog>.history-catalog-content{padding:8px}
+}
+@media print{
+ .disease-catalog,.selected-diagnoses{display:none!important}
+ .entry-footer,.entry-section{display:none!important}
+ .supplementary-habits{padding:4px;border-color:#ccc;border-radius:0}
+ .supplementary-habits h4{font-size:8px;margin:0 0 3px}
+}
