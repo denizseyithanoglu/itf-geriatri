@@ -447,3 +447,23 @@ button.action.danger:hover{background:#ffebe7}
  .supplementary-habits{padding:4px;border-color:#ccc;border-radius:0}
  .supplementary-habits h4{font-size:8px;margin:0 0 3px}
 }
+
+/* Addable surgical history: operation name at left, date or "Hatırlamıyor" at right. */
+.entry-body .entry-fields.entry-surgery{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(145px,.85fr);gap:10px}
+.entry-surgery .entry-field-name{min-width:0}
+.entry-surgery .entry-field-date{min-width:0}
+.entry-surgery .entry-field-date>input{min-height:37px;width:100%}
+.entry-surgery .entry-field-date>input:disabled{background:#f3f5f5;color:#7e8990}
+.surgery-unknown-label{display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:.75rem;color:#41647a;cursor:pointer;font-weight:700}
+.surgery-unknown-label input{accent-color:#275a7b;width:17px;height:17px;flex:0 0 17px}
+.surgery-catalog{margin-top:13px}
+.surgery-catalog .disease-option{min-height:36px}
+@media(max-width:650px){
+ .entry-body .entry-fields.entry-surgery{grid-template-columns:1fr;gap:6px}
+ .entry-surgery .entry-field-date{max-width:none}
+ .surgery-unknown-label{min-height:30px}
+}
+@media print{
+ .entry-surgery,.surgery-catalog{display:none!important}
+ .surgery-unknown-label{display:none!important}
+}
