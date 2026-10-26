@@ -530,7 +530,7 @@ function migrateBeforeV5(values){
 }
 function refreshEntryCounts(){
  renderSelectedDiagnoses();
- for(const type of ["diagnosis","medication","surgery"])updateEntryNumbers(type);
+ for(const type of ["diagnosis","medication","surgery","preliminary"])updateEntryNumbers(type);
  updateCompactPrintLists();syncHistoryPicker();syncSurgeryPicker();
 }
 function initializeFirstPageDefaults(){
@@ -940,6 +940,32 @@ function setupWholeSummary(){
  });
 }
 
+function handleEntryKeyboardShortcut(event){
+ // Tab remains the browser's normal next-field shortcut. Enter on the final
+ // text field of a numbered row adds and focuses a new row instead.
+ if(event.key!=="Enter"||event.defaultPrevented||event.isComposing||
+    event.shiftKey||event.ctrlKey||event.altKey||event.metaKey||event.repeat)return;
+ const input=event.target;
+ if(!input?.matches?.('input[data-field]'))return;
+ const row=input.closest(".dynamic-entry");
+ let type=null;
+ if(row){
+  type=row.dataset.entryType;
+  if(!ENTRY_META[type])return;
+  const inputs=Array.from(row.querySelectorAll("input[data-field]"));
+  if(inputs[inputs.length-1]!==input)return;
+ }else if(input.matches("[data-disease-date]")){
+  // The selected-disease table also has a second (date) text box.
+  type="diagnosis";
+ }else return;
+ event.preventDefault();
+ makeEntry(type);
+ refreshEntryCounts();
+ save();
+ const meta=ENTRY_META[type];
+ byId(meta.prefix+"_"+entrySequence+"_name")?.focus();
+}
+
 function initialize(){
  build();
  let restored;
@@ -1006,6 +1032,7 @@ function initialize(){
   if(current<3){go(current+1);save();toast(filled?"✓ "+(current+1)+". sekme kaydedildi; sonraki sekmeye geçildi":"Boş sekme geçildi; tamamlandı olarak işaretlenmedi");}
   else toast(filled?"✓ Son sekme kaydedildi":"Son sekme boş olarak bırakıldı");
  });
+ byId("pages").addEventListener("keydown",handleEntryKeyboardShortcut);
  byId("pages").addEventListener("click",event=>{
   const reset=event.target.closest("[data-reset-section]");
   if(reset){resetSection(reset.closest(".block"));return;}
