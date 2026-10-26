@@ -789,9 +789,53 @@ function makeSummaryNode(tag,txt,cls=""){
  const node=document.createElement(tag);node.textContent=txt;
  if(cls)node.className=cls;return node;
 }
-function buildPrintSummary(i){
+function summarySections(i){
+ return Array.from(byId("page"+i).querySelectorAll(".block")).map(block=>({
+  title:block.querySelector("h3")?.textContent?.trim()||"Değerlendirme",
+  items:summarizedBlockItems(block)
+ })).filter(section=>section.items.length);
+}
+function summaryAsText(i=null){
+ const indices=i===null?[0,1,2,3]:[i];
+ const lines=["İTF Geriatri — Online İlk Muayene Formu",
+  i===null?"BÜTÜN FORM ÖZETİ":(i+1)+". SEKME ÖZETİ — "+LABELS[i],
+  "Hazırlanma: "+new Date().toLocaleString("tr-TR")];
+ const name=byId("ad")?.value.trim()||"",protocol=byId("proto")?.value.trim()||"";
+ const date=byId("basvuru")?.value||"";
+ if(name)lines.push("Hasta: "+name);
+ if(protocol)lines.push("Protokol: "+protocol);
+ if(date)lines.push("Başvuru: "+formatSummaryValue(date,"date"));
+ for(const num of indices){
+  const sections=summarySections(num);
+  if(i===null)lines.push("","\u2501 ".repeat(4)+(num+1)+". "+LABELS[num]+" \u2501".repeat(4));
+  if(!sections.length){lines.push("Değerlendirme girilmemiş.");continue;}
+  for(const section of sections)lines.push("","— "+section.title+" —",...section.items.map(item=>"• "+item));
+ }
+ lines.push("","Not: Listelenmeyen bulgular normal veya negatif kabul edilmemelidir.");
+ return lines.join("\n");
+}
+async function copySummaryText(content){
+ let success=false;
+ try{
+  if(navigator.clipboard&&window.isSecureContext){
+   await navigator.clipboard.writeText(content);success=true;
+  }
+ }catch(error){}
+ if(!success){
+  try{
+   const area=document.createElement("textarea");
+   area.value=content;area.setAttribute("aria-hidden","true");
+   area.style.position="fixed";area.style.left="-9999px";
+   document.body.appendChild(area);area.select();
+   success=!!document.execCommand("copy");area.remove();
+  }catch(error){}
+ }
+ toast(success?"✓ Özet panoya kopyalandı":"Özet kopyalanamadı; tarayıcının pano iznini kontrol edin.",!success);
+}
+function copyOneSummary(){return copySummaryText(summaryAsText(step));}
+function buildPrintSummary(i=null){
  const sheet=byId("summaryPrintSheet");sheet.replaceChildren();
- sheet.appendChild(makeSummaryNode("h1",(i+1)+". Sekme Özeti — "+LABELS[i]));
+ sheet.appendChild(makeSummaryNode("h1",i===null?"Bütün Form Özeti":(i+1)+". Sekme Özeti — "+LABELS[i]));
  sheet.appendChild(makeSummaryNode("p","İTF Geriatri · Online İlk Muayene Formu · "+new Date().toLocaleString("tr-TR"),"summary-subtitle"));
  const meta=document.createElement("div");meta.className="summary-meta";
  const name=byId("ad")?.value.trim(),protocol=byId("proto")?.value.trim(),date=byId("basvuru")?.value;
@@ -800,27 +844,76 @@ function buildPrintSummary(i){
  if(date)meta.appendChild(makeSummaryNode("span","Başvuru: "+formatSummaryValue(date,"date")));
  if(meta.children.length)sheet.appendChild(meta);
  let total=0;
- byId("page"+i).querySelectorAll(".block").forEach(block=>{
-  const items=summarizedBlockItems(block);
-  if(!items.length)return;
-  total+=items.length;
-  const section=document.createElement("section");
-  section.appendChild(makeSummaryNode("h2",block.querySelector("h3")?.textContent||"Değerlendirme"));
-  const ul=document.createElement("ul");
-  for(const value of items)ul.appendChild(makeSummaryNode("li",value));
-  section.appendChild(ul);sheet.appendChild(section);
- });
- if(!total)sheet.appendChild(makeSummaryNode("p","Bu sekmede henüz girilmiş değerlendirme bulunmuyor.","summary-empty"));
+ const numbers=i===null?[0,1,2,3]:[i];
+ for(const num of numbers){
+  if(i===null)sheet.appendChild(makeSummaryNode("h2",(num+1)+". "+LABELS[num],"summary-tab-heading"));
+  for(const entry of summarySections(num)){
+   total+=entry.items.length;
+   const section=document.createElement("section");
+   section.appendChild(makeSummaryNode(i===null?"h3":"h2",entry.title));
+   const ul=document.createElement("ul");
+   for(const value of entry.items)ul.appendChild(makeSummaryNode("li",value));
+   section.appendChild(ul);sheet.appendChild(section);
+  }
+ }
+ if(!total)sheet.appendChild(makeSummaryNode("p","Formda henüz girilmiş değerlendirme bulunmuyor.","summary-empty"));
  sheet.appendChild(makeSummaryNode("p","Yalnızca işaretlenen veya bilgi girilen alanlar listelenmiştir. Listelenmeyen bulgular normal veya negatif kabul edilmemelidir.","summary-note"));
 }
-function printOneSummary(){
- save();
- buildPrintSummary(step);
+function printSummary(i){
+ if(!save())return;
+ buildPrintSummary(i);
  document.body.classList.add("printing-summary");
- window.print();
+ try{window.print();}
+ catch(error){
+  document.body.classList.remove("printing-summary");
+  toast("Yazdırma başlatılamadı. Tarayıcı ayarlarını kontrol edin.",true);
+ }
 }
+function printOneSummary(){printSummary(step);}
 function printWholeForm(){
- save();document.body.classList.remove("printing-summary");window.print();
+ if(!save())return;
+ document.body.classList.remove("printing-summary");
+ try{window.print();}
+ catch(error){toast("Yazdırma başlatılamadı.",true);}
+}
+function renderWholeSummary(){
+ const body=byId("wholeSummaryBody");
+ body.replaceChildren();
+ const heading=makeSummaryNode("p","İTF Geriatri — Online İlk Muayene Formu","summary-overview-heading");
+ body.appendChild(heading);
+ const name=byId("ad")?.value.trim();
+ if(name)body.appendChild(makeSummaryNode("p","Hasta: "+name));
+ for(let i=0;i<4;i++){
+  const section=document.createElement("section");
+  section.appendChild(makeSummaryNode("h3",(i+1)+". "+LABELS[i]));
+  const entries=summarySections(i);
+  if(!entries.length)section.appendChild(makeSummaryNode("p","Henüz doldurulmadı.","summary-empty"));
+  for(const entry of entries){
+   section.appendChild(makeSummaryNode("h4",entry.title));
+   const ul=document.createElement("ul");
+   for(const item of entry.items)ul.appendChild(makeSummaryNode("li",item));
+   section.appendChild(ul);
+  }
+  body.appendChild(section);
+ }
+}
+function openWholeSummary(){
+ if(!save())return;
+ renderWholeSummary();
+ const dialog=byId("wholeSummaryDialog");
+ if(typeof dialog.showModal==="function")dialog.showModal();
+ else{toast("Tarayıcı özet penceresini açamıyor. Yazdırma ile devam edin.",true);}
+}
+function setupWholeSummary(){
+ byId("wholeSummary").addEventListener("click",openWholeSummary);
+ const dialog=byId("wholeSummaryDialog");
+ byId("wholeSummaryClose").addEventListener("click",()=>dialog.close());
+ dialog.addEventListener("click",e=>{if(e.target===dialog)dialog.close();});
+ byId("wholeSummaryCopy").addEventListener("click",()=>copySummaryText(summaryAsText(null)));
+ byId("wholeSummaryPrint").addEventListener("click",()=>{
+  dialog.close();
+  printSummary(null);
+ });
 }
 
 function initialize(){
@@ -854,6 +947,10 @@ function initialize(){
  }
  initializeFirstPageDefaults();
  updateSexSpecific();syncOsteoporosisRisk();syncSurgeryDateInputs();refreshEntryCounts();
+ if(restored?.savedAt){
+  const when=new Date(restored.savedAt);
+  if(!Number.isNaN(when.getTime()))saveFeedback("✓ Geçici taslak yüklendi · "+when.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}),"success");
+ }
  for(let i=0;i<4;i++)byId("tab"+i).addEventListener("click",()=>{save();go(i);save();});
  byId("prev").addEventListener("click",()=>{save();go(step-1);save();});
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
@@ -861,6 +958,7 @@ function initialize(){
  byId("print").addEventListener("click",printWholeForm);
  byId("printSummaryBottom").addEventListener("click",printOneSummary);
  byId("copySummaryBottom").addEventListener("click",copyOneSummary);
+ setupWholeSummary();
  window.addEventListener("beforeprint",()=>{
   updateCompactPrintLists();
   const catalog=byId("historyCatalog");if(catalog){catalog.dataset.wasOpen=String(catalog.open);catalog.open=true;}
