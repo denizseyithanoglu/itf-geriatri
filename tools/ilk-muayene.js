@@ -349,14 +349,29 @@ function checkedDiseases(){
   name:el.closest(".disease-option")?.querySelector(".disease-name")?.textContent.trim()||"Hastalık"
  }));
 }
-function selectedHistory(){return checkedDiseases().map(item=>item.name);}
+function selectedHistory(){
+ return checkedDiseases().map(item=>{
+  const date=byId("dxdate_"+item.id)?.value.trim()||"";
+  return item.name+(date?" ("+date+")":"");
+ });
+}
 function renderSelectedDiagnoses(){
  const list=byId("selectedDiagnosisList");if(!list)return;
+ // Reuse entered dates whenever the list is rebuilt after an unrelated field changes.
+ const dates=Object.fromEntries(Array.from(list.querySelectorAll("[data-disease-date]"))
+  .map(input=>[input.id,input.value]));
  const selections=checkedDiseases();
- list.innerHTML=selections.map((item,i)=>'<div class="selected-diagnosis">'+
-  '<strong class="selected-number">'+(i+1)+'.</strong>'+
-  '<span>'+esc(item.name)+'</span>'+
-  '<button type="button" data-unselect-disease="'+esc(item.id)+'" aria-label="'+esc(item.name)+' seçimini kaldır" title="Seçimi kaldır">✕</button></div>').join("");
+ list.innerHTML=selections.map((item,i)=>{
+  const id="dxdate_"+item.id;
+  return '<div class="selected-diagnosis">'+
+   '<strong class="selected-number">'+(i+1)+'.</strong>'+
+   '<span class="selected-diagnosis-name">'+esc(item.name)+'</span>'+
+   '<label class="selected-diagnosis-date"><span>Tanı tarihi</span>'+
+   '<input type="text" data-field data-disease-date id="'+id+'" value="'+esc(dates[id]||"")+'"'+
+   ' placeholder="Yıl / tarih / Hatırlamıyor" autocomplete="off"'+
+   ' aria-label="'+esc(item.name)+' tanı tarihi veya açıklaması"></label>'+
+   '<button type="button" data-unselect-disease="'+esc(item.id)+'" aria-label="'+esc(item.name)+' seçimini kaldır" title="Seçimi kaldır">✕</button></div>';
+ }).join("");
  list.hidden=!selections.length;
 }
 function syncHistoryPicker(){
@@ -497,7 +512,7 @@ function refreshEntryCounts(){
 }
 function initializeFirstPageDefaults(){
  if(!byId("basvuru").value)byId("basvuru").value=localToday();
- for(const type of ["diagnosis","medication"])if(!entryIds(type).length)makeEntry(type);
+ for(const type of ["diagnosis","medication","surgery"])if(!entryIds(type).length)makeEntry(type);
  updateDerivedFields();refreshEntryCounts();
 }
 
@@ -519,6 +534,12 @@ function hydrate(values){
   if(!el||!el.hasAttribute("data-field"))continue;
   if(el.type==="checkbox"||el.type==="radio")el.checked=value===true;
   else el.value=String(value??"");
+ }
+ // Dynamic diagnosis-date inputs are created after their checkboxes are hydrated.
+ renderSelectedDiagnoses();
+ for(const [key,value] of Object.entries(values||{})){
+  if(!/^dxdate_dx_\d+_\d+$/.test(key))continue;
+  const date=byId(key);if(date)date.value=String(value??"");
  }
 }
 function signature(i){return JSON.stringify(fieldsOnPage(i).map(el=>[el.id||el.name+"::"+el.value,el.type==="checkbox"||el.type==="radio"?el.checked:el.value]));}
@@ -761,11 +782,14 @@ function initialize(){
  byId("historyCatalog").addEventListener("toggle",syncHistoryPicker);
  byId("surgeryCatalog").addEventListener("toggle",syncSurgeryPicker);
  byId("pages").addEventListener("input",event=>{
+  // Keep the active date input mounted so users can type normally without losing focus.
+  if(event.target.matches("[data-disease-date]")){updateCompactPrintLists();save();return;}
   if(event.target.id==="tc")event.target.value=event.target.value.replace(/\D/g,"").slice(0,11);
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
  });
  byId("pages").addEventListener("change",event=>{
+  if(event.target.matches("[data-disease-date]")){updateCompactPrintLists();save();return;}
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
   if(event.target.matches("[data-surgery-choice]"))addSurgeryFromPicker(event.target);
   if(event.target.id?.startsWith("surg_")&&event.target.id.endsWith("_unknown"))syncSurgeryDateInputs();
