@@ -139,10 +139,10 @@ function entrySection(type){
  const id=ENTRY_META[type].container,output=type==="diagnosis"?"diagnosisCount":type==="medication"?"medicationCount":"surgeryCount";
  const toggle=type==="diagnosis"?'<button type="button" class="action entry-catalog-toggle" data-toggle-disease-list aria-controls="historyCatalog" aria-expanded="true">Hastalık Listesinden Seçip Ekle</button>':
   type==="surgery"?'<button type="button" class="action entry-catalog-toggle" data-toggle-surgery-list aria-controls="surgeryCatalog" aria-expanded="true">Ameliyat Listesinden Seç</button>':"";
- const colHeader=type==="diagnosis"||type==="surgery"?
+ const colHeader=true?
  '<div class="entry-column-head" aria-hidden="true"><span></span>'+
- '<span>'+esc(type==="diagnosis"?"Hastalık / Tanı":"Geçirdiği Ameliyat")+'</span>'+
- '<span>'+esc(type==="diagnosis"?"Tanı Tarihi":"Tarih / Yıl")+'</span><span></span></div>':"";
+ '<span>'+esc(type==="diagnosis"?"Hastalık / Tanı":type==="surgery"?"Geçirdiği Ameliyat":"İlaç Adı")+'</span>'+
+ '<span>'+esc(type==="diagnosis"?"Tanı Tarihi":type==="surgery"?"Tarih / Yıl":"Doz / Kullanım Sıklığı")+'</span><span></span></div>':"";
  return '<div class="entry-section entry-section-'+type+'">'+colHeader+
  (type==="diagnosis"?'<div id="selectedDiagnosisList" class="selected-diagnoses" aria-live="polite"></div>':"")+
  '<div id="'+id+'" class="entry-list"></div>'+
