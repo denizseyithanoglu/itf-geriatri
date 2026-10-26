@@ -23,6 +23,7 @@
 <button type="button" class="action" id="print">Bütün Formu Yazdır</button>
 <button type="button" class="action danger" id="resetAll">Bütün Formu Sıfırla</button>
 </div>
+<div id="saveStatus" class="save-feedback" role="status" aria-live="polite">Henüz elle kaydedilmedi.</div>
 <p class="mini-note">Sarı: doldurulmaya başlandı. Yeşil: sekme tamamlandı olarak işaretlendi. Boş alanlar değerlendirilmedi anlamına gelir; “Normal” kabul edilmez.</p>
 </aside>
 <div class="content" id="content"><div id="pages">
@@ -31,11 +32,31 @@
 <section class="page" id="page2" role="tabpanel" aria-labelledby="tab2" hidden></section>
 <section class="page" id="page3" role="tabpanel" aria-labelledby="tab3" hidden></section>
 </div><nav class="prevnext section-navigation" aria-label="Sekme işlemleri ve geçiş">
+<button type="button" class="action" id="prev"><span aria-hidden="true">←</span> Önceki Sekme</button>
+<button type="button" class="action" id="next">Sonraki Sekme <span aria-hidden="true">→</span></button>
 <button type="button" class="action" id="printSummaryBottom">Sekme Özeti Yazdır</button>
-<button type="button" class="action danger-lite" id="resetPageBottom">Sekmeyi Sıfırla</button>
-<button type="button" class="action" id="prev">Önceki Sekme</button>
+<button type="button" class="action" id="copySummaryBottom">Sekme Özeti Kopyala</button>
 <button type="button" class="action main" id="markComplete">Sekmeyi Kaydet ve Geç</button>
-<button type="button" class="action" id="next">Sonraki Sekme</button>
+<button type="button" class="action danger" id="resetPageBottom">Sekmeyi Sıfırla</button>
 </nav></div>
 </div></main><article id="summaryPrintSheet" class="summary-sheet" aria-label="Sekme özeti yazdırma alanı"></article><div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<dialog id="resetConfirmDialog" class="reset-dialog" aria-labelledby="resetDialogTitle" aria-describedby="resetDialogDescription">
+<div class="reset-dialog-icon" aria-hidden="true">!</div>
+<h2 id="resetDialogTitle">Sıfırlama işlemi</h2>
+<p id="resetDialogDescription"></p>
+<div id="resetStageOne" class="reset-stage">
+<p class="reset-warning"><strong>Dikkat:</strong> Bu işlem ilgili bilgileri siler ve geri alınamaz.</p>
+<div class="reset-dialog-actions">
+<button type="button" class="action" id="resetCancelFirst">Vazgeç</button>
+<button type="button" class="action danger" id="resetContinue">Devam Et</button>
+</div>
+</div>
+<div id="resetStageTwo" class="reset-stage" hidden>
+<p class="reset-warning reset-warning-strong"><strong>Son onay:</strong> Verilerin silinmesini gerçekten onaylıyor musunuz?</p>
+<div class="reset-dialog-actions">
+<button type="button" class="action" id="resetCancelSecond">Vazgeç</button>
+<button type="button" class="action danger" id="resetConfirmFinal">Evet, Sıfırla</button>
+</div>
+</div>
+</dialog>
 </body></html>
