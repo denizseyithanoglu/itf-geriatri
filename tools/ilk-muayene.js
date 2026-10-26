@@ -37,11 +37,13 @@ function makeEntry(type,explicitId=null){
  const list=byId(conf.container);if(list.querySelector('[data-entry-id="'+id+'"]'))return;
  const row=document.createElement("div");row.className="dynamic-entry";
  row.dataset.entryType=type;row.dataset.entryId=String(id);
+ const fieldHTML=([field,label,inputType])=>'<div class="field entry-field-'+field+'"><label for="'+conf.prefix+'_'+id+'_'+field+'">'+esc(label)+'</label>'+
+ '<input id="'+conf.prefix+'_'+id+'_'+field+'" data-field type="'+inputType+'" autocomplete="off" placeholder="'+(field==="name"?(type==="diagnosis"?"Hastalık adı":"İlaç adı"):field==="date"?"örn. 2020":"")+'"></div>';
  row.innerHTML='<div class="entry-header"><strong class="entry-title"></strong>'+
+ (type==="medication"?'<div class="entry-date">'+fieldHTML(conf.fields.find(item=>item[0]==="date"))+'</div>':"")+
  '<button type="button" class="entry-remove" data-remove-entry aria-label="Kaydı sil">✕ Sil</button></div>'+
  '<div class="entry-fields '+(type==="medication"?"entry-med":"")+'">'+
- conf.fields.map(([field,label,inputType])=>'<div class="field"><label for="'+conf.prefix+'_'+id+'_'+field+'">'+esc(label)+'</label>'+
- '<input id="'+conf.prefix+'_'+id+'_'+field+'" data-field type="'+inputType+'" autocomplete="off" placeholder="'+(field==="name"?(type==="diagnosis"?"Hastalık adı":"İlaç adı"):"")+'"></div>').join("")+'</div>';
+ conf.fields.filter(item=>type!=="medication"||item[0]!=="date").map(fieldHTML).join("")+'</div>';
  list.appendChild(row);updateEntryNumbers(type);
 }
 function updateEntryNumbers(type){
@@ -65,8 +67,10 @@ function entrySection(type){
  const noun=type==="diagnosis"?"Hastalık":"İlaç",id=ENTRY_META[type].container;
  return '<div class="entry-section"><div id="'+id+'" class="entry-list"></div>'+
  '<p class="entry-empty">Henüz '+noun.toLocaleLowerCase("tr-TR")+' eklenmedi.</p>'+
+ '<div class="entry-footer">'+
+ '<div class="entry-stat"><span>'+noun+' Sayısı</span><output id="'+(type==="diagnosis"?"diagnosisCount":"medicationCount")+'">0</output></div>'+
  '<div class="entry-buttons"><button class="action entry-add" type="button" data-add-entry="'+type+'">+ '+noun+' Ekle</button></div>'+
- '<div class="entry-stat"><span>'+noun+' Sayısı</span><output id="'+(type==="diagnosis"?"diagnosisCount":"medicationCount")+'">0</output></div></div>';
+ '</div></div>';
 }
 
 function build(){
@@ -75,20 +79,19 @@ function build(){
   block("Başvuru ve Hasta Bilgileri",
    '<div class="patient-info">'+
     '<div class="patient-row patient-row-primary">'+
-     f("ad","Adı Soyadı")+
-     f("basvuru","Başvuru Tarihi","date")+
-     f("proto","Protokol No")+
      '<div class="field"><label for="tc">T.C. Kimlik No</label><input id="tc" data-field type="text" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" autocomplete="off" placeholder="11 haneli"></div>'+
-    '</div>'+
-    '<div class="patient-row patient-row-demography">'+
-     f("dogumyeri","Doğum Yeri")+
+     f("proto","Protokol No")+
+     f("basvuru","Başvuru Tarihi","date")+
      '<div class="field">'+
       '<label for="dogumtarihi">Doğum Tarihi (Gün / Ay / Yıl)</label>'+
       '<input data-field id="dogumtarihi" type="date" lang="tr-TR" autocomplete="bday">'+
       '<input id="dogumyili" data-field type="hidden" value="">'+
       '<span class="legacy-birth-hint" id="legacyBirthHint" hidden></span>'+
      '</div>'+
-     '<div class="field field-calculated"><label for="yas">Yaş</label><input data-field id="yas" type="text" readonly aria-label="Otomatik hesaplanan yaş" placeholder="—"></div>'+
+    '</div>'+
+    '<div class="patient-row patient-row-identity">'+
+     f("ad","Hastanın Adı Soyadı")+
+     '<div class="field field-calculated field-age"><label for="yas">Yaş</label><input data-field id="yas" type="text" inputmode="numeric" maxlength="3" size="3" readonly aria-label="Otomatik hesaplanan yaş" placeholder="—"></div>'+
      '<div class="field gender-field"><span class="field-label" id="genderTitle">Cinsiyet</span>'+
       '<div class="gender-options" role="group" aria-labelledby="genderTitle">'+
        '<label class="gender-choice female"><input data-field type="radio" name="cinsiyet" value="Kadın"><span class="gender-symbol" aria-hidden="true">♀</span> Kadın</label>'+
@@ -96,20 +99,21 @@ function build(){
       '</div>'+
      '</div>'+
     '</div>'+
+    '<div class="patient-row patient-row-contact">'+
+     f("dogumyeri","Doğum Yeri")+
+     area("adres","Adres","",2)+
+     f("telefon","Telefon No","tel")+
+    '</div>'+
     '<div class="patient-row patient-row-metrics">'+
-     f("meslegi","Mesleği")+
      '<div class="field"><label for="egitim">Eğitim Durumu</label><select id="egitim" data-field>'+
        '<option value="">Seçiniz</option><option>Okuryazar Değil</option><option>Okuryazar</option>'+
        '<option>İlkokul</option><option>Ortaokul</option><option>Lise</option>'+
        '<option>Ön Lisans</option><option>Lisans</option><option>Yüksek Lisans</option><option>Doktora</option>'+
       '</select></div>'+
+     f("meslegi","Mesleği")+
      f("boy","Boy (cm)","number","","cm")+
      f("kilo","Kilo (kg)","number","","kg")+
      '<div class="field field-calculated"><label for="bki">BKİ (kg/m²)</label><input id="bki" data-field type="text" readonly aria-label="Otomatik hesaplanan beden kitle indeksi" placeholder="—"></div>'+
-    '</div>'+
-    '<div class="patient-row patient-row-contact">'+
-     area("adres","Adres","",2)+
-     f("telefon","Telefon No","tel")+
     '</div>'+
    '</div>')+
   block("Tanılar ve Hastalıklar",entrySection("diagnosis"))+
