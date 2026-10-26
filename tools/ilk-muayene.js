@@ -90,7 +90,7 @@ function makeEntry(type,explicitId=null){
 function updateEntryNumbers(type){
  const list=byId(ENTRY_META[type].container);
  const rows=Array.from(list.querySelectorAll(".dynamic-entry"));
- rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1)+".";});
+ rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1+(type==="diagnosis"?checkedDiseases().length:0))+".";});
  const empty=list.parentElement.querySelector(".entry-empty");if(empty)empty.hidden=rows.length!==0;
  const filled=rows.filter(row=>row.querySelector('input[id$="_name"]')?.value.trim()).length;
  const checked=type==="diagnosis"?selectedHistory().length:0;
@@ -178,19 +178,18 @@ function build(){
    historyOptionList()+
    area("diagnosisGeneralNote","Hastalıklar – Genel Ek Açıklama","",2)+
    '<div id="diagnosisPrintList" class="compact-print-list" aria-hidden="true"></div>')+
-  block("Alerjiler, Dişler ve Yardımcı Araçlar",
+  block("Alerjiler, Alışkanlıklar, Dişler ve Yardımcı Araçlar",
    '<div class="supplementary-rows">'+
     '<div class="supplementary-row">'+selectField("alerji","Alerji",["Yok","Var"],"alerjiNot")+'</div>'+
+    '<div class="supplementary-habits"><h4>Sigara ve Alkol Kullanımı</h4><div class="habit-columns">'+
+     '<div>'+radio("sigaraDurum","Sigara Kullanımı",["Hiç kullanmadı","Bıraktı","Aktif kullanıyor"])+
+      f("sigaraMiktar","Miktar / süre / bırakma yılı")+'</div>'+
+     '<div>'+radio("alkolDurum","Alkol Kullanımı",["Yok","Bıraktı","Var"])+
+      f("alkolMiktar","Miktar / sıklık (örn. ünite/gün)")+'</div>'+
+    '</div></div>'+
     '<div class="supplementary-row">'+selectField("disDurumu","Dişler",["Doğal dişler","Eksik diş","Parsiyel protez","Total protez","Diğer"],"disNot")+'</div>'+
     '<div class="supplementary-row">'+selectField("gozluk","Gözlük",["Yok","Var"],"gozlukNot")+'</div>'+
     '<div class="supplementary-row">'+selectField("isitmeCihazi","İşitme Cihazı",["Yok","Var","Var ama kullanmıyor"],"isitmeNot")+'</div>'+
-   '</div>')+
-  block("Alışkanlıklar (Sigara ve Alkol)",
-   '<div class="habit-columns">'+
-    '<div>'+radio("sigaraDurum","Sigara Kullanımı",["Hiç kullanmadı","Bıraktı","Aktif kullanıyor"])+
-     f("sigaraMiktar","Miktar / süre / bırakma yılı")+'</div>'+
-    '<div>'+radio("alkolDurum","Alkol Kullanımı",["Yok","Bıraktı","Var"])+
-     f("alkolMiktar","Miktar / sıklık (örn. ünite/gün)")+'</div>'+
    '</div>')+
   block("Ameliyat Öyküsü",
    '<div class="surgery-check">'+check("Koroner bypass öyküsü","oz_1_2")+'</div>'+
@@ -314,14 +313,29 @@ function syncOsteoporosisRisk(){
   if(!riskOverrides[id]&&byId(id))byId(id).checked=value;
  }
 }
-function selectedHistory(){
+function checkedDiseases(){
  const catalog=byId("historyCatalog");if(!catalog)return [];
- return Array.from(catalog.querySelectorAll(".checknote")).filter(item=>item.querySelector('input[type="checkbox"]')?.checked)
-  .map(item=>{
-   const name=item.querySelector(".check-head span")?.textContent.trim()||"Tanı";
-   const date=item.querySelector(".note-input")?.value.trim()||"";
-   return name+(date?" ("+date+")":"");
-  });
+ return Array.from(catalog.querySelectorAll(".disease-option input:checked")).map(el=>({
+  id:el.id,
+  name:el.closest(".disease-option")?.querySelector(".disease-name")?.textContent.trim()||"Hastalık"
+ }));
+}
+function selectedHistory(){return checkedDiseases().map(item=>item.name);}
+function renderSelectedDiagnoses(){
+ const list=byId("selectedDiagnosisList");if(!list)return;
+ const selections=checkedDiseases();
+ list.innerHTML=selections.map((item,i)=>'<div class="selected-diagnosis">'+
+  '<strong class="selected-number">'+(i+1)+'.</strong>'+
+  '<span>'+esc(item.name)+'</span>'+
+  '<button type="button" data-unselect-disease="'+esc(item.id)+'" aria-label="'+esc(item.name)+' seçimini kaldır" title="Seçimi kaldır">✕</button></div>').join("");
+ list.hidden=!selections.length;
+}
+function syncHistoryPicker(){
+ const catalog=byId("historyCatalog");
+ const toggle=document.querySelector("[data-toggle-disease-list]");
+ if(!catalog||!toggle)return;
+ toggle.setAttribute("aria-expanded",String(catalog.open));
+ toggle.classList.toggle("is-open",catalog.open);
 }
 function dynamicList(type){
  const meta=ENTRY_META[type],list=byId(meta.container);if(!list)return [];
@@ -334,8 +348,7 @@ function dynamicList(type){
    return name+(date?" ("+date+")":"");
   }
   const dose=byId(meta.prefix+"_"+id+"_dose")?.value.trim()||"";
-  const note=byId(meta.prefix+"_"+id+"_note")?.value.trim()||"";
-  return name+(dose?" "+dose:"")+(note?" — "+note:"");
+  return name+(dose?" "+dose:"");
  }).filter(Boolean);
 }
 function diagnosisNames(){return [...selectedHistory(),...dynamicList("diagnosis")];}
@@ -361,7 +374,8 @@ function migrateOldValues(values){
 }
 
 function refreshEntryCounts(){
- updateEntryNumbers("diagnosis");updateEntryNumbers("medication");updateCompactPrintLists();
+ renderSelectedDiagnoses();updateEntryNumbers("diagnosis");updateEntryNumbers("medication");
+ updateCompactPrintLists();syncHistoryPicker();
 }
 function initializeFirstPageDefaults(){
  if(!byId("basvuru").value)byId("basvuru").value=localToday();
@@ -404,8 +418,7 @@ function refreshTabs(){
  byId("prev").disabled=step===0;byId("next").disabled=step===3;
  const historyCount=byId("historyCount");
  if(historyCount){
-  const selected=Array.from(byId("historyCatalog").querySelectorAll(".checknote")).filter(box=>
-   box.querySelector('input[type="checkbox"]')?.checked||box.querySelector(".note-input")?.value.trim()).length;
+  const selected=checkedDiseases().length;
   historyCount.textContent=selected?"("+selected+" kayıtlı bulgu)":"";
  }
  byId("printSummary").textContent=(step+1)+". Sekme Özetini Yazdır / PDF";
@@ -456,12 +469,12 @@ function formatSummaryValue(raw,type){
 }
 function summarizedBlockItems(block){
  if(block.querySelector("#diagnosisList")){
-  const values=diagnosisNames();
-  return ["Tanılar ve Hastalıklar: "+(values.join(", ")||"Kayıt yok"),"Hastalık sayısı: "+values.length];
+  const values=diagnosisNames(),note=byId("diagnosisGeneralNote")?.value.trim()||"";
+  return ["Tanılar ve Hastalıklar: "+(values.join(", ")||"Kayıt yok"),"Hastalık sayısı: "+values.length,...(note?["Genel açıklama: "+note]:[])];
  }
  if(block.querySelector("#medicationList")){
-  const values=dynamicList("medication");
-  return ["Kullandığı İlaçlar: "+(values.join(", ")||"Kayıt yok"),"İlaç sayısı: "+values.length];
+  const values=dynamicList("medication"),note=byId("medicationGeneralNote")?.value.trim()||"";
+  return ["Kullandığı İlaçlar: "+(values.join(", ")||"Kayıt yok"),"İlaç sayısı: "+values.length,...(note?["Ek not: "+note]:[])];
  }
  const items=[];
  block.querySelectorAll(".checknote,.preventive-item,.risk-row,.risk-choice,.field").forEach(item=>{
@@ -595,6 +608,14 @@ function initialize(){
  byId("resetAllBottom").addEventListener("click",resetAll);
  byId("markComplete").addEventListener("click",()=>{if(!pageHasData(step)){toast("Önce bu sekmede değerlendirme bilgisi giriniz",true);return;}confirmed[step]=signature(step);save();toast("✓ Sekme tamamlandı");});
  byId("pages").addEventListener("click",event=>{
+  const catalogToggle=event.target.closest("[data-toggle-disease-list]");
+  if(catalogToggle){const catalog=byId("historyCatalog");catalog.open=!catalog.open;syncHistoryPicker();return;}
+  const deselect=event.target.closest("[data-unselect-disease]");
+  if(deselect){
+   const checkbox=byId(deselect.dataset.unselectDisease);
+   if(checkbox){checkbox.checked=false;refreshEntryCounts();save();}
+   return;
+  }
   const add=event.target.closest("[data-add-entry]");
   if(add){makeEntry(add.dataset.addEntry);save();return;}
   const remove=event.target.closest("[data-remove-entry]");
@@ -603,6 +624,7 @@ function initialize(){
    card.remove();updateEntryNumbers(type);save();toast("Kayıt silindi");
   }
  });
+ byId("historyCatalog").addEventListener("toggle",syncHistoryPicker);
  byId("pages").addEventListener("input",event=>{
   if(event.target.id==="tc")event.target.value=event.target.value.replace(/\D/g,"").slice(0,11);
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
