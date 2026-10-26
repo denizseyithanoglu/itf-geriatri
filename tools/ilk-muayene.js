@@ -102,33 +102,48 @@ function makeEntry(type,explicitId=null,sourceOption=""){
 function updateEntryNumbers(type){
  const list=byId(ENTRY_META[type].container);
  const rows=Array.from(list.querySelectorAll(".dynamic-entry"));
- rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1+(type==="diagnosis"?checkedDiseases().length:0))+".";});
+ const start=type==="diagnosis"?checkedDiseases().length:0;
+ rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1+start)+".";});
  const empty=list.parentElement.querySelector(".entry-empty");if(empty)empty.hidden=rows.length!==0;
  const filled=rows.filter(row=>row.querySelector('input[id$="_name"]')?.value.trim()).length;
- const checked=type==="diagnosis"?selectedHistory().length:0;
- const count=byId(type==="diagnosis"?"diagnosisCount":"medicationCount");
- if(count)count.textContent=String(filled+checked);
+ const selected=type==="diagnosis"?selectedHistory().length:0;
+ const count=byId(type==="diagnosis"?"diagnosisCount":type==="medication"?"medicationCount":"surgeryCount");
+ if(count)count.textContent=String(filled+selected);
  rows.forEach((row,i)=>{
   const remove=row.querySelector("[data-remove-entry]");
-  if(remove){remove.hidden=i===0;remove.disabled=i===0;}
+  if(remove){remove.hidden=type!=="surgery"&&i===0;remove.disabled=type!=="surgery"&&i===0;}
  });
 }
-function removeEntries(type){
- byId(ENTRY_META[type].container).replaceChildren();updateEntryNumbers(type);
+function removeEntries(type){byId(ENTRY_META[type].container).replaceChildren();updateEntryNumbers(type);}
+function entryIds(type){
+ return Array.from(byId(ENTRY_META[type].container).querySelectorAll(".dynamic-entry")).map(row=>Number(row.dataset.entryId));
 }
-function entryIds(type){return Array.from(byId(ENTRY_META[type].container).querySelectorAll(".dynamic-entry")).map(row=>Number(row.dataset.entryId));}
+function surgeryLinks(){
+ return Array.from(byId("surgeryList").querySelectorAll(".dynamic-entry"))
+  .filter(row=>row.dataset.surgerySource)
+  .map(row=>({id:Number(row.dataset.entryId),source:row.dataset.surgerySource}));
+}
+function surgeryOptionList(){
+ return '<details class="medical-history-disclosure disease-catalog surgery-catalog" id="surgeryCatalog" open>'+
+ '<summary>Ameliyat listesinden seçin</summary><div class="history-catalog-content">'+
+ '<fieldset class="disease-group"><legend>Geçirdiği Ameliyatlar</legend><div class="disease-options">'+
+ SURGERY_OPTIONS.map((name,i)=>'<label class="disease-option" for="surgeryPick_'+i+'">'+
+ '<input type="checkbox" id="surgeryPick_'+i+'" data-field data-surgery-choice>'+
+ '<span class="disease-name">'+esc(name)+'</span></label>').join("")+
+ '</div></fieldset></div></details>';
+}
 function entrySection(type){
- const noun=type==="diagnosis"?"Hastalık":"İlaç",id=ENTRY_META[type].container;
+ const noun=type==="diagnosis"?"Hastalık":type==="medication"?"İlaç":"Ameliyat";
+ const id=ENTRY_META[type].container,output=type==="diagnosis"?"diagnosisCount":type==="medication"?"medicationCount":"surgeryCount";
+ const toggle=type==="diagnosis"?'<button type="button" class="action entry-catalog-toggle" data-toggle-disease-list aria-controls="historyCatalog" aria-expanded="true">Hastalık Listesinden Seçip Ekle</button>':
+  type==="surgery"?'<button type="button" class="action entry-catalog-toggle" data-toggle-surgery-list aria-controls="surgeryCatalog" aria-expanded="true">Ameliyat Listesinden Seç</button>':"";
  return '<div class="entry-section">'+
  (type==="diagnosis"?'<div id="selectedDiagnosisList" class="selected-diagnoses" aria-live="polite"></div>':"")+
  '<div id="'+id+'" class="entry-list"></div>'+
  '<p class="entry-empty">Henüz '+noun.toLocaleLowerCase("tr-TR")+' eklenmedi.</p>'+
- '<div class="entry-footer">'+
- '<div class="entry-stat"><span>'+noun+' Sayısı</span><output id="'+(type==="diagnosis"?"diagnosisCount":"medicationCount")+'">0</output></div>'+
- '<div class="entry-buttons">'+
- (type==="diagnosis"?'<button type="button" class="action entry-catalog-toggle" data-toggle-disease-list aria-controls="historyCatalog" aria-expanded="true">Hastalık Listesinden Seçip Ekle</button>':"")+
- '<button class="action entry-add" type="button" data-add-entry="'+type+'">+ '+noun+' Ekle</button></div>'+
- '</div></div>';
+ '<div class="entry-footer"><div class="entry-stat"><span>'+noun+' Sayısı</span><output id="'+output+'">0</output></div>'+
+ '<div class="entry-buttons">'+toggle+
+ '<button class="action entry-add" type="button" data-add-entry="'+type+'">+ '+noun+' Ekle</button></div></div></div>';
 }
 function printInstitutionHeader(page){
  return '<div class="print-institution-header" aria-hidden="true">'+
