@@ -376,7 +376,7 @@ function renderSelectedDiagnoses(){
    '<input type="text" data-field data-disease-date id="'+id+'" value="'+esc(dates[id]||"")+'"'+
    ' placeholder="Yıl / tarih / Hatırlamıyor" autocomplete="off"'+
    ' aria-label="'+esc(item.name)+' tanı tarihi veya açıklaması"></label>'+
-   '<button type="button" data-unselect-disease="'+esc(item.id)+'" aria-label="'+esc(item.name)+' seçimini kaldır" title="Seçimi kaldır">✕</button></div>';
+   '<button type="button" data-unselect-disease="'+esc(item.id)+'" aria-label="'+esc(item.name)+' seçimini sil" title="Seçimi sil">Sil</button></div>';
  }).join("");
  list.hidden=!selections.length;
 }
@@ -574,10 +574,10 @@ function pageHasData(i){return fieldsOnPage(i).some(el=>{
 });}
 function refreshTabs(){
  for(let i=0;i<4;i++){
-  const t=byId("tab"+i),done=confirmed[i]===signature(i),has=pageHasData(i);
+  const t=byId("tab"+i),has=pageHasData(i),done=has&&confirmed[i]===signature(i);
   t.setAttribute("aria-selected",String(i===step));
   t.dataset.progress=done?"full":has?"partial":"empty";
-  t.querySelector(".tab-state").textContent=done?"✓ Sekme tamamlandı":has?"◐ Devam ediyor":"— Boş";
+  t.querySelector(".tab-state").textContent=done?"✓ Kaydedildi":has?"◐ Devam ediyor":"— Boş";
  }
  byId("prev").disabled=step===0;byId("next").disabled=step===3;
  const historyCount=byId("historyCount");
@@ -665,23 +665,22 @@ function setupResetDialog(){
 function resetSection(section){
  if(!section||!section.classList.contains("block"))return;
  const title=section.querySelector(".block-heading h3")?.textContent.trim()||"Bu bölüm";
- requestReset("Bölümü Sıfırla","“"+title+"” bölümündeki tüm yanıtlar silinecek; diğer bölümler korunacaktır.",()=>{
-  section.querySelectorAll("[data-field]").forEach(el=>{
-   if(el.type==="checkbox"||el.type==="radio")el.checked=false;
-   else if(el.tagName==="SELECT")el.selectedIndex=0;
-   else el.value="";
-  });
-  if(section.querySelector("#diagnosisList")){removeEntries("diagnosis");makeEntry("diagnosis");}
-  if(section.querySelector("#medicationList")){removeEntries("medication");makeEntry("medication");}
-  if(section.querySelector("#surgeryList")){removeEntries("surgery");makeEntry("surgery");syncSurgeryDateInputs();}
-  if(section.querySelector("#osteoParent"))riskOverrides={};
-  if(section.querySelector("#basvuru"))initializeFirstPageDefaults();
-  updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
-  delete confirmed[step];
-  save();
-  saveFeedback("↺ “"+title+"” bölümü sıfırlandı.","reset");
-  toast("✓ "+title+" bölümü sıfırlandı");
+ // Section reset is a quick local action: unlike tab/form reset it needs no confirmation.
+ section.querySelectorAll("[data-field]").forEach(el=>{
+  if(el.type==="checkbox"||el.type==="radio")el.checked=false;
+  else if(el.tagName==="SELECT")el.selectedIndex=0;
+  else el.value="";
  });
+ if(section.querySelector("#diagnosisList")){removeEntries("diagnosis");makeEntry("diagnosis");}
+ if(section.querySelector("#medicationList")){removeEntries("medication");makeEntry("medication");}
+ if(section.querySelector("#surgeryList")){removeEntries("surgery");makeEntry("surgery");syncSurgeryDateInputs();}
+ if(section.querySelector("#osteoParent"))riskOverrides={};
+ if(section.querySelector("#basvuru"))initializeFirstPageDefaults();
+ updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
+ delete confirmed[step];
+ save();
+ saveFeedback("↺ “"+title+"” bölümü sıfırlandı.","reset");
+ toast("↺ "+title+" bölümü sıfırlandı");
 }
 function resetPage(){
  const current=step;
@@ -861,6 +860,7 @@ function initialize(){
  byId("save").addEventListener("click",()=>save(true));
  byId("print").addEventListener("click",printWholeForm);
  byId("printSummaryBottom").addEventListener("click",printOneSummary);
+ byId("copySummaryBottom").addEventListener("click",copyOneSummary);
  window.addEventListener("beforeprint",()=>{
   updateCompactPrintLists();
   const catalog=byId("historyCatalog");if(catalog){catalog.dataset.wasOpen=String(catalog.open);catalog.open=true;}
