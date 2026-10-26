@@ -948,3 +948,41 @@ button.action.danger:hover{background:#ffebe7}
  .preliminary-entry-section .entry-fields input{width:100%;min-height:18px;height:18px;font-size:8px}
  .preliminary-entry-section .entry-remove{display:none!important}
 }
+
+/* Vaccination and screening Var/Yok choices, using the existing initial-exam palette. */
+.preventive-fields[hidden]{display:none!important}
+.preventive-status{
+ display:flex;align-items:stretch;gap:8px;margin:3px 0 0;min-width:0
+}
+.preventive-status-choice{
+ display:inline-flex;align-items:center;justify-content:center;gap:7px;
+ flex:0 0 100px;max-width:calc(50% - 4px);min-height:37px;
+ padding:6px 11px;background:#f8fbfd;border:1px solid #c3d7e4;
+ border-radius:8px;color:#315674;cursor:pointer;box-sizing:border-box;
+ font-family:inherit;font-weight:700;line-height:1.3
+}
+.preventive-status-choice input[type="radio"]{
+ width:17px;height:17px;min-width:17px;margin:0;accent-color:#286e94
+}
+.preventive-status-choice:has(input:checked){
+ background:#e5f1f8;border-color:#5990b3;color:#1c5276;
+ box-shadow:inset 0 0 0 1px #96bdd5
+}
+.preventive-status-choice:has(input:focus-visible){
+ outline:3px solid #cf9623;outline-offset:2px
+}
+.preventive-status+.preventive-fields{margin-top:9px}
+@media screen and (max-width:470px){
+ .preventive-status-choice{flex:1 1 0;max-width:calc(50% - 4px);padding:6px 7px}
+}
+@media print{
+ .preventive-status{gap:4px;margin:1px 0 2px}
+ .preventive-status-choice{
+  min-height:14px;max-width:60px;flex:0 0 45px;padding:1px 3px;
+  border-radius:2px;line-height:1.15;print-color-adjust:exact
+ }
+ .preventive-status-choice input[type="radio"]{
+  width:9px;height:9px;min-width:9px;margin:0
+ }
+ .preventive-status+.preventive-fields{margin-top:2px}
+}
