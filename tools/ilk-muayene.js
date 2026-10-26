@@ -48,10 +48,33 @@ function datedRows(items,prefix,order=null){
   screeningField(items[i],prefix+'_'+i+'_date',prefix+'_'+i+'_result')).join("")+'</div>';
 }
 function screeningField(label,dateId,resultId){
- return '<div class="preventive-item"><div class="preventive-title">'+esc(label)+'</div>'+
- '<div class="preventive-fields">'+
- '<div class="field"><label for="'+dateId+'">Yıl / Tarih</label><input id="'+dateId+'" type="text" data-field placeholder="örn. 2023" autocomplete="off"></div>'+
- '<div class="field"><label for="'+resultId+'">Sonuç / Ek Not</label><input id="'+resultId+'" type="text" data-field placeholder="Sonuç / not" autocomplete="off"></div></div></div>';
+ const statusId=dateId.replace(/_date$/,"")+"_status";
+ return '<div class="preventive-item" data-preventive-item data-status-name="'+esc(statusId)+'">'+
+ '<div class="preventive-title">'+esc(label)+'</div>'+
+ '<div class="preventive-status" role="radiogroup" aria-label="'+esc(label)+' durumu">'+
+ '<label class="preventive-status-choice no"><input type="radio" data-field data-preventive-choice name="'+statusId+'" id="'+statusId+'_no" value="Yok"><span>Yok</span></label>'+
+ '<label class="preventive-status-choice yes"><input type="radio" data-field data-preventive-choice name="'+statusId+'" id="'+statusId+'_yes" value="Var"><span>Var</span></label></div>'+
+ '<div class="preventive-fields" hidden>'+
+ '<div class="field"><label for="'+dateId+'">Tarih / Yıl</label><input id="'+dateId+'" type="text" data-field placeholder="örn. 2023" autocomplete="off"></div>'+
+ '<div class="field"><label for="'+resultId+'">Ek Not</label><input id="'+resultId+'" type="text" data-field placeholder="Ek not / sonuç" autocomplete="off"></div></div></div>';
+}
+function syncPreventiveFields(){
+ document.querySelectorAll("[data-preventive-item]").forEach(item=>{
+  const yes=item.querySelector('input[data-preventive-choice][value="Var"]');
+  const details=item.querySelector(".preventive-fields");
+  if(details)details.hidden=!yes?.checked;
+ });
+}
+function migratePreventiveChoices(values){
+ // Older drafts had only dates and notes. Preserve them by marking Var.
+ const out={...(values||{})};
+ document.querySelectorAll("[data-preventive-item]").forEach(item=>{
+  const status=item.dataset.statusName;
+  if(!status||out[status+"_yes"]===true||out[status+"_no"]===true)return;
+  const keys=Array.from(item.querySelectorAll(".preventive-fields [data-field]")).map(el=>el.id);
+  if(keys.some(id=>String(out[id]??"").trim()!==""))out[status+"_yes"]=true;
+ });
+ return out;
 }
 function selectField(id,label,options,noteId=null){
  return '<div class="field"><label for="'+id+'">'+esc(label)+'</label>'+
@@ -114,7 +137,7 @@ function updateEntryNumbers(type){
  if(count)count.textContent=String(filled+selected);
  rows.forEach((row,i)=>{
   const remove=row.querySelector("[data-remove-entry]");
-  if(remove){remove.hidden=type!=="surgery"&&i===0;remove.disabled=type!=="surgery"&&i===0;}
+  if(remove){remove.hidden=i===0;remove.disabled=i===0;}
  });
 }
 function removeEntries(type){byId(ENTRY_META[type].container).replaceChildren();updateEntryNumbers(type);}
@@ -573,8 +596,8 @@ function convertLegacySurgeryDates(values){
  return output;
 }
 function hydrate(values){
- // Convert legacy surgery "Hatırlamıyor" checkboxes into free-text date entries.
- values=convertLegacySurgeryDates(values);
+ // Convert legacy surgical dates and infer Var for old vaccination/screening records.
+ values=migratePreventiveChoices(convertLegacySurgeryDates(values));
  // Preserve hearing-aid selections saved by the earlier radio-button layout.
  const earlierHearing=["Yok","Var","Var ama kullanmıyor"].find(option=>values?.["isitmeCihazi::"+option]===true);
  if(earlierHearing&&!values?.isitmeCihazi&&byId("isitmeCihazi"))byId("isitmeCihazi").value=earlierHearing;
@@ -693,6 +716,7 @@ function resetSection(section){
  if(section.querySelector("#preliminaryList")){removeEntries("preliminary");makeEntry("preliminary");}
  if(section.querySelector("#osteoParent"))riskOverrides={};
  if(section.querySelector("#basvuru"))initializeFirstPageDefaults();
+ syncPreventiveFields();
  updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
  delete confirmed[step];
  save();
@@ -713,6 +737,7 @@ function resetPage(){
   }
   if(current===1)riskOverrides={};
   if(current===3){removeEntries("preliminary");makeEntry("preliminary");}
+  syncPreventiveFields();
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
   delete confirmed[current];
   save();
@@ -729,7 +754,7 @@ function resetAll(){
   });
   for(const type of ["diagnosis","medication","surgery","preliminary"])removeEntries(type);
   confirmed={};riskOverrides={};
-  initializeFirstPageDefaults();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
+  initializeFirstPageDefaults();syncPreventiveFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
   try{sessionStorage.removeItem(STORE);}catch(error){}
   go(0);
   saveFeedback("↺ Bütün form sıfırlandı.","reset");
@@ -767,14 +792,17 @@ function summarizedBlockItems(block){
   if(item.closest("[data-sex-only][hidden], #menopozDetail[hidden]"))return;
   if(item.classList.contains("field")&&item.closest(".dynamic-entry,.risk-row,.preventive-item"))return;
   if(item.classList.contains("preventive-item")){
-   if(item.querySelector(".preventive-two"))return;
+   if(!item.hasAttribute("data-preventive-item"))return;
    const title=item.querySelector(".preventive-title")?.textContent.trim()||"Tarama";
-   const text=Array.from(item.querySelectorAll(".preventive-fields input")).map(input=>{
+   const selection=item.querySelector('input[data-preventive-choice]:checked');
+   if(!selection)return;
+   if(selection.value==="Yok"){items.push(title+": Yok");return;}
+   const text=Array.from(item.querySelectorAll(".preventive-fields input[data-field]")).map(input=>{
     const value=formatSummaryValue(input.value,input.type);
     const label=input.closest(".field")?.querySelector("label")?.textContent.trim()||"Bilgi";
     return value?label+": "+value:"";
    }).filter(Boolean);
-   if(text.length)items.push(title+" — "+text.join("; "));
+   items.push(title+": Var"+(text.length?" — "+text.join("; "):""));
   }else if(item.classList.contains("risk-row")){
    const checkbox=item.querySelector('input[type="checkbox"]');
    const title=item.querySelector(".risk-choice")?.textContent.trim()||"Osteoporoz";
@@ -998,7 +1026,7 @@ function initialize(){
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }
  initializeFirstPageDefaults();
- updateSexSpecific();syncOsteoporosisRisk();syncSurgeryDateInputs();refreshEntryCounts();
+ syncPreventiveFields();updateSexSpecific();syncOsteoporosisRisk();syncSurgeryDateInputs();refreshEntryCounts();
  if(restored?.savedAt){
   const when=new Date(restored.savedAt);
   if(!Number.isNaN(when.getTime()))saveFeedback("✓ Geçici taslak yüklendi · "+when.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}),"success");
@@ -1070,6 +1098,7 @@ function initialize(){
   if(event.target.matches("[data-disease-date]")){updateCompactPrintLists();save();return;}
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
   if(event.target.matches("[data-surgery-choice]"))addSurgeryFromPicker(event.target);
+  if(event.target.matches("[data-preventive-choice]"))syncPreventiveFields();
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
  });
  window.addEventListener("pagehide",()=>save());
