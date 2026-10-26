@@ -73,8 +73,20 @@ function entrySection(type){
  '</div></div>';
 }
 
+function printInstitutionHeader(page){
+ return '<div class="print-institution-header" aria-hidden="true">'+
+ '<img src="../assets/itf-geriatri-logo.webp" alt="" width="60" height="60">'+
+ '<div class="print-institution-text">'+
+ '<div class="institution-line">T.C. İSTANBUL ÜNİVERSİTESİ</div>'+
+ '<div class="institution-main">İSTANBUL TIP FAKÜLTESİ</div>'+
+ '<div class="institution-sub">İÇ HASTALIKLARI ANABİLİM DALI</div>'+
+ '<div class="institution-sub">GERİATRİ BİLİM DALI</div>'+
+ '<div class="form-heading">HASTA İLK DEĞERLENDİRME FORMU (KARTI)</div>'+
+ '</div><div class="print-institution-number">İTF.HB.FR.168<br>Sayfa '+page+'/4</div></div>';
+}
+
 function build(){
- byId("page0").innerHTML=
+ byId("page0").innerHTML=printInstitutionHeader(1)+
   '<div class="page-title"><h2>1. Hasta İlk Değerlendirme Formu</h2><small>İTF.HB.FR.168 • Sayfa 1/4</small></div>'+
   block("Başvuru ve Hasta Bilgileri",
    '<div class="patient-info">'+
@@ -121,7 +133,7 @@ function build(){
   block("Anamnez",'<div class="fields two">'+
    area("sikayetler","Şikayetleri","span2",4)+area("hikaye","Hikayesi","span2",5)+
    f("hekim","Değerlendiren Hekim")+'</div>');
- byId("page1").innerHTML=
+ byId("page1").innerHTML=printInstitutionHeader(2)+
   '<div class="page-title"><h2>2. Özgeçmiş ve Koruyucu Hekimlik</h2><small>İTF.HB.FR.168 • Sayfa 2/4</small></div>'+
   block("Özgeçmiş",
    '<details class="medical-history-disclosure" id="historyCatalog"><summary>Basılı formdaki hastalık seçeneklerini göster <span id="historyCount"></span></summary>'+
@@ -132,7 +144,7 @@ function build(){
   block("Koruyucu Hekimlik — En Son Uygulama Tarihi ve Sonucu",
    '<div class="fields two"><div><h4>İmmünizasyon</h4>'+datedRows(DATA.vaccines,"asi")+'</div>'+
    '<div><h4>Tarama</h4>'+datedRows(DATA.screens,"tarama")+'</div></div>');
- byId("page2").innerHTML=
+ byId("page2").innerHTML=printInstitutionHeader(3)+
   '<div class="page-title"><h2>3. Sistem Sorgulaması, Kognitif ve Duygudurum</h2><small>İTF.HB.FR.168 • Sayfa 3/4</small></div>'+
   block("Sistem Sorgulaması",twoColumns(DATA.symptoms,"ss"))+
   block("Kognitif Değerlendirme",
@@ -144,7 +156,7 @@ function build(){
    '</div>'+twoColumns(DATA.cognition,"kog")+
    '<div class="group" style="margin-top:12px"><h4>Ek Bilişsel / Davranışsal Bulgular</h4>'+checks(DATA.behavior,"dav","two")+'</div>')+
   block("Duygu-Durum Değerlendirmesi",checks(DATA.mood,"duygu","two"));
- byId("page3").innerHTML=
+ byId("page3").innerHTML=printInstitutionHeader(4)+
   '<div class="page-title"><h2>4. Fizik Muayene ve Ön Tanılar</h2><small>İTF.HB.FR.168 • Sayfa 4/4</small></div>'+
   block("Fizik Muayene",grouped(DATA.exam,"fm"))+
   block("Nörolojik Muayene",
