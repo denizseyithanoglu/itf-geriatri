@@ -1,7 +1,7 @@
 "use strict";
 const DATA={"history":[["Göz",["Katarakt","Glokom","Makular Dejenerasyon"]],["Kardiyovasküler",["KAH","MI","Bypass Öyküsü","Hipertansiyon","Aritmi","Kalp Yetmezliği"]],["Üriner",["Böbrek Hastalığı","Prostat Hastalığı","Sık İYE"]],["Pulmoner",["Bronşiyal Astım","KOAH"]],["Gastrointestinal",["Peptik Ülser","Karaciğer Hastalığı","Kolelitiyazis"]],["Lokomotor",["Osteoartrit","Osteoporoz","Fraktür"]],["Nöro-Psikiyatrik",["SVO","Parkinson","Epilepsi","Demans","Depresyon"]],["Endokrin",["Hipertiroidi","Hipotiroidi","Guatr","DM"]],["Diğer",["Kanser"]]],"family":["Demans","Hipertansiyon","DM","SVO","Depresyon","Hiperlipidemi","KAH","Annede Osteoporoz","Anne / Babada Kalça Kırığı (osteoporotik / hafif travma)"],"vaccines":["İnfluenza","Pnömokok (Prevenar-20, KPA-13, PPSV23)","Tetanoz-Difteri-Aselüler Boğmaca (Tdap)","Herpes Zoster","RSV"],"screens":["Mamografi","GGK","Rektosigmoidoskopi","Kolonoskopi","sPSA / PSA","Kemik Mineral Yoğunluk Ölçümü (T skorları)","Pap Smear","Abdominal US (AAA Taraması)"],"symptoms":[["Halsizlik","Kilo Kaybı","Ateş","İştahsızlık","Ağrı","Baş Ağrısı","Bel Ağrısı","Eklem Ağrısı","Ağrının Şiddeti (0–10)","Baş Dönmesi","Göğüs Ağrısı","Çarpıntı","Ortopne","Öksürük","Nefes Darlığı","PND","Balgam","Hemoptizi","Protez Öyküsü","Kalça Dışı Kırık"],["Cinsel İlişki","Empotans","Erektil Disfonksiyon","Ejekülasyon Sorunu","Üriner İnkontinans","Kaç Kez","Sıkışma","Stres (Öksürme, Ikınma)","Gece","BPH Semptomları","Kesik Kesik İdrar","Sık İdrar","Çatallanma","Tam Boşaltamama Hissi","İdrar Debisinde Azalma","Yürüme Sorunu","Baston Kullanımı","Düşme Öyküsü","Kalça-Femur Kırığı","Dekübit Riski"],["Kasık Ağrısı","Dizüri","Tremor","Noktüri","Polidipsi","Poliüri","Dispepsi","Boyda Kısalma","Fekal İnkontinans","İnatçı Kabızlık","Sık İshal","Kusma","Bulantı","Gaz","Şişkinlik","Karın Ağrısı","Memede Kitle","Memede Akıntı","Memede Ağrı","Diğer"]],"cognition":[["İlaç Takibinde Zorlanma","Hobilere İlgide Azalma","Kelime Bulma Güçlüğü","İsimleri Unutma","İnsanları Karıştırma","Torun Adları","Gazete, Kitap, TV Takibinde Sorun","Eşya Kaybetme"],["Hesap, Alışveriş","Aynı Konuları Tekrar Tekrar Sorma","Yeni Olayları Hatırlayamama","Kişilik Değişikliği","Yolları Karıştırma","Kaybolma","Adresleri Unutma","Evde Odaları Karıştırma","Afazi","Apraksi","Agnozi"]],"behavior":["Halüsinasyon","Sanrı","Anksiyete","Ajitasyon","Uyku Sorunu","Amaçsız Gezinme"],"mood":["Uyku Süresi","Uykuyu Başlatmada Güçlük","Uykuyu Sürdürmede Güçlük","Uyanma Sebebi","Sık Ağlama","İsteksizlik","Can Sıkıntısı","Somatik Yakınmalarda Artış","Ölüm İsteği","İntihar Düşüncesi"],"exam":[["Genel Durum",["Şuur","Kooperasyon","Oryantasyon","Ödem","İkter","Siyanoz","LA","Solukluk"]],["Baş ve Boyun",["Pupiller","Ağız İçi","LAP","Karotis Üfürümü","Tiroid"]],["Kardiyovasküler Sistem",["Sağ Kol Tansiyon","Sol Kol Tansiyon","Ortostatik Hipotansiyon","Nabız","S1","S2","Ek Ses","Üfürüm","Boyun Venöz Dolgunluk","Pretibial Ödem","Nabızlar"]],["Solunum Sistemi",["Ral","Ronküs","Siyanoz","Solunum Sayısı"]],["Batın",["Hepatomegali","Splenomegali","Traube Alanı","Asit","Hassasiyet","Defans","Rebound","Kitle"]],["Meme Muayenesi",["Aksiller LAP","Meme Muayenesi"]],["Lokomotor Sistem",["Ekstremite Uzunluğu Simetrisi","Deformite","Hareket Kısıtlılığı","Artrit","Artralji"]]],"neuro":[["Motor",["Üst Ekstremite","Alt Ekstremite"]],["Duyu",["Yüzeyel","Derin"]],["Patolojik Refleksler",["Mayerson","Palmomental Refleks","Yakalama Refleksi","Babinski (Taban Deri Refleksi)","Romberg"]],["Ekstrapiramidal Bulgular",["Bradikinezi","Rijidite","Alt Beden Yarısı Parkinsonizmi","İstirahat Tremoru","Postural Tremor","İntentional Tremor","Postural İnstabilite"]],["Göz Hareketleri",["Horizontal Bakış Kısıtlılığı","Vertikal Bakış Kısıtlılığı","Nistagmus"]],["Serebellar Testler",["Disdiadokinezi","Ataksi","Dizartri","Ardışık Hareketler"]]]};
 const STORE="itf_ilk_muayene_v1_session";
-const LABELS=["Başvuru ve Anamnez","Özgeçmiş ve Koruyucu Hekimlik","Sistem, Biliş ve Duygudurum","Fizik Muayene ve Ön Tanılar"];
+const LABELS=["Başvuru ve Anamnez","Soygeçmiş ve Koruyucu Hekimlik","Sistem, Biliş ve Duygudurum","Fizik Muayene ve Ön Tanılar"];
 let step=0,confirmed={},toastTimer,entrySequence=0,riskOverrides={};
 const byId=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
@@ -153,22 +153,76 @@ function build(){
      '<div class="field field-calculated"><label for="bki">BKİ (kg/m²)</label><input id="bki" data-field type="text" readonly aria-label="Otomatik hesaplanan beden kitle indeksi" placeholder="—"></div>'+
     '</div>'+
    '</div>')+
-  block("Tanılar ve Hastalıklar",entrySection("diagnosis"))+
-  block("Kullandığı İlaçlar",entrySection("medication"))+
+  block("Tanılar ve Hastalıklar",
+   entrySection("diagnosis")+
+   historyOptionList()+
+   '<div id="diagnosisPrintList" class="compact-print-list" aria-hidden="true"></div>')+
+  block("Alerjiler, Dişler ve Yardımcı Araçlar",
+   '<div class="supplementary-rows">'+
+    '<div class="supplementary-row">'+selectField("alerji","Alerji",["Yok","Var"],"alerjiNot")+'</div>'+
+    '<div class="supplementary-row">'+selectField("disDurumu","Dişler",["Doğal dişler","Eksik diş","Parsiyel protez","Total protez","Diğer"],"disNot")+'</div>'+
+    '<div class="supplementary-row">'+selectField("gozluk","Gözlük",["Yok","Var"],"gozlukNot")+'</div>'+
+    '<div class="supplementary-row">'+radio("isitmeCihazi","İşitme Cihazı",["Var","Yok","Var ama kullanmıyor"])+f("isitmeNot","Açıklama")+'</div>'+
+   '</div>')+
+  block("Ameliyat Öyküsü",
+   area("ameliyat","Geçirdiği ameliyatlar (varsa işlem ve yılı)", "",2)+
+   '<p class="field-help">Ameliyatlar hastalık sayısına dahil edilmez; aktif hastalık varsa tanılar arasında ayrıca belirtiniz.</p>')+
+  block("Kullandığı İlaçlar",
+   entrySection("medication")+
+   '<div id="medicationPrintList" class="compact-print-list" aria-hidden="true"></div>')+
   block("Anamnez",'<div class="fields two">'+
-   area("sikayetler","Şikayetleri","span2",4)+area("hikaye","Hikayesi","span2",5)+
+   area("sikayetler","Şikayetleri","span2",2)+
+   area("hikaye","Hikayesi","span2",7)+
    f("hekim","Değerlendiren Hekim")+'</div>');
  byId("page1").innerHTML=printInstitutionHeader(2)+
-  '<div class="page-title"><h2>2. Özgeçmiş ve Koruyucu Hekimlik</h2><small>İTF.HB.FR.168 • Sayfa 2/4</small></div>'+
-  block("Özgeçmiş",
-   '<details class="medical-history-disclosure" id="historyCatalog"><summary>Basılı formdaki hastalık seçeneklerini göster <span id="historyCount"></span></summary>'+
-   '<div class="history-catalog-content">'+grouped(DATA.history,"oz")+'</div></details>'+
-   '<div class="group"><h4>İşitme Cihazı</h4>'+radio("isitmeCihazi","Kullanım durumu",["Var","Yok","Var ama kullanmıyor"])+'</div>'+
-   area("ameliyat","Ameliyat Öyküsü","",3))+
+  '<div class="page-title"><h2>2. Soygeçmiş, Alışkanlıklar ve Koruyucu Hekimlik</h2><small>İTF.HB.FR.168 • Sayfa 2/4</small></div>'+
   block("Soygeçmiş",checks(DATA.family,"aile","two"))+
-  block("Koruyucu Hekimlik — En Son Uygulama Tarihi ve Sonucu",
-   '<div class="fields two"><div><h4>İmmünizasyon</h4>'+datedRows(DATA.vaccines,"asi")+'</div>'+
-   '<div><h4>Tarama</h4>'+datedRows(DATA.screens,"tarama")+'</div></div>');
+  block("Alışkanlıklar (Sigara ve Alkol)",
+   '<div class="habit-columns">'+
+    '<div>'+radio("sigaraDurum","Sigara Kullanımı",["Hiç kullanmadı","Bıraktı","Aktif kullanıyor"])+
+     f("sigaraMiktar","Miktar / süre / bırakma yılı")+'</div>'+
+    '<div>'+radio("alkolDurum","Alkol Kullanımı",["Yok","Bıraktı","Var"])+
+     f("alkolMiktar","Miktar / sıklık (örn. ünite/gün)")+'</div>'+
+   '</div>')+
+  block("Koruyucu Hekimlik",
+   '<div class="preventive-subsection"><h4>İmmünizasyon (Aşılamalar)</h4>'+
+    datedRows(DATA.vaccines,"asi",[1,0,2,3,4])+
+   '</div><div class="preventive-subsection"><h4>Taramalar</h4>'+
+    '<div class="preventive-grid">'+
+    screeningField("Endoskopi","endo_date","endo_result")+
+    screeningField("Kolonoskopi","tarama_3_date","tarama_3_result")+
+    '<div class="preventive-item"><div class="preventive-title">Diğer (Gaitada Gizli Kan, Rektosigmoidoskopi)</div>'+
+     '<div class="preventive-two">'+
+      screeningField("Gaitada Gizli Kan","tarama_1_date","tarama_1_result")+
+      screeningField("Rektosigmoidoskopi","tarama_2_date","tarama_2_result")+
+     '</div></div>'+
+    screeningField("Toraks BT","toraksbt_date","toraksbt_result")+
+    screeningField("Abdominal US (AAA Taraması)","tarama_7_date","tarama_7_result")+
+    '<div class="sex-only" data-sex-only="Kadın" hidden>'+
+     screeningField("Pelvik Tarama (Pap-smear)","tarama_6_date","tarama_6_result")+
+     screeningField("Mamografi","tarama_0_date","tarama_0_result")+
+    '</div>'+
+    '<div class="sex-only" data-sex-only="Erkek" hidden>'+
+     screeningField("Prostat Taraması","tarama_4_date","tarama_4_result")+
+    '</div>'+
+    '</div></div>')+
+  block("Osteoporoz Sorgusu",
+   '<p class="field-help">Soygeçmiş, sigara ve alkol yanıtları buraya otomatik aktarılır; gerekirse osteoporoz sorgusunda ayrıca değiştirilebilir.</p>'+
+   '<div class="risk-list">'+
+    riskQuestion("osteoParent","Anne / babada kalça kırığı")+
+    riskQuestion("osteoSmoke","Sigara kullanımı")+
+    riskQuestion("osteoAlcohol","Alkol kullanımı")+
+    riskQuestion("osteoFall","Düşme öyküsü")+
+    riskQuestion("osteoFracture","Kırık öyküsü")+
+    riskQuestion("osteoDental","Diş muayenesi yapıldı")+
+    '</div>'+
+    '<div class="sex-only female-menopause" data-sex-only="Kadın" hidden>'+
+     '<label class="risk-choice"><input id="menopozSwitch" type="checkbox" data-field> Menopoz bilgisini ekle</label>'+
+     '<div id="menopozDetail" hidden>'+f("menopozAge","Menopoz Yaşı","number","","Yaş")+'</div>'+
+    '</div>'+
+    '<div class="preventive-subsection"><h4>DXA Ölçümü</h4>'+
+    screeningField("DXA (tarih, bölge, T-skorları)","tarama_5_date","tarama_5_result")+
+    '</div>');
  byId("page2").innerHTML=printInstitutionHeader(3)+
   '<div class="page-title"><h2>3. Sistem Sorgulaması, Kognitif ve Duygudurum</h2><small>İTF.HB.FR.168 • Sayfa 3/4</small></div>'+
   block("Sistem Sorgulaması",twoColumns(DATA.symptoms,"ss"))+
