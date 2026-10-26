@@ -92,11 +92,9 @@ function makeEntry(type,explicitId=null,sourceOption=""){
  row.dataset.entryType=type;row.dataset.entryId=String(id);
  if(type==="surgery"&&sourceOption)row.dataset.surgerySource=sourceOption;
  const fields=conf.fields.map(([field,label,inputType])=>{
-  const extra=type==="surgery"&&field==="date"?
-   '<label class="surgery-unknown-label"><input data-field type="checkbox" id="'+conf.prefix+'_'+id+'_unknown"> Hatırlamıyor</label>':"";
   return '<div class="field entry-field-'+field+'"><label for="'+conf.prefix+'_'+id+'_'+field+'">'+esc(label)+'</label>'+
   '<input id="'+conf.prefix+'_'+id+'_'+field+'" data-field type="'+inputType+'" autocomplete="off"'+
-  ' placeholder="'+(field==="name"?(type==="diagnosis"?"Tanı / hastalık":type==="medication"?"İlaç adı":"Ameliyat adı"):field==="date"?"Yıl / tarih":field==="dose"?"örn. 2x1000 mg veya 1x10/40 mg":"")+'">'+extra+'</div>';
+  ' placeholder="'+(field==="name"?(type==="diagnosis"?"Tanı / hastalık":type==="medication"?"İlaç adı":"Ameliyat adı"):field==="date"?"Yıl / tarih / Hatırlamıyor":field==="dose"?"örn. 2x1000 mg veya 1x10/40 mg":"")+'"></div>';
  }).join("");
  row.innerHTML='<div class="entry-body"><strong class="entry-title" aria-label="Kayıt numarası"></strong>'+
  '<div class="entry-fields '+(type==="medication"?"entry-med":type==="surgery"?"entry-surgery":"")+'">'+
@@ -141,7 +139,11 @@ function entrySection(type){
  const id=ENTRY_META[type].container,output=type==="diagnosis"?"diagnosisCount":type==="medication"?"medicationCount":"surgeryCount";
  const toggle=type==="diagnosis"?'<button type="button" class="action entry-catalog-toggle" data-toggle-disease-list aria-controls="historyCatalog" aria-expanded="true">Hastalık Listesinden Seçip Ekle</button>':
   type==="surgery"?'<button type="button" class="action entry-catalog-toggle" data-toggle-surgery-list aria-controls="surgeryCatalog" aria-expanded="true">Ameliyat Listesinden Seç</button>':"";
- return '<div class="entry-section">'+
+ const colHeader=type==="diagnosis"||type==="surgery"?
+ '<div class="entry-column-head" aria-hidden="true"><span></span>'+
+ '<span>'+esc(type==="diagnosis"?"Hastalık / Tanı":"Geçirdiği Ameliyat")+'</span>'+
+ '<span>'+esc(type==="diagnosis"?"Tanı Tarihi":"Tarih / Yıl")+'</span><span></span></div>':"";
+ return '<div class="entry-section entry-section-'+type+'">'+colHeader+
  (type==="diagnosis"?'<div id="selectedDiagnosisList" class="selected-diagnoses" aria-live="polite"></div>':"")+
  '<div id="'+id+'" class="entry-list"></div>'+
  '<p class="entry-empty">Henüz '+noun.toLocaleLowerCase("tr-TR")+' eklenmedi.</p>'+
@@ -394,14 +396,8 @@ function syncSurgeryPicker(){
  toggle.classList.toggle("is-open",catalog.open);
 }
 function syncSurgeryDateInputs(){
- for(const row of Array.from(byId("surgeryList")?.querySelectorAll(".dynamic-entry")||[])){
-  const id=row.dataset.entryId;
-  const unknown=byId("surg_"+id+"_unknown"),date=byId("surg_"+id+"_date");
-  if(date&&unknown){
-   date.disabled=unknown.checked;
-   date.title=unknown.checked?"Ameliyat tarihi hatırlanmıyor":"Biliniyorsa tarih veya yıl";
-  }
- }
+ // A free-text date replaces the former "Hatırlamıyor" checkbox.
+ // Preserve the call for saved drafts using the existing initialization flow.
 }
 function addSurgeryFromPicker(input){
  if(!input)return;
@@ -417,8 +413,7 @@ function addSurgeryFromPicker(input){
    if(item.dataset.surgerySource)return false;
    const id=item.dataset.entryId;
    return !byId("surg_"+id+"_name")?.value.trim()&&
-    !byId("surg_"+id+"_date")?.value.trim()&&
-    !byId("surg_"+id+"_unknown")?.checked;
+    !byId("surg_"+id+"_date")?.value.trim();
   });
   if(!row){makeEntry("surgery",null,source);row=list.querySelector('[data-entry-id="'+entrySequence+'"]');}
   else row.dataset.surgerySource=source;
@@ -441,9 +436,8 @@ function dynamicList(type){
    return name+(date?" ("+date+")":"");
   }
   if(type==="surgery"){
-   const unknown=byId("surg_"+id+"_unknown")?.checked||false;
    const date=byId("surg_"+id+"_date")?.value.trim()||"";
-   return name+" ("+(unknown?"Tarih hatırlanmıyor":date||"Tarih belirtilmedi")+")";
+   return name+" ("+(date||"Tarih belirtilmedi")+")";
   }
   const dose=byId(meta.prefix+"_"+id+"_dose")?.value.trim()||"";
   return name+(dose?" "+dose:"");
@@ -542,7 +536,21 @@ function readData(){
  });
  return result;
 }
+function convertLegacySurgeryDates(values){
+ const output={...(values||{})};
+ for(const [key,checked] of Object.entries(output)){
+  if(!/^surg_\d+_unknown$/.test(key))continue;
+  if(checked===true){
+   const dateKey=key.replace(/_unknown$/,"_date");
+   output[dateKey]="Hatırlamıyor";
+  }
+  delete output[key];
+ }
+ return output;
+}
 function hydrate(values){
+ // Convert legacy surgery "Hatırlamıyor" checkboxes into free-text date entries.
+ values=convertLegacySurgeryDates(values);
  // Preserve hearing-aid selections saved by the earlier radio-button layout.
  const earlierHearing=["Yok","Var","Var ama kullanmıyor"].find(option=>values?.["isitmeCihazi::"+option]===true);
  if(earlierHearing&&!values?.isitmeCihazi&&byId("isitmeCihazi"))byId("isitmeCihazi").value=earlierHearing;
@@ -845,7 +853,6 @@ function initialize(){
   if(event.target.matches("[data-disease-date]")){updateCompactPrintLists();save();return;}
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
   if(event.target.matches("[data-surgery-choice]"))addSurgeryFromPicker(event.target);
-  if(event.target.id?.startsWith("surg_")&&event.target.id.endsWith("_unknown"))syncSurgeryDateInputs();
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
  });
  window.addEventListener("pagehide",()=>save());
