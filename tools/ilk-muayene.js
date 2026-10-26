@@ -1,8 +1,8 @@
 "use strict";
-const DATA={"history":[["Göz",["Katarakt","Glokom","Makular Dejenerasyon"]],["Kardiyovasküler",["KAH","MI","Bypass Öyküsü","Hipertansiyon","Aritmi","Kalp Yetmezliği"]],["Üriner",["Böbrek Hastalığı","Prostat Hastalığı","Sık İYE"]],["Pulmoner",["Bronşiyal Astım","KOAH"]],["Gastrointestinal",["Peptik Ülser","Karaciğer Hastalığı","Kolelitiyazis"]],["Lokomotor",["Osteoartrit","Osteoporoz","Fraktür"]],["Nöro-Psikiyatrik",["SVO","Parkinson","Epilepsi","Demans","Depresyon"]],["Endokrin",["Hipertiroidi","Hipotiroidi","Guatr","DM"]],["Diğer",["Kanser","Alerji","Dişler"]]],"family":["Demans","Hipertansiyon","DM","SVO","Depresyon","Hiperlipidemi","KAH","Annede Osteoporoz","Annede Kalça Kırığı (patolojik/osteoporotik/hafif travma ile)"],"vaccines":["İnfluenza","Pnömokok (PPSV / PCV)","Tetanoz - difteri - asüler boğmaca (Tdap)","Herpes Zoster"],"screens":["Mamografi","GGK","Rektosigmoidoskopi","Kolonoskopi","sPSA / PSA","Kemik Mineral Yoğunluk Ölçümü (T skorları)","Pap Smear","Abdominal US (AAA Taraması)"],"symptoms":[["Halsizlik","Kilo Kaybı","Ateş","İştahsızlık","Ağrı","Baş Ağrısı","Bel Ağrısı","Eklem Ağrısı","Ağrının Şiddeti (0–10)","Baş Dönmesi","Göğüs Ağrısı","Çarpıntı","Ortopne","Öksürük","Nefes Darlığı","PND","Balgam","Hemoptizi","Protez Öyküsü","Kalça Dışı Kırık"],["Cinsel İlişki","Empotans","Erektil Disfonksiyon","Ejekülasyon Sorunu","Üriner İnkontinans","Kaç Kez","Sıkışma","Stres (Öksürme, Ikınma)","Gece","BPH Semptomları","Kesik Kesik İdrar","Sık İdrar","Çatallanma","Tam Boşaltamama Hissi","İdrar Debisinde Azalma","Yürüme Sorunu","Baston Kullanımı","Düşme Öyküsü","Kalça-Femur Kırığı","Dekübit Riski"],["Kasık Ağrısı","Dizüri","Tremor","Noktüri","Polidipsi","Poliüri","Dispepsi","Boyda Kısalma","Fekal İnkontinans","İnatçı Kabızlık","Sık İshal","Kusma","Bulantı","Gaz","Şişkinlik","Karın Ağrısı","Memede Kitle","Memede Akıntı","Memede Ağrı","Diğer"]],"cognition":[["İlaç Takibinde Zorlanma","Hobilere İlgide Azalma","Kelime Bulma Güçlüğü","İsimleri Unutma","İnsanları Karıştırma","Torun Adları","Gazete, Kitap, TV Takibinde Sorun","Eşya Kaybetme"],["Hesap, Alışveriş","Aynı Konuları Tekrar Tekrar Sorma","Yeni Olayları Hatırlayamama","Kişilik Değişikliği","Yolları Karıştırma","Kaybolma","Adresleri Unutma","Evde Odaları Karıştırma","Afazi","Apraksi","Agnozi"]],"behavior":["Halüsinasyon","Sanrı","Anksiyete","Ajitasyon","Uyku Sorunu","Amaçsız Gezinme"],"mood":["Uyku Süresi","Uykuyu Başlatmada Güçlük","Uykuyu Sürdürmede Güçlük","Uyanma Sebebi","Sık Ağlama","İsteksizlik","Can Sıkıntısı","Somatik Yakınmalarda Artış","Ölüm İsteği","İntihar Düşüncesi"],"exam":[["Genel Durum",["Şuur","Kooperasyon","Oryantasyon","Ödem","İkter","Siyanoz","LA","Solukluk"]],["Baş ve Boyun",["Pupiller","Ağız İçi","LAP","Karotis Üfürümü","Tiroid"]],["Kardiyovasküler Sistem",["Sağ Kol Tansiyon","Sol Kol Tansiyon","Ortostatik Hipotansiyon","Nabız","S1","S2","Ek Ses","Üfürüm","Boyun Venöz Dolgunluk","Pretibial Ödem","Nabızlar"]],["Solunum Sistemi",["Ral","Ronküs","Siyanoz","Solunum Sayısı"]],["Batın",["Hepatomegali","Splenomegali","Traube Alanı","Asit","Hassasiyet","Defans","Rebound","Kitle"]],["Meme Muayenesi",["Aksiller LAP","Meme Muayenesi"]],["Lokomotor Sistem",["Ekstremite Uzunluğu Simetrisi","Deformite","Hareket Kısıtlılığı","Artrit","Artralji"]]],"neuro":[["Motor",["Üst Ekstremite","Alt Ekstremite"]],["Duyu",["Yüzeyel","Derin"]],["Patolojik Refleksler",["Mayerson","Palmomental Refleks","Yakalama Refleksi","Babinski (Taban Deri Refleksi)","Romberg"]],["Ekstrapiramidal Bulgular",["Bradikinezi","Rijidite","Alt Beden Yarısı Parkinsonizmi","İstirahat Tremoru","Postural Tremor","İntentional Tremor","Postural İnstabilite"]],["Göz Hareketleri",["Horizontal Bakış Kısıtlılığı","Vertikal Bakış Kısıtlılığı","Nistagmus"]],["Serebellar Testler",["Disdiadokinezi","Ataksi","Dizartri","Ardışık Hareketler"]]]};
+const DATA={"history":[["Göz",["Katarakt","Glokom","Makular Dejenerasyon"]],["Kardiyovasküler",["KAH","MI","Bypass Öyküsü","Hipertansiyon","Aritmi","Kalp Yetmezliği"]],["Üriner",["Böbrek Hastalığı","Prostat Hastalığı","Sık İYE"]],["Pulmoner",["Bronşiyal Astım","KOAH"]],["Gastrointestinal",["Peptik Ülser","Karaciğer Hastalığı","Kolelitiyazis"]],["Lokomotor",["Osteoartrit","Osteoporoz","Fraktür"]],["Nöro-Psikiyatrik",["SVO","Parkinson","Epilepsi","Demans","Depresyon"]],["Endokrin",["Hipertiroidi","Hipotiroidi","Guatr","DM"]],["Diğer",["Kanser"]]],"family":["Demans","Hipertansiyon","DM","SVO","Depresyon","Hiperlipidemi","KAH","Annede Osteoporoz","Anne / Babada Kalça Kırığı (osteoporotik / hafif travma)"],"vaccines":["İnfluenza","Pnömokok (Prevenar-20, KPA-13, PPSV23)","Tetanoz-Difteri-Aselüler Boğmaca (Tdap)","Herpes Zoster","RSV"],"screens":["Mamografi","GGK","Rektosigmoidoskopi","Kolonoskopi","sPSA / PSA","Kemik Mineral Yoğunluk Ölçümü (T skorları)","Pap Smear","Abdominal US (AAA Taraması)"],"symptoms":[["Halsizlik","Kilo Kaybı","Ateş","İştahsızlık","Ağrı","Baş Ağrısı","Bel Ağrısı","Eklem Ağrısı","Ağrının Şiddeti (0–10)","Baş Dönmesi","Göğüs Ağrısı","Çarpıntı","Ortopne","Öksürük","Nefes Darlığı","PND","Balgam","Hemoptizi","Protez Öyküsü","Kalça Dışı Kırık"],["Cinsel İlişki","Empotans","Erektil Disfonksiyon","Ejekülasyon Sorunu","Üriner İnkontinans","Kaç Kez","Sıkışma","Stres (Öksürme, Ikınma)","Gece","BPH Semptomları","Kesik Kesik İdrar","Sık İdrar","Çatallanma","Tam Boşaltamama Hissi","İdrar Debisinde Azalma","Yürüme Sorunu","Baston Kullanımı","Düşme Öyküsü","Kalça-Femur Kırığı","Dekübit Riski"],["Kasık Ağrısı","Dizüri","Tremor","Noktüri","Polidipsi","Poliüri","Dispepsi","Boyda Kısalma","Fekal İnkontinans","İnatçı Kabızlık","Sık İshal","Kusma","Bulantı","Gaz","Şişkinlik","Karın Ağrısı","Memede Kitle","Memede Akıntı","Memede Ağrı","Diğer"]],"cognition":[["İlaç Takibinde Zorlanma","Hobilere İlgide Azalma","Kelime Bulma Güçlüğü","İsimleri Unutma","İnsanları Karıştırma","Torun Adları","Gazete, Kitap, TV Takibinde Sorun","Eşya Kaybetme"],["Hesap, Alışveriş","Aynı Konuları Tekrar Tekrar Sorma","Yeni Olayları Hatırlayamama","Kişilik Değişikliği","Yolları Karıştırma","Kaybolma","Adresleri Unutma","Evde Odaları Karıştırma","Afazi","Apraksi","Agnozi"]],"behavior":["Halüsinasyon","Sanrı","Anksiyete","Ajitasyon","Uyku Sorunu","Amaçsız Gezinme"],"mood":["Uyku Süresi","Uykuyu Başlatmada Güçlük","Uykuyu Sürdürmede Güçlük","Uyanma Sebebi","Sık Ağlama","İsteksizlik","Can Sıkıntısı","Somatik Yakınmalarda Artış","Ölüm İsteği","İntihar Düşüncesi"],"exam":[["Genel Durum",["Şuur","Kooperasyon","Oryantasyon","Ödem","İkter","Siyanoz","LA","Solukluk"]],["Baş ve Boyun",["Pupiller","Ağız İçi","LAP","Karotis Üfürümü","Tiroid"]],["Kardiyovasküler Sistem",["Sağ Kol Tansiyon","Sol Kol Tansiyon","Ortostatik Hipotansiyon","Nabız","S1","S2","Ek Ses","Üfürüm","Boyun Venöz Dolgunluk","Pretibial Ödem","Nabızlar"]],["Solunum Sistemi",["Ral","Ronküs","Siyanoz","Solunum Sayısı"]],["Batın",["Hepatomegali","Splenomegali","Traube Alanı","Asit","Hassasiyet","Defans","Rebound","Kitle"]],["Meme Muayenesi",["Aksiller LAP","Meme Muayenesi"]],["Lokomotor Sistem",["Ekstremite Uzunluğu Simetrisi","Deformite","Hareket Kısıtlılığı","Artrit","Artralji"]]],"neuro":[["Motor",["Üst Ekstremite","Alt Ekstremite"]],["Duyu",["Yüzeyel","Derin"]],["Patolojik Refleksler",["Mayerson","Palmomental Refleks","Yakalama Refleksi","Babinski (Taban Deri Refleksi)","Romberg"]],["Ekstrapiramidal Bulgular",["Bradikinezi","Rijidite","Alt Beden Yarısı Parkinsonizmi","İstirahat Tremoru","Postural Tremor","İntentional Tremor","Postural İnstabilite"]],["Göz Hareketleri",["Horizontal Bakış Kısıtlılığı","Vertikal Bakış Kısıtlılığı","Nistagmus"]],["Serebellar Testler",["Disdiadokinezi","Ataksi","Dizartri","Ardışık Hareketler"]]]};
 const STORE="itf_ilk_muayene_v1_session";
 const LABELS=["Başvuru ve Anamnez","Özgeçmiş ve Koruyucu Hekimlik","Sistem, Biliş ve Duygudurum","Fizik Muayene ve Ön Tanılar"];
-let step=0,confirmed={},toastTimer,entrySequence=0;
+let step=0,confirmed={},toastTimer,entrySequence=0,riskOverrides={};
 const byId=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function f(id,label,type="text",cls="",placeholder=""){
@@ -21,39 +21,64 @@ function radio(name,label,choices){
  return '<div class="field"><span class="field-label">'+esc(label)+'</span><div class="radio-line">'+choices.map((text,i)=>
   '<label><input type="radio" data-field name="'+name+'" value="'+esc(text)+'" aria-label="'+esc(text)+'">'+esc(text)+'</label>').join('')+'</div></div>';
 }
-function datedRows(items,prefix){return '<div class="fields two">'+items.map((text,i)=>'<div class="field"><label>'+esc(text)+'</label><div class="inline-pair"><input data-field type="date" id="'+prefix+'_'+i+'_date" aria-label="'+esc(text)+' uygulama veya tarama tarihi"><input data-field type="text" id="'+prefix+'_'+i+'_result" placeholder="Sonuç / not" aria-label="'+esc(text)+' sonuç veya not"></div></div>').join('')+'</div>';}
+function datedRows(items,prefix,order=null){
+ return '<div class="preventive-grid">'+(order||items.map((_,i)=>i)).map(i=>
+  screeningField(items[i],prefix+'_'+i+'_date',prefix+'_'+i+'_result')).join("")+'</div>';
+}
+function screeningField(label,dateId,resultId){
+ return '<div class="preventive-item"><div class="preventive-title">'+esc(label)+'</div>'+
+ '<div class="preventive-fields">'+
+ '<div class="field"><label for="'+dateId+'">Yıl / Tarih</label><input id="'+dateId+'" type="text" data-field placeholder="örn. 2023" autocomplete="off"></div>'+
+ '<div class="field"><label for="'+resultId+'">Sonuç / Ek Not</label><input id="'+resultId+'" type="text" data-field placeholder="Sonuç / not" autocomplete="off"></div></div></div>';
+}
+function selectField(id,label,options,noteId=null){
+ return '<div class="field"><label for="'+id+'">'+esc(label)+'</label>'+
+ '<select id="'+id+'" data-field><option value="">Seçiniz</option>'+
+ options.map(x=>'<option>'+esc(x)+'</option>').join("")+'</select></div>'+
+ (noteId?f(noteId,label+" — açıklama","text","", "Açıklama / detay"):"");
+}
+function historyOptionList(){
+ return '<details class="medical-history-disclosure" id="historyCatalog">'+
+ '<summary>Özgeçmişteki hastalıkları seçin <span id="historyCount"></span></summary>'+
+ '<div class="history-catalog-content">'+grouped(DATA.history,"oz")+'</div></details>';
+}
+function riskQuestion(id,label){
+ return '<div class="risk-row"><label class="risk-choice" for="'+id+'"><input type="checkbox" id="'+id+'" data-field> '+esc(label)+'</label>'+
+ f(id+"_note","Açıklama / tarih")+'</div>';
+}
 function twoColumns(arr,prefix){return '<div class="symptom-columns" style="grid-template-columns:repeat('+arr.length+',minmax(0,1fr))">'+arr.map((group,i)=>
  '<div class="checklist">'+group.map((label,j)=>check(label,prefix+'_'+i+'_'+j)).join('')+'</div>').join('')+'</div>';}
 
 const ENTRY_META={
- diagnosis:{container:"diagnosisList",prefix:"diag",fields:[["name","Hastalık / Tanı","text"],["date","Tanı yılı / tarih bilgisi","text"]]},
- medication:{container:"medicationList",prefix:"med",fields:[["name","İlaç adı","text"],["dose","Doz","text"],["frequency","Kullanım sıklığı","text"],["date","Başlangıç yılı / tarih bilgisi","text"],["note","Ek not","text"]]}
+ diagnosis:{container:"diagnosisList",prefix:"diag",fields:[["name","Hastalık / Tanı","text"],["date","Tanı yılı / tarih","text"]]},
+ medication:{container:"medicationList",prefix:"med",fields:[["name","İlaç adı","text"],["dose","Doz ve Kullanım Sıklığı","text"],["note","Ek Not","text"]]}
 };
 function makeEntry(type,explicitId=null){
  const conf=ENTRY_META[type];if(!conf)return;
  const id=explicitId===null?++entrySequence:Number(explicitId);
  if(!Number.isSafeInteger(id)||id<1)return;
- entrySequence=Math.max(id,entrySequence);
+ entrySequence=Math.max(entrySequence,id);
  const list=byId(conf.container);if(list.querySelector('[data-entry-id="'+id+'"]'))return;
  const row=document.createElement("div");row.className="dynamic-entry";
  row.dataset.entryType=type;row.dataset.entryId=String(id);
- const fieldHTML=([field,label,inputType])=>'<div class="field entry-field-'+field+'"><label for="'+conf.prefix+'_'+id+'_'+field+'">'+esc(label)+'</label>'+
- '<input id="'+conf.prefix+'_'+id+'_'+field+'" data-field type="'+inputType+'" autocomplete="off" placeholder="'+(field==="name"?(type==="diagnosis"?"Hastalık adı":"İlaç adı"):field==="date"?"örn. 2020":"")+'"></div>';
- row.innerHTML='<div class="entry-header"><strong class="entry-title"></strong>'+
- (type==="medication"?'<div class="entry-date">'+fieldHTML(conf.fields.find(item=>item[0]==="date"))+'</div>':"")+
- '<button type="button" class="entry-remove" data-remove-entry aria-label="Kaydı sil">✕ Sil</button></div>'+
+ row.innerHTML='<div class="entry-body"><strong class="entry-title" aria-label="Kayıt numarası"></strong>'+
  '<div class="entry-fields '+(type==="medication"?"entry-med":"")+'">'+
- conf.fields.filter(item=>type!=="medication"||item[0]!=="date").map(fieldHTML).join("")+'</div>';
+ conf.fields.map(([field,label,inputType])=>
+ '<div class="field entry-field-'+field+'"><label for="'+conf.prefix+'_'+id+'_'+field+'">'+esc(label)+'</label>'+
+ '<input id="'+conf.prefix+'_'+id+'_'+field+'" data-field type="'+inputType+'" autocomplete="off"'+
+ ' placeholder="'+(field==="name"?(type==="diagnosis"?"Tanı / hastalık":"İlaç adı"):field==="date"?"Yıl / tarih":field==="dose"?"örn. 2x1000 mg veya 1x10/40 mg":"Ek açıklama")+'"></div>').join("")+'</div>'+
+ '<button type="button" class="entry-remove" data-remove-entry aria-label="Bu kaydı sil">Sil</button></div>';
  list.appendChild(row);updateEntryNumbers(type);
 }
 function updateEntryNumbers(type){
  const list=byId(ENTRY_META[type].container);
  const rows=Array.from(list.querySelectorAll(".dynamic-entry"));
- rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1)+". "+(type==="diagnosis"?"Hastalık / Tanı":"İlaç");});
+ rows.forEach((row,i)=>{row.querySelector(".entry-title").textContent=(i+1)+".";});
  const empty=list.parentElement.querySelector(".entry-empty");if(empty)empty.hidden=rows.length!==0;
  const filled=rows.filter(row=>row.querySelector('input[id$="_name"]')?.value.trim()).length;
+ const checked=type==="diagnosis"?Array.from(byId("historyCatalog")?.querySelectorAll('.checknote input[type="checkbox"]')||[]).filter(el=>el.checked).length:0;
  const count=byId(type==="diagnosis"?"diagnosisCount":"medicationCount");
- if(count)count.textContent=String(filled);
+ if(count)count.textContent=String(filled+checked);
  rows.forEach((row,i)=>{
   const remove=row.querySelector("[data-remove-entry]");
   if(remove){remove.hidden=i===0;remove.disabled=i===0;}
