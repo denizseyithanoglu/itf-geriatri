@@ -366,6 +366,38 @@ function syncHistoryPicker(){
  toggle.setAttribute("aria-expanded",String(catalog.open));
  toggle.classList.toggle("is-open",catalog.open);
 }
+
+function syncSurgeryPicker(){
+ const catalog=byId("surgeryCatalog");
+ const toggle=document.querySelector("[data-toggle-surgery-list]");
+ if(!catalog||!toggle)return;
+ toggle.setAttribute("aria-expanded",String(catalog.open));
+ toggle.classList.toggle("is-open",catalog.open);
+}
+function syncSurgeryDateInputs(){
+ for(const row of Array.from(byId("surgeryList")?.querySelectorAll(".dynamic-entry")||[])){
+  const id=row.dataset.entryId;
+  const unknown=byId("surg_"+id+"_unknown"),date=byId("surg_"+id+"_date");
+  if(date&&unknown){
+   date.disabled=unknown.checked;
+   date.title=unknown.checked?"Ameliyat tarihi hatırlanmıyor":"Biliniyorsa tarih veya yıl";
+  }
+ }
+}
+function addSurgeryFromPicker(input){
+ if(!input)return;
+ const source=input.id;
+ const list=byId("surgeryList");
+ const existing=Array.from(list.querySelectorAll(".dynamic-entry")).find(r=>r.dataset.surgerySource===source);
+ if(input.checked){
+  if(existing)return;
+  const name=input.closest(".disease-option")?.querySelector(".disease-name")?.textContent.trim()||"Ameliyat";
+  makeEntry("surgery",null,source);
+  byId("surg_"+entrySequence+"_name").value=name;
+ }else if(existing)existing.remove();
+ syncSurgeryDateInputs();refreshEntryCounts();
+}
+
 function dynamicList(type){
  const meta=ENTRY_META[type],list=byId(meta.container);if(!list)return [];
  return Array.from(list.querySelectorAll(".dynamic-entry")).map(row=>{
@@ -376,6 +408,11 @@ function dynamicList(type){
    const date=byId(meta.prefix+"_"+id+"_date")?.value.trim()||"";
    return name+(date?" ("+date+")":"");
   }
+  if(type==="surgery"){
+   const unknown=byId("surg_"+id+"_unknown")?.checked||false;
+   const date=byId("surg_"+id+"_date")?.value.trim()||"";
+   return name+" ("+(unknown?"Tarih hatırlanmıyor":date||"Tarih belirtilmedi")+")";
+  }
   const dose=byId(meta.prefix+"_"+id+"_dose")?.value.trim()||"";
   return name+(dose?" "+dose:"");
  }).filter(Boolean);
@@ -384,7 +421,8 @@ function diagnosisNames(){return [...selectedHistory(),...dynamicList("diagnosis
 function updateCompactPrintLists(){
  for(const [id,label,values,countLabel] of [
   ["diagnosisPrintList","Hastalıklar",diagnosisNames(),"Hastalık sayısı"],
-  ["medicationPrintList","İlaçlar",dynamicList("medication"),"İlaç sayısı"]]){
+  ["medicationPrintList","İlaçlar",dynamicList("medication"),"İlaç sayısı"],
+  ["surgeryPrintList","Ameliyatlar",dynamicList("surgery"),"Ameliyat sayısı"]]){
   const el=byId(id);if(el)el.textContent=label+": "+(values.length?values.join(", "):"Kayıt yok")+". "+countLabel+": "+values.length;
  }
 }
@@ -440,8 +478,9 @@ function migrateLegacyDraft(values){
 }
 
 function refreshEntryCounts(){
- renderSelectedDiagnoses();updateEntryNumbers("diagnosis");updateEntryNumbers("medication");
- updateCompactPrintLists();syncHistoryPicker();
+ renderSelectedDiagnoses();
+ for(const type of ["diagnosis","medication","surgery"])updateEntryNumbers(type);
+ updateCompactPrintLists();syncHistoryPicker();syncSurgeryPicker();
 }
 function initializeFirstPageDefaults(){
  if(!byId("basvuru").value)byId("basvuru").value=localToday();
@@ -534,6 +573,11 @@ function formatSummaryValue(raw,type){
  return s;
 }
 function summarizedBlockItems(block){
+ if(block.querySelector("#surgeryList")){
+  const values=dynamicList("surgery"),note=byId("surgeryGeneralNote")?.value.trim()||"";
+  return ["Geçirdiği Ameliyatlar: "+(values.join(", ")||"Kayıt yok"),"Ameliyat sayısı: "+values.length,
+   ...(note?["Ameliyatlarla ilgili ek açıklama: "+note]:[])];
+ }
  if(block.querySelector("#diagnosisList")){
   const values=diagnosisNames(),note=byId("diagnosisGeneralNote")?.value.trim()||"";
   return ["Tanılar ve Hastalıklar: "+(values.join(", ")||"Kayıt yok"),"Hastalık sayısı: "+values.length,...(note?["Genel açıklama: "+note]:[])];
