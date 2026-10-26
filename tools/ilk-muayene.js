@@ -165,7 +165,7 @@ function build(){
     '<div class="supplementary-row">'+selectField("alerji","Alerji",["Yok","Var"],"alerjiNot")+'</div>'+
     '<div class="supplementary-row">'+selectField("disDurumu","Dişler",["Doğal dişler","Eksik diş","Parsiyel protez","Total protez","Diğer"],"disNot")+'</div>'+
     '<div class="supplementary-row">'+selectField("gozluk","Gözlük",["Yok","Var"],"gozlukNot")+'</div>'+
-    '<div class="supplementary-row">'+radio("isitmeCihazi","İşitme Cihazı",["Var","Yok","Var ama kullanmıyor"])+f("isitmeNot","Açıklama")+'</div>'+
+    '<div class="supplementary-row">'+selectField("isitmeCihazi","İşitme Cihazı",["Yok","Var","Var ama kullanmıyor"],"isitmeNot")+'</div>'+
    '</div>')+
   block("Ameliyat Öyküsü",
    '<div class="surgery-check">'+check("Koroner bypass öyküsü","oz_1_2")+'</div>'+
@@ -360,6 +360,9 @@ function readData(){
  return result;
 }
 function hydrate(values){
+ // Preserve hearing-aid selections saved by the earlier radio-button layout.
+ const earlierHearing=["Yok","Var","Var ama kullanmıyor"].find(option=>values?.["isitmeCihazi::"+option]===true);
+ if(earlierHearing&&!values?.isitmeCihazi&&byId("isitmeCihazi"))byId("isitmeCihazi").value=earlierHearing;
  for(const [key,value] of Object.entries(values||{})){
   const el=key.includes("::")?document.querySelector('input[name="'+CSS.escape(key.split("::")[0])+'"][value="'+CSS.escape(key.split("::")[1])+'"]'):byId(key);
   if(!el||!el.hasAttribute("data-field"))continue;
