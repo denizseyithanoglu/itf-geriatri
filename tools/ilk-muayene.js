@@ -372,6 +372,43 @@ function migrateOldValues(values){
  }
  return out;
 }
+function migrateLegacyDraft(values){
+ const out=migrateOldValues(values||{});
+ const extraNotes=[],oldToManual=[];
+ for(let i=0;i<LEGACY_HISTORY.length;i++){
+  for(let j=0;j<LEGACY_HISTORY[i][1].length;j++){
+   const key="oz_"+i+"_"+j;
+   if(["oz_1_2","oz_8_1","oz_8_2"].includes(key))continue;
+   const selected=values?.[key]===true,note=String(values?.[key+"_note"]||"").trim();
+   if(!selected&&!note)continue;
+   if(key==="oz_5_2"&&selected){out.osteoFracture=true;if(note)out.osteoFracture_note=note;continue;}
+   const mapped=LEGACY_TO_NEW[key];
+   if(selected&&mapped&&!note){out[mapped]=true;continue;}
+   const name=mapped?(()=>{
+    const [,category,index]=mapped.split("_").map((part,i)=>i?Number(part):part);
+    return DATA.history[category]?.[1]?.[index]||LEGACY_HISTORY[i][1][j];
+   })():LEGACY_HISTORY[i][1][j];
+   if(selected)oldToManual.push({name,date:note});
+   else extraNotes.push(name+": "+note);
+  }
+ }
+ for(const item of oldToManual){
+  makeEntry("diagnosis");
+  const id=entrySequence;out["diag_"+id+"_name"]=item.name;
+  if(item.date)out["diag_"+id+"_date"]=item.date;
+ }
+ for(const type of ["medication"]){
+  for(const id of Array.from(byId("medicationList").querySelectorAll(".dynamic-entry")).map(row=>row.dataset.entryId)){
+   const note=String(out["med_"+id+"_note"]||"").trim();
+   if(note)extraNotes.push("İlaç "+(out["med_"+id+"_name"]||id)+": "+note);
+  }
+ }
+ const diagNotes=extraNotes.filter(t=>!t.startsWith("İlaç "));
+ const medNotes=extraNotes.filter(t=>t.startsWith("İlaç "));
+ if(diagNotes.length)out.diagnosisGeneralNote=[out.diagnosisGeneralNote,...diagNotes].filter(Boolean).join("\n");
+ if(medNotes.length)out.medicationGeneralNote=[out.medicationGeneralNote,...medNotes].filter(Boolean).join("\n");
+ return out;
+}
 
 function refreshEntryCounts(){
  renderSelectedDiagnoses();updateEntryNumbers("diagnosis");updateEntryNumbers("medication");
@@ -440,7 +477,7 @@ function toast(message,bad=false){
 }
 function save(manual=false){
  try{
-  sessionStorage.setItem(STORE,JSON.stringify({version:3,values:readData(),entries:{diagnosis:entryIds("diagnosis"),medication:entryIds("medication")},riskOverrides,confirmed,active:step,savedAt:new Date().toISOString()}));
+  sessionStorage.setItem(STORE,JSON.stringify({version:4,values:readData(),entries:{diagnosis:entryIds("diagnosis"),medication:entryIds("medication")},riskOverrides,confirmed,active:step,savedAt:new Date().toISOString()}));
   if(manual)toast("✓ Geçici taslak kaydedildi");
  }catch(e){if(manual)toast("Kaydedilemedi: tarayıcı depolaması kullanılamıyor",true);}
  refreshTabs();
@@ -565,11 +602,12 @@ function initialize(){
  build();
  let restored;
  try{restored=JSON.parse(sessionStorage.getItem(STORE)||"null");}catch(e){restored=null;}
- if(restored?.version===2||restored?.version===3){
+ if([2,3,4].includes(restored?.version)){
   for(const type of ["diagnosis","medication"])(restored.entries?.[type]||[]).slice(0,200).forEach(id=>makeEntry(type,id));
-  hydrate(restored.version===2?migrateOldValues(restored.values||{}):restored.values||{});
-  riskOverrides=restored.version===3?restored.riskOverrides||{}:{};
-  confirmed=restored.version===3?restored.confirmed||{}:{};
+  const previous=restored.version===4?restored.values||{}:migrateLegacyDraft(restored.values||{});
+  hydrate(previous);
+  riskOverrides=restored.version>=3?restored.riskOverrides||{}:{};
+  confirmed=restored.version===4?restored.confirmed||{}:{};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }else if(restored?.version===1){
   const old=restored.values||{};
@@ -579,7 +617,7 @@ function initialize(){
    byId("diag_"+id+"_date").value=old["tanitarih_"+i]||"";
   }
   if((old.ilaclar||"").trim()){makeEntry("medication");byId("med_"+entrySequence+"_name").value=old.ilaclar;}
-  hydrate(migrateOldValues(old));confirmed={};
+  hydrate(migrateLegacyDraft(old));confirmed={};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }
  initializeFirstPageDefaults();
