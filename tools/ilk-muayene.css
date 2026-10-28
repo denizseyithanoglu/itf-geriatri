@@ -1154,3 +1154,65 @@ button.action.danger:hover{background:#ffebe7}
  .sex-screen[data-inactive="false"]{border:0;padding:2px 0;background:white}
  .sex-screen[data-inactive="false"] .preventive-item{break-inside:avoid}
 }
+
+/* Optional repeat vaccine doses and repeat endoscopy/colonoscopy/mammography tests. */
+@media screen{
+ .preventive-extra-list{display:grid;gap:9px}
+ .preventive-extra-row{
+  box-sizing:border-box;border:1px solid #d4e3eb;background:#f8fbfd;
+  border-radius:8px;margin-top:8px;padding:9px 10px;min-width:0
+ }
+ .preventive-extra-row[hidden],
+ .preventive-add-wrapper[hidden]{display:none!important}
+ .preventive-extra-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+ .preventive-extra-heading strong{color:#275579;font-size:.85rem}
+ .preventive-extra-fields{display:grid;grid-template-columns:minmax(110px,.8fr) minmax(0,2fr);gap:9px}
+ .preventive-extra-fields .field{min-width:0}
+ .preventive-extra-fields input{width:100%;min-height:41px}
+ .preventive-remove-extra{
+  box-sizing:border-box;padding:4px 11px;min-height:31px;
+  border:1px solid #dfb9b5;border-radius:7px;background:#fff9f8;
+  font:750 .76rem/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;color:#963f3c
+ }
+ .preventive-add-wrapper{display:flex;justify-content:flex-end;margin-top:8px}
+ .preventive-add-extra{min-height:37px;padding:6px 11px}
+ .other-vaccine{margin-top:13px;border-top:1px solid #d4e1e9;padding-top:12px}
+ .other-vaccine textarea{min-height:75px}
+ .dxa-entry-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px}
+ .dxa-entry-grid>.dxa-date{grid-column:span 2}
+ .dxa-entry-grid>.dxa-device{grid-column:span 4}
+ .dxa-metrics{grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+ .dxa-metric-group{
+  border:1px solid #d2e1eb;background:#f7fbfe;border-radius:8px;
+  padding:7px 9px 9px;min-width:0
+ }
+ .dxa-metric-group legend{padding:0 5px;color:#275579;font-size:.83rem;font-weight:800}
+ .dxa-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .dxa-pair .field{min-width:0}
+ .dxa-pair .field label{font-size:.76rem;min-height:0}
+ .dxa-metric-group input{width:100%;min-width:0;min-height:39px}
+}
+@media screen and (max-width:900px){
+ .dxa-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media screen and (max-width:650px){
+ .dxa-metrics{grid-template-columns:minmax(0,1fr)}
+ .dxa-entry-grid>.dxa-date,.dxa-entry-grid>.dxa-device{grid-column:span 1}
+ .preventive-extra-fields{grid-template-columns:minmax(0,.75fr) minmax(0,1.3fr)}
+}
+@media screen and (max-width:410px){
+ .preventive-extra-fields{grid-template-columns:minmax(0,1fr)}
+ .dxa-entry-grid>.dxa-date,.dxa-entry-grid>.dxa-device{grid-column:1}
+}
+@media print{
+ .preventive-add-wrapper,.preventive-remove-extra{display:none!important}
+ .preventive-extra-row:not([hidden]){display:block;border:1px solid #ddd;padding:3px 5px;margin:2px 0;background:white}
+ .preventive-extra-fields{display:grid;grid-template-columns:1fr 2fr;gap:4px}
+ .dxa-entry-grid{display:grid;grid-template-columns:1fr 2fr;gap:4px}
+ .dxa-entry-grid>.dxa-date,.dxa-entry-grid>.dxa-device{grid-column:auto}
+ .dxa-metrics{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+ .dxa-metric-group{padding:3px;border:1px solid #ccc}
+ .dxa-metric-group legend{font-size:7px}
+ .dxa-pair{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+ .dxa-pair .field label{font-size:6px}
+}
