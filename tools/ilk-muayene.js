@@ -1277,6 +1277,7 @@ function initialize(){
   if(event.target.matches("[data-disease-date]")){updateCompactPrintLists();save();return;}
   if(event.target.id==="tc")event.target.value=event.target.value.replace(/\D/g,"").slice(0,11);
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
+  if(/^fam_[mf]_9$/.test(event.target.id))riskOverrides.osteoParent=false;
   if(["sigaraDurum","alkolDurum"].includes(event.target.name)||["osteoSmoke","osteoAlcohol"].includes(event.target.id))onRiskOrHabitsChanged(event.target);
   setSexFromScreen(event.target);
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
@@ -1284,6 +1285,7 @@ function initialize(){
  byId("pages").addEventListener("change",event=>{
   if(event.target.matches("[data-disease-date]")){updateCompactPrintLists();save();return;}
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
+  if(/^fam_[mf]_9$/.test(event.target.id))riskOverrides.osteoParent=false;
   if(["sigaraDurum","alkolDurum"].includes(event.target.name)||["osteoSmoke","osteoAlcohol"].includes(event.target.id))onRiskOrHabitsChanged(event.target);
   setSexFromScreen(event.target);
   if(event.target.matches("[data-surgery-choice]"))addSurgeryFromPicker(event.target);
