@@ -64,6 +64,7 @@ function syncPreventiveFields(){
   const details=item.querySelector(".preventive-fields");
   if(details)details.hidden=!yes?.checked;
  });
+ syncColonoscopyAlternatives();syncDxaFields();
 }
 function migratePreventiveChoices(values){
  // Older drafts had only dates and notes. Preserve them by marking Var.
@@ -122,6 +123,112 @@ function dxaSection(){
   '<div id="dxaDetails" hidden><div id="dxaList" class="dxa-list"></div>'+
   '<div class="dxa-actions"><button type="button" class="action" id="addDxa" data-add-dxa>+ DXA Ölçümü Ekle</button></div>'+
   '</div></div>';
+}
+
+let dxaSequence=0;
+const DXA_FIELDS=[
+ ["date","Tarih / Yıl"],
+ ["device","DXA Çekim Yeri / Cihazı"],
+ ["lumbar_t","L1–4 total T-skoru"],
+ ["lumbar_bmd","L1–4 total BMD (g/cm²)"],
+ ["neck_t","Femur boyun T-skoru"],
+ ["neck_bmd","Femur boyun BMD (g/cm²)"],
+ ["hip_t","Femur total T-skoru"],
+ ["hip_bmd","Femur total BMD (g/cm²)"]
+];
+function makeDxaEntry(explicitId=null){
+ const list=byId("dxaList");if(!list)return;
+ const id=explicitId===null?++dxaSequence:Number(explicitId);
+ if(!Number.isSafeInteger(id)||id<1)return;
+ dxaSequence=Math.max(dxaSequence,id);
+ if(list.querySelector('[data-dxa-id="'+id+'"]'))return;
+ const entry=document.createElement("div");
+ entry.className="dxa-entry";entry.dataset.dxaId=String(id);
+ const field=([key,label])=>'<div class="field dxa-field dxa-'+key+'"><label for="dxa_'+id+'_'+key+'">'+esc(label)+'</label>'+
+  '<input type="text" data-field id="dxa_'+id+'_'+key+'" autocomplete="off"'+
+  (key.endsWith("_t")?" placeholder="+"\"T-skoru\"":key.endsWith("_bmd")?" placeholder="+"\"BMD\"":"")+'></div>';
+ entry.innerHTML='<div class="dxa-entry-heading"><strong class="dxa-index"></strong>'+
+  '<button type="button" class="dxa-remove" data-remove-dxa>Sil</button></div>'+
+  '<div class="dxa-entry-grid">'+DXA_FIELDS.map(field).join("")+'</div>'+
+  '<div class="field dxa-note"><label for="dxa_'+id+'_note">Ek Not</label>'+
+  '<textarea rows="2" data-field id="dxa_'+id+'_note" placeholder="Cihaz, ölçüm, rapor veya klinik not..."></textarea></div>';
+ list.appendChild(entry);numberDxaEntries();
+}
+function numberDxaEntries(){
+ Array.from(byId("dxaList")?.querySelectorAll(".dxa-entry")||[]).forEach((entry,i)=>{
+  entry.querySelector(".dxa-index").textContent=(i+1)+". DXA Ölçümü";
+  const remove=entry.querySelector("[data-remove-dxa]");
+  if(remove){remove.hidden=i===0;remove.disabled=i===0;}
+ });
+}
+function dxaIds(){return Array.from(byId("dxaList")?.querySelectorAll(".dxa-entry")||[]).map(entry=>Number(entry.dataset.dxaId));}
+function resetDxaEntries(){byId("dxaList")?.replaceChildren();}
+function dxaSummaries(){
+ return Array.from(byId("dxaList")?.querySelectorAll(".dxa-entry")||[]).map((entry,i)=>{
+  const id=entry.dataset.dxaId;
+  const values=DXA_FIELDS.map(([key,label])=>{
+   const value=byId("dxa_"+id+"_"+key)?.value.trim()||"";
+   return value?label+": "+value:"";
+  }).filter(Boolean);
+  const note=byId("dxa_"+id+"_note")?.value.trim()||"";
+  if(note)values.push("Ek Not: "+note);
+  return (i+1)+". DXA Ölçümü"+(values.length?" — "+values.join("; "):"");
+ });
+}
+function syncDxaFields(){
+ const yes=byId("tarama_5_status_yes")?.checked;
+ const detail=byId("dxaDetails");
+ if(detail)detail.hidden=!yes;
+ if(yes&&!dxaIds().length)makeDxaEntry();
+}
+function syncColonoscopyAlternatives(){
+ const container=byId("colonoscopyAlternatives");
+ if(container)container.hidden=!byId("tarama_3_status_no")?.checked;
+}
+function setSexFromScreen(el){
+ const card=el?.closest?.("[data-sex-screen]");
+ if(!card||sexValue())return;
+ const wanted=card.dataset.sexScreen;
+ const radio=document.querySelector('input[name="cinsiyet"][value="'+wanted+'"]');
+ if(radio){radio.checked=true;updateSexSpecific();}
+}
+function onRiskOrHabitsChanged(target){
+ const name=target.name||"";
+ if(name==="sigaraDurum"||name==="alkolDurum"){
+  const id=name==="sigaraDurum"?"osteoSmoke":"osteoAlcohol";
+  riskOverrides[id]=false;
+ }else if(target.id==="osteoSmoke"||target.id==="osteoAlcohol"){
+  riskOverrides[target.id]=true;
+  const name=target.id==="osteoSmoke"?"sigaraDurum":"alkolDurum";
+  const positive=target.id==="osteoSmoke"?"Aktif kullanıyor":"Var";
+  const negative=target.id==="osteoSmoke"?"Hiç kullanmadı":"Yok";
+  const current=selectedRadio(name);
+  const option=target.checked?positive:current===positive?negative:null;
+  if(option){
+   const radio=Array.from(document.querySelectorAll('input[name="'+name+'"]')).find(el=>el.value===option);
+   if(radio)radio.checked=true;
+  }
+ }
+}
+function migrateHistoryAndDxa(values,version){
+ const out={...(values||{})};
+ if(version<7){
+  const oldNames=["Demans","HT","DM","SVO","Depresyon","HL","Koroner Arter Hastalığı","Annede Osteoporoz","Anne/Babada Kalça Kırığı"];
+  const history=[];
+  oldNames.forEach((name,i)=>{
+   if(out["aile_"+i]===true)history.push(name+(out["aile_"+i+"_note"]?" ("+out["aile_"+i+"_note"]+")":""));
+   else if(String(out["aile_"+i+"_note"]||"").trim())history.push(name+": "+out["aile_"+i+"_note"]);
+  });
+  if(history.length)out.familyExtra=[out.familyExtra,"Önceki soygeçmiş (ebeveyn belirtilmemiş): "+history.join(", ")].filter(Boolean).join("\n");
+  if(out.aile_8===true&&!out.osteoParent)out.osteoParent=true;
+  // The previous DXA had a single date and note; transfer to measurement 1.
+  if(out.tarama_5_date||out.tarama_5_result){
+   out.tarama_5_status_yes=true;
+   out.dxa_1_date=out.tarama_5_date||"";
+   out.dxa_1_note=out.tarama_5_result||"";
+  }
+ }
+ return out;
 }
 function riskQuestion(id,label){
  return '<div class="risk-row"><label class="risk-choice" for="'+id+'"><input type="checkbox" id="'+id+'" data-field> '+esc(label)+'</label>'+
@@ -399,13 +506,18 @@ function sexValue(){return document.querySelector('input[name="cinsiyet"]:checke
 function updateSexSpecific(){
  const gender=sexValue();
  document.querySelectorAll("[data-sex-only]").forEach(el=>el.hidden=el.dataset.sexOnly!==gender);
+ document.querySelectorAll("[data-sex-screen]").forEach(card=>{
+  const inactive=gender!==card.dataset.sexScreen;
+  card.dataset.inactive=String(inactive);
+  card.querySelectorAll("[data-field]").forEach(input=>input.disabled=!!gender&&inactive);
+ });
  const panel=byId("menopozDetail");
  if(panel)panel.hidden=gender!=="Kadın"||!byId("menopozSwitch")?.checked;
 }
 function selectedRadio(name){return document.querySelector('input[name="'+name+'"]:checked')?.value||"";}
 function syncOsteoporosisRisk(){
  const sources={
-  osteoParent:!!byId("aile_8")?.checked,
+  osteoParent:!!(byId("fam_m_9")?.checked||byId("fam_f_9")?.checked),
   osteoSmoke:selectedRadio("sigaraDurum")==="Aktif kullanıyor",
   osteoAlcohol:selectedRadio("alkolDurum")==="Var"
  };
