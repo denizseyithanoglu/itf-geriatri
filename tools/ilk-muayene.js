@@ -359,7 +359,8 @@ const SYSTEM_REVIEW_ROWS=[
  ],
  [
   ["ss_0_5","Baş Ağrısı"],["ss_0_6","Bel Ağrısı"],
-  ["ss_0_7","Eklem Ağrısı"],["ss_0_8","Ağrının Şiddeti (0–10)"],
+  ["ss_0_7","Eklem Ağrısı"],["ss_0_4","Diğer Ağrılar"],
+  ["ss_0_8","Ağrının Şiddeti (0–10)"],
   ["ss_new_restless_legs","Huzursuz Bacak"]
  ],
  [
@@ -402,8 +403,9 @@ function systemSymptomGroups(){
  })));
  const used=new Set(SYSTEM_REVIEW_ROWS.flat().map(item=>item[0]));
  BREAST_SYMPTOMS.forEach(([id])=>used.add(id));
- // Empotans is an obsolete duplicate of Erektil Disfonksiyon.
- used.add("ss_1_1");
+ // Empotans was merged with Erektil Disfonksiyon. The old "Diğer"
+ // checkbox is now a free-text note, preserving its existing _note ID.
+ used.add("ss_1_1");used.add("ss_2_19");
  return {
   rows:SYSTEM_REVIEW_ROWS,
   remaining:all.filter(x=>!used.has(x.id)&&
@@ -427,10 +429,16 @@ function systemReviewRows(groups){
    '<div class="symptom-review-remaining"><h4>Diğer Mevcut Sorgular</h4>'+
     '<p class="field-help">Önceki kayıtlarda bulunan, yeni sekiz satırda henüz konumlandırılmamış sorular.</p>'+
     '<div class="symptom-review-row">'+groups.remaining.map(x=>check(x.name,x.id)).join("")+'</div></div>':"")+
+  '<div class="symptom-review-other">'+area("ss_2_19_note","Diğer Sistem Sorgusu / Ek Not","",3)+'</div>'+
   '</div>';
 }
 function migrateOldImpotence(values){
  const out={...(values||{})};
+ // Retain the meaning of a formerly checked "Diğer" box even if no
+ // explanatory note had been entered in older saved drafts.
+ if(out.ss_2_19===true&&!String(out.ss_2_19_note||"").trim())
+  out.ss_2_19_note="Diğer (önceki formda işaretlenmiş)";
+ delete out.ss_2_19;
  if(out.ss_1_1===true)out.ss_1_2=true;
  const note=String(out.ss_1_1_note||"").trim();
  if(note){
