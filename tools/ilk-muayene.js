@@ -349,15 +349,96 @@ const MICTURITION_SYMPTOMS=new Set([
  "Dizüri","Noktüri","Polidipsi","Poliüri"
 ]);
 const DEFECATION_SYMPTOMS=new Set(["Fekal İnkontinans","İnatçı Kabızlık","Sık İshal"]);
+// Exact clinical order requested for the eight rows of the system review.
+// The former ss_ identifiers remain unchanged for old patient drafts.
+const SYSTEM_REVIEW_ROWS=[
+ [
+  ["ss_0_0","Halsizlik"],["ss_0_2","Ateş"],
+  ["ss_new_night_sweats","Gece Terlemesi"],["ss_0_3","İştahsızlık"],
+  ["ss_0_1","Kilo Kaybı"],["ss_new_chew_swallow","Çiğneme / Yutma Sorunu"]
+ ],
+ [
+  ["ss_0_5","Baş Ağrısı"],["ss_0_6","Bel Ağrısı"],
+  ["ss_0_7","Eklem Ağrısı"],["ss_0_8","Ağrının Şiddeti (0–10)"],
+  ["ss_new_restless_legs","Huzursuz Bacak"]
+ ],
+ [
+  ["ss_0_9","Baş Dönmesi"],["ss_new_orthostasis","Ortostatizm"],
+  ["ss_0_10","Göğüs Ağrısı"],["ss_0_11","Çarpıntı"],
+  ["ss_0_14","Nefes Darlığı"],["ss_0_12","Ortopne"]
+ ],
+ [
+  ["ss_0_13","Öksürük"],["ss_0_16","Balgam"],
+  ["ss_0_17","Hemoptizi"],["ss_0_15","Paroksismal Noktürnal Dispne"],
+  ["ss_new_allergic_rhinitis","Alerjik Rinit"],["ss_new_nasal_congestion","Nazal Konjesyon"]
+ ],
+ [
+  ["ss_2_12","Bulantı"],["ss_2_11","Kusma"],
+  ["ss_2_13","Gaz"],["ss_2_14","Şişkinlik"],
+  ["ss_2_15","Karın Ağrısı"],["ss_2_6","Dispepsi"]
+ ],
+ [
+  ["ss_1_17","Düşme"],["ss_new_fear_falling","Düşme Korkusu"],
+  ["ss_1_18","Kalça-Femur Kırığı"],["ss_0_19","Kalça Dışı Kırık"],
+  ["ss_0_18","Protez Öyküsü"],["ss_2_7","Boyda Kısalma"]
+ ],
+ [
+  ["ss_1_15","Yürüme Sorunu"],["ss_new_balance","Denge Bozukluğu"],
+  ["ss_2_2","Tremor"],["ss_new_muscle_loss","Kas Erimesi"],
+  ["ss_1_16","Baston Kullanımı"],["ss_1_19","Dekübit Riski"]
+ ],
+ [
+  ["ss_1_0","Cinsel İlişki"],["ss_1_2","Erektil Disfonksiyon"],
+  ["ss_1_3","Ejakülasyon Sorunu"],["ss_new_painful_intercourse","Ağrılı İlişki"],
+  ["breast_group","Memede Ağrı / Akıntı / Kitle"]
+ ]
+];
+const BREAST_SYMPTOMS=[
+ ["ss_2_18","Ağrı"],["ss_2_17","Akıntı"],["ss_2_16","Kitle"]
+];
 function systemSymptomGroups(){
  const all=DATA.symptoms.flatMap((group,i)=>group.map((name,j)=>({
   name,id:"ss_"+i+"_"+j
  })));
+ const used=new Set(SYSTEM_REVIEW_ROWS.flat().map(item=>item[0]));
+ BREAST_SYMPTOMS.forEach(([id])=>used.add(id));
+ // Empotans is an obsolete duplicate of Erektil Disfonksiyon.
+ used.add("ss_1_1");
  return {
-  general:all.filter(x=>!MICTURITION_SYMPTOMS.has(x.name)&&!DEFECATION_SYMPTOMS.has(x.name)),
+  rows:SYSTEM_REVIEW_ROWS,
+  remaining:all.filter(x=>!used.has(x.id)&&
+   !MICTURITION_SYMPTOMS.has(x.name)&&!DEFECATION_SYMPTOMS.has(x.name)),
   urine:all.filter(x=>MICTURITION_SYMPTOMS.has(x.name)),
   bowel:all.filter(x=>DEFECATION_SYMPTOMS.has(x.name))
  };
+}
+function breastSymptomsTile(){
+ return '<fieldset class="symptom-breast-group"><legend>Memede Ağrı / Akıntı / Kitle</legend>'+
+  '<div class="symptom-breast-choices">'+BREAST_SYMPTOMS.map(([id,label])=>
+   '<div class="symptom-breast-choice">'+check(label,id)+'</div>').join("")+
+  '</div></fieldset>';
+}
+function systemReviewRows(groups){
+ return '<div class="symptom-review-rows">'+groups.rows.map((row,i)=>
+  '<div class="symptom-review-row" data-review-row="'+(i+1)+'">'+
+  row.map(([id,label])=>id==="breast_group"?breastSymptomsTile():check(label,id)).join("")+
+  '</div>').join("")+
+  (groups.remaining.length?
+   '<div class="symptom-review-remaining"><h4>Diğer Mevcut Sorgular</h4>'+
+    '<p class="field-help">Önceki kayıtlarda bulunan, yeni sekiz satırda henüz konumlandırılmamış sorular.</p>'+
+    '<div class="symptom-review-row">'+groups.remaining.map(x=>check(x.name,x.id)).join("")+'</div></div>':"")+
+  '</div>';
+}
+function migrateOldImpotence(values){
+ const out={...(values||{})};
+ if(out.ss_1_1===true)out.ss_1_2=true;
+ const note=String(out.ss_1_1_note||"").trim();
+ if(note){
+  const existing=String(out.ss_1_2_note||"").trim();
+  out.ss_1_2_note=[existing,note].filter(Boolean).join("; ");
+ }
+ delete out.ss_1_1;delete out.ss_1_1_note;
+ return out;
 }
 function symptomGrid(items){
  return '<div class="symptom-six-grid">'+items.map(x=>check(x.name,x.id)).join("")+'</div>';
@@ -602,7 +683,7 @@ function build(){
  const symptomGroups=systemSymptomGroups();
  byId("page2").innerHTML=printInstitutionHeader(3)+
   '<div class="page-title"><h2>3. Sistem Sorgulaması, Uyku, Biliş ve Duygudurum</h2><small>İTF.HB.FR.168 • Sayfa 3/4</small></div>'+
-  block("Sistem Sorgulaması",symptomGrid(symptomGroups.general))+
+  block("Sistem Sorgulaması",systemReviewRows(symptomGroups))+
   block("Miksiyon ve Defekasyon Sorgusu",eliminationSection(symptomGroups))+
   block("Uyku Sorgusu",sleepSection())+
   block("Unutkanlık ve Bilişsel Değerlendirme",
@@ -901,7 +982,7 @@ function convertLegacySurgeryDates(values){
 }
 function hydrate(values){
  // Convert legacy surgical dates and infer Var for old vaccination/screening records.
- values=migratePreventiveChoices(convertLegacySurgeryDates(values));
+ values=migrateOldImpotence(migratePreventiveChoices(convertLegacySurgeryDates(values)));
  // Preserve hearing-aid selections saved by the earlier radio-button layout.
  const earlierHearing=["Yok","Var","Var ama kullanmıyor"].find(option=>values?.["isitmeCihazi::"+option]===true);
  if(earlierHearing&&!values?.isitmeCihazi&&byId("isitmeCihazi"))byId("isitmeCihazi").value=earlierHearing;
