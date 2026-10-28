@@ -772,6 +772,11 @@ function refreshTabs(){
   t.setAttribute("aria-selected",String(i===step));
   t.dataset.progress=done?"full":has?"partial":"empty";
   t.querySelector(".tab-state").textContent=done?"✓ Kaydedildi":has?"◐ Devam ediyor":"— Boş";
+  const mobile=document.querySelector('[data-mobile-tab="'+i+'"]');
+  if(mobile){
+   mobile.dataset.progress=t.dataset.progress;
+   mobile.setAttribute("aria-current",i===step?"step":"false");
+  }
  }
  byId("prev").disabled=step===0;byId("next").disabled=step===3;
  const historyCount=byId("historyCount");
@@ -1199,6 +1204,10 @@ function initialize(){
   if(!Number.isNaN(when.getTime()))saveFeedback("✓ Geçici taslak yüklendi · "+when.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}),"success");
  }
  for(let i=0;i<4;i++)byId("tab"+i).addEventListener("click",()=>{save();go(i);save();});
+ document.querySelectorAll("[data-mobile-tab]").forEach(button=>button.addEventListener("click",()=>{
+  const destination=Number(button.dataset.mobileTab);
+  if(destination!==step){save();go(destination);save();}
+ }));
  byId("prev").addEventListener("click",()=>{save();go(step-1);save();});
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
  byId("save").addEventListener("click",()=>save(true));
