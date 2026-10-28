@@ -76,7 +76,7 @@ function screeningField(label,dateId,resultId){
  '<label class="preventive-status-choice no"><input type="radio" data-field data-preventive-choice name="'+statusId+'" id="'+statusId+'_no" value="Yok"><span>Yok</span></label>'+
  '<label class="preventive-status-choice yes"><input type="radio" data-field data-preventive-choice name="'+statusId+'" id="'+statusId+'_yes" value="Var"><span>Var</span></label></div>'+
  '<div class="preventive-fields" hidden>'+
-  preventiveInput(dateId,"1. "+(limit>1?(vaccine?"doz":"test")+" — ":"")+"Tarih / Yıl","örn. 2023")+
+  preventiveInput(dateId,(limit>1?"1. "+(prefix.startsWith("asi_")?"doz":"test")+" — ":"")+"Tarih / Yıl","örn. 2023")+
   preventiveInput(resultId,"Ek Not / Sonuç","Rapor / biyopsi / aşı bilgisi",productList)+
  '</div>'+
  (vaccine?'<datalist id="pneumococcalChoices"><option value="Prevenar-20"><option value="KPA-13"><option value="PPSV23"></datalist>':"")+
@@ -91,18 +91,38 @@ function updatePreventiveRepeaters(){
   const checked=card.querySelector('input[data-preventive-choice][value="Var"]')?.checked;
   const max=Number(card.dataset.preventiveRepeat)||1;
   const rows=Array.from(card.querySelectorAll("[data-preventive-extra]"));
-  let next=2;
-  rows.forEach(row=>{
-   const index=Number(row.dataset.preventiveExtra);
-   const enabled=row.querySelector(".preventive-extra-enabled")?.checked;
-   row.hidden=!checked||!enabled;
-   if(enabled)next=Math.max(next,index+1);
-  });
+  rows.forEach(row=>{row.hidden=!checked||!row.querySelector(".preventive-extra-enabled")?.checked;});
+  const next=rows.find(row=>!row.querySelector(".preventive-extra-enabled")?.checked);
   const wrapper=card.querySelector(".preventive-add-wrapper");
   const add=card.querySelector("[data-add-preventive]");
-  if(wrapper)wrapper.hidden=!checked||next>max;
-  if(add&&next<=max)add.textContent="+ "+next+". "+(card.dataset.statusName.startsWith("asi_")?"Doz":"Test")+" Ekle";
+  if(wrapper)wrapper.hidden=!checked||!next;
+  if(add&&next){
+   const number=Number(next.dataset.preventiveExtra);
+   add.textContent="+ "+number+". "+(card.dataset.statusName.startsWith("asi_")?"Doz":"Test")+" Ekle";
+  }
  });
+}
+function addPreventiveExtra(card){
+ const row=Array.from(card?.querySelectorAll("[data-preventive-extra]")||[])
+  .find(item=>!item.querySelector(".preventive-extra-enabled")?.checked);
+ if(!row)return;
+ row.querySelector(".preventive-extra-enabled").checked=true;
+ updatePreventiveRepeaters();save();
+ row.querySelector('input[id*="_date"]')?.focus();
+}
+function removePreventiveExtra(button){
+ const card=button.closest("[data-preventive-item]");
+ const row=button.closest("[data-preventive-extra]");
+ if(!card||!row)return;
+ // Removing dose/test 2 also clears test 3, retaining a consecutive sequence.
+ const index=Number(row.dataset.preventiveExtra);
+ card.querySelectorAll("[data-preventive-extra]").forEach(item=>{
+  if(Number(item.dataset.preventiveExtra)<index)return;
+  const checked=item.querySelector(".preventive-extra-enabled");
+  if(checked)checked.checked=false;
+  item.querySelectorAll('input[data-field]:not([type="checkbox"])').forEach(el=>el.value="");
+ });
+ updatePreventiveRepeaters();save();
 }
 function preventiveCardSummary(card){
  const title=card.querySelector(".preventive-title")?.textContent.trim()||"Tarama";
@@ -286,6 +306,14 @@ function onRiskOrHabitsChanged(target){
    if(radio)radio.checked=true;
   }
  }
+}
+function migrateOtherVaccines(values,version){
+ if(version>=8)return values;
+ const out={...(values||{})};
+ const previous=[out.asi_5_date,out.asi_5_result].map(x=>String(x||"").trim()).filter(Boolean);
+ if(previous.length)out.otherVaccines=[out.otherVaccines,"Önceki diğer aşı: "+previous.join(" — ")].filter(Boolean).join("\n");
+ else if(out.asi_5_status_yes===true)out.otherVaccines=[out.otherVaccines,"Önceki kayıtta diğer aşı: Var"].filter(Boolean).join("\n");
+ return out;
 }
 function migrateHistoryAndDxa(values,version){
  const out={...(values||{})};
@@ -891,7 +919,7 @@ function saveFeedback(message,kind="success"){
 function save(manual=false){
  let saved=false;
  try{
-  sessionStorage.setItem(STORE,JSON.stringify({version:7,values:readData(),entries:{
+  sessionStorage.setItem(STORE,JSON.stringify({version:8,values:readData(),entries:{
    diagnosis:entryIds("diagnosis"),medication:entryIds("medication"),surgery:entryIds("surgery"),
    preliminary:entryIds("preliminary"),dxa:dxaIds()
   },surgerySources:surgeryLinks(),riskOverrides,confirmed,active:step,savedAt:new Date().toISOString()}));
@@ -1261,7 +1289,7 @@ function initialize(){
  build();
  let restored;
  try{restored=JSON.parse(sessionStorage.getItem(STORE)||"null");}catch(e){restored=null;}
- if([2,3,4,5,6,7].includes(restored?.version)){
+ if([2,3,4,5,6,7,8].includes(restored?.version)){
   for(const type of ["diagnosis","medication"])(restored.entries?.[type]||[]).slice(0,200).forEach(id=>makeEntry(type,id));
   if(restored.version>=5){
    const links=Array.isArray(restored.surgerySources)?restored.surgerySources:[];
@@ -1271,15 +1299,15 @@ function initialize(){
    });
   }
   if(restored.version>=6)(restored.entries?.preliminary||[]).slice(0,200).forEach(id=>makeEntry("preliminary",id));
-  if(restored.version===7)(restored.entries?.dxa||[]).slice(0,40).forEach(id=>makeDxaEntry(id));
+  if(restored.version>=7)(restored.entries?.dxa||[]).slice(0,40).forEach(id=>makeDxaEntry(id));
   const old=restored.version<4?migrateLegacyDraft(restored.values||{}):restored.values||{};
   const migrated=restored.version>=5?old:migrateBeforeV5(old);
   const converted=migrateHistoryAndDxa(restored.version>=6?migrated:migrateLegacyPreliminary(migrated),restored.version);
   if(restored.version<7&&converted.tarama_5_status_yes===true)makeDxaEntry(1);
-  hydrate(converted);
+  hydrate(migrateOtherVaccines(converted,restored.version));
   riskOverrides=restored.version>=3?restored.riskOverrides||{}:{};
   if(restored.version<7&&converted.aile_8===true)riskOverrides.osteoParent=true;
-  confirmed=restored.version===7?restored.confirmed||{}:{};
+  confirmed=restored.version>=7?restored.confirmed||{}:{};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }else if(restored?.version===1){
   const old=restored.values||{};
@@ -1291,7 +1319,7 @@ function initialize(){
   if((old.ilaclar||"").trim()){makeEntry("medication");byId("med_"+entrySequence+"_name").value=old.ilaclar;}
   const converted=migrateHistoryAndDxa(migrateLegacyPreliminary(migrateBeforeV5(migrateLegacyDraft(old))),1);
   if(converted.tarama_5_status_yes===true)makeDxaEntry(1);
-  hydrate(converted);confirmed={};
+  hydrate(migrateOtherVaccines(converted,1));confirmed={};
   if(converted.aile_8===true)riskOverrides.osteoParent=true;
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }
@@ -1348,6 +1376,10 @@ function initialize(){
    if(checkbox){checkbox.checked=false;refreshEntryCounts();save();}
    return;
   }
+  const addRepeat=event.target.closest("[data-add-preventive]");
+  if(addRepeat){addPreventiveExtra(addRepeat.closest("[data-preventive-item]"));return;}
+  const removeRepeat=event.target.closest("[data-remove-preventive]");
+  if(removeRepeat){removePreventiveExtra(removeRepeat);return;}
   const addDxa=event.target.closest("[data-add-dxa]");
   if(addDxa){makeDxaEntry();save();return;}
   const removeDxa=event.target.closest("[data-remove-dxa]");
