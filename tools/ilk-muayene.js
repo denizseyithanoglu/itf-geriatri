@@ -371,7 +371,10 @@ function eliminationSection(groups){
 function sleepSection(){
  const questions=[
   ["Uyku Sorunu","dav_4"],
-  ...DATA.mood.slice(0,4).map((name,i)=>[name,"duygu_"+i]),
+  [DATA.mood[1],"duygu_1"],
+  [DATA.mood[2],"duygu_2"],
+  [DATA.mood[3],"duygu_3"],
+  [DATA.mood[0],"duygu_0"],
   ["REM Uyku Davranış Bozukluğu","uykuRBD"]
  ];
  return '<div class="sleep-question-grid">'+
@@ -612,7 +615,8 @@ function build(){
    '<div class="group" style="margin-top:12px"><h4>Ek Bilişsel / Davranışsal Bulgular</h4>'+
     DATA.behavior.map((name,i)=>name==="Uyku Sorunu"?"":check(name,"dav_"+i)).join("")+'</div>')+
   block("Duygudurum Değerlendirmesi",
-   checks(DATA.mood.slice(4).map(x=>x),"duygu_tmp","two").replace(/duygu_tmp_(\d+)/g,(_,n)=>"duygu_"+(Number(n)+4)));
+   '<div class="bullets two">'+DATA.mood.slice(4)
+    .map((name,i)=>check(name,"duygu_"+(i+4))).join("")+'</div>');
  byId("page3").innerHTML=printInstitutionHeader(4)+
   '<div class="page-title"><h2>4. Fizik Muayene ve Ön Tanılar</h2><small>İTF.HB.FR.168 • Sayfa 4/4</small></div>'+
   block("Fizik Muayene",grouped(DATA.exam,"fm"))+
