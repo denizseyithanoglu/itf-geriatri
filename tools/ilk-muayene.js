@@ -1,5 +1,5 @@
 "use strict";
-const DATA={"history":[["Göz",["Katarakt","Glokom","Makular Dejenerasyon"]],["Kardiyovasküler",["KAH (Koroner Arter Hastalığı)","MI (Miyokard İnfarktüsü)","HT (Hipertansiyon)","AF (Atriyal Fibrillasyon)","Aritmi – Diğer","KKY (Konjestif Kalp Yetmezliği)"]],["Pulmoner",["Astım","KOAH (Kronik Obstrüktif Akciğer Hastalığı)","Pulmoner Emboli","Tekrarlayan Pnömoni"]],["Üriner",["KBH (Kronik Böbrek Hastalığı)","BPH (Benign Prostat Hiperplazisi)","Nefrolitiazis","Tekrarlayan İYE (İdrar Yolu Enfeksiyonu)"]],["Nöro/Psikiyatrik",["İskemik SVH (İskemik Serebrovasküler Hastalık)","Hemorajik SVH (Hemorajik Serebrovasküler Hastalık)","Epilepsi","Parkinson","Alzheimer Demans","Vasküler Demans","Frontotemporal Demans","Lewy Cisimcikli Demans","Demans – Diğer","Depresyon","Anksiyete"]],["Gastrointestinal",["Peptik Ülser","Reflü","Kronik Karaciğer Hastalığı","Kolelitiazis"]],["Endokrin",["T2DM (Tip 2 Diyabetes Mellitus)","T1DM (Tip 1 Diyabetes Mellitus)","Hipertiroidi","Hipotiroidi","Guatr"]],["Lokomotor",["Osteoartrit","Osteoporoz","RA (Romatoid Artrit)","PMR (Polimyalji Romatika)","Dev Hücreli Arterit"]],["Onkoloji / Hematoloji",["MGUS (Önemi Belirsiz Monoklonal Gammopati)","Akciğer Ca","Kolon Ca","Meme Ca","Prostat Ca","Endometrium Ca","Over Ca"]]],"family":["Demans","Hipertansiyon","DM","SVO","Depresyon","Hiperlipidemi","KAH","Annede Osteoporoz","Anne / Babada Kalça Kırığı (osteoporotik / hafif travma)"],"vaccines":["İnfluenza","Pnömokok (Prevenar-20, KPA-13, PPSV23)","Tetanoz-Difteri-Aselüler Boğmaca (Tdap)","Herpes Zoster","RSV"],"screens":["Mamografi","GGK","Rektosigmoidoskopi","Kolonoskopi","sPSA / PSA","Kemik Mineral Yoğunluk Ölçümü (T skorları)","Pap Smear","Abdominal US (AAA Taraması)"],"symptoms":[["Halsizlik","Kilo Kaybı","Ateş","İştahsızlık","Ağrı","Baş Ağrısı","Bel Ağrısı","Eklem Ağrısı","Ağrının Şiddeti (0–10)","Baş Dönmesi","Göğüs Ağrısı","Çarpıntı","Ortopne","Öksürük","Nefes Darlığı","PND","Balgam","Hemoptizi","Protez Öyküsü","Kalça Dışı Kırık"],["Cinsel İlişki","Empotans","Erektil Disfonksiyon","Ejekülasyon Sorunu","Üriner İnkontinans","Kaç Kez","Sıkışma","Stres (Öksürme, Ikınma)","Gece","BPH Semptomları","Kesik Kesik İdrar","Sık İdrar","Çatallanma","Tam Boşaltamama Hissi","İdrar Debisinde Azalma","Yürüme Sorunu","Baston Kullanımı","Düşme Öyküsü","Kalça-Femur Kırığı","Dekübit Riski"],["Kasık Ağrısı","Dizüri","Tremor","Noktüri","Polidipsi","Poliüri","Dispepsi","Boyda Kısalma","Fekal İnkontinans","İnatçı Kabızlık","Sık İshal","Kusma","Bulantı","Gaz","Şişkinlik","Karın Ağrısı","Memede Kitle","Memede Akıntı","Memede Ağrı","Diğer"]],"cognition":[["İlaç Takibinde Zorlanma","Hobilere İlgide Azalma","Kelime Bulma Güçlüğü","İsimleri Unutma","İnsanları Karıştırma","Torun Adları","Gazete, Kitap, TV Takibinde Sorun","Eşya Kaybetme"],["Hesap, Alışveriş","Aynı Konuları Tekrar Tekrar Sorma","Yeni Olayları Hatırlayamama","Kişilik Değişikliği","Yolları Karıştırma","Kaybolma","Adresleri Unutma","Evde Odaları Karıştırma","Afazi","Apraksi","Agnozi"]],"behavior":["Halüsinasyon","Sanrı","Anksiyete","Ajitasyon","Uyku Sorunu","Amaçsız Gezinme"],"mood":["Uyku Süresi","Uykuyu Başlatmada Güçlük","Uykuyu Sürdürmede Güçlük","Uyanma Sebebi","Sık Ağlama","İsteksizlik","Can Sıkıntısı","Somatik Yakınmalarda Artış","Ölüm İsteği","İntihar Düşüncesi"],"exam":[["Genel Durum",["Şuur","Kooperasyon","Oryantasyon","Ödem","İkter","Siyanoz","LA","Solukluk"]],["Baş ve Boyun",["Pupiller","Ağız İçi","LAP","Karotis Üfürümü","Tiroid"]],["Kardiyovasküler Sistem",["Sağ Kol Tansiyon","Sol Kol Tansiyon","Ortostatik Hipotansiyon","Nabız","S1","S2","Ek Ses","Üfürüm","Boyun Venöz Dolgunluk","Pretibial Ödem","Nabızlar"]],["Solunum Sistemi",["Ral","Ronküs","Siyanoz","Solunum Sayısı"]],["Batın",["Hepatomegali","Splenomegali","Traube Alanı","Asit","Hassasiyet","Defans","Rebound","Kitle"]],["Meme Muayenesi",["Aksiller LAP","Meme Muayenesi"]],["Lokomotor Sistem",["Ekstremite Uzunluğu Simetrisi","Deformite","Hareket Kısıtlılığı","Artrit","Artralji"]]],"neuro":[["Motor",["Üst Ekstremite","Alt Ekstremite"]],["Duyu",["Yüzeyel","Derin"]],["Patolojik Refleksler",["Mayerson","Palmomental Refleks","Yakalama Refleksi","Babinski (Taban Deri Refleksi)","Romberg"]],["Ekstrapiramidal Bulgular",["Bradikinezi","Rijidite","Alt Beden Yarısı Parkinsonizmi","İstirahat Tremoru","Postural Tremor","İntentional Tremor","Postural İnstabilite"]],["Göz Hareketleri",["Horizontal Bakış Kısıtlılığı","Vertikal Bakış Kısıtlılığı","Nistagmus"]],["Serebellar Testler",["Disdiadokinezi","Ataksi","Dizartri","Ardışık Hareketler"]]]};
+const DATA={"history":[["Göz",["Katarakt","Glokom","Makular Dejenerasyon"]],["Kardiyovasküler",["KAH (Koroner Arter Hastalığı)","MI (Miyokard İnfarktüsü)","HT (Hipertansiyon)","AF (Atriyal Fibrillasyon)","Aritmi – Diğer","KKY (Konjestif Kalp Yetmezliği)"]],["Pulmoner",["Astım","KOAH (Kronik Obstrüktif Akciğer Hastalığı)","Pulmoner Emboli","Tekrarlayan Pnömoni"]],["Üriner",["KBH (Kronik Böbrek Hastalığı)","BPH (Benign Prostat Hiperplazisi)","Nefrolitiazis","Tekrarlayan İYE (İdrar Yolu Enfeksiyonu)"]],["Nöro/Psikiyatrik",["İskemik SVH (İskemik Serebrovasküler Hastalık)","Hemorajik SVH (Hemorajik Serebrovasküler Hastalık)","Epilepsi","Parkinson","Alzheimer Demans","Vasküler Demans","Frontotemporal Demans","Lewy Cisimcikli Demans","Demans – Diğer","Depresyon","Anksiyete"]],["Gastrointestinal",["Peptik Ülser","Reflü","Kronik Karaciğer Hastalığı","Kolelitiazis"]],["Endokrin",["T2DM (Tip 2 Diyabetes Mellitus)","T1DM (Tip 1 Diyabetes Mellitus)","Hipertiroidi","Hipotiroidi","Guatr"]],["Lokomotor",["Osteoartrit","Osteoporoz","RA (Romatoid Artrit)","PMR (Polimyalji Romatika)","Dev Hücreli Arterit"]],["Onkoloji / Hematoloji",["MGUS (Önemi Belirsiz Monoklonal Gammopati)","Akciğer Ca","Kolon Ca","Meme Ca","Prostat Ca","Endometrium Ca","Over Ca"]]],"family":["Demans","Hipertansiyon","DM","SVO","Depresyon","Hiperlipidemi","KAH","Annede Osteoporoz","Anne / Babada Kalça Kırığı (osteoporotik / hafif travma)"],"vaccines":["İnfluenza","Pnömokok (Prevenar-20, KPA-13, PPSV23)","Tetanoz-Difteri-Aselüler Boğmaca (Tdap)","Herpes Zoster","RSV","Diğer"],"screens":["Mamografi","GGK","Rektosigmoidoskopi","Kolonoskopi","sPSA / PSA","Kemik Mineral Yoğunluk Ölçümü (T skorları)","Pap Smear","Abdominal US (AAA Taraması)"],"symptoms":[["Halsizlik","Kilo Kaybı","Ateş","İştahsızlık","Ağrı","Baş Ağrısı","Bel Ağrısı","Eklem Ağrısı","Ağrının Şiddeti (0–10)","Baş Dönmesi","Göğüs Ağrısı","Çarpıntı","Ortopne","Öksürük","Nefes Darlığı","PND","Balgam","Hemoptizi","Protez Öyküsü","Kalça Dışı Kırık"],["Cinsel İlişki","Empotans","Erektil Disfonksiyon","Ejekülasyon Sorunu","Üriner İnkontinans","Kaç Kez","Sıkışma","Stres (Öksürme, Ikınma)","Gece","BPH Semptomları","Kesik Kesik İdrar","Sık İdrar","Çatallanma","Tam Boşaltamama Hissi","İdrar Debisinde Azalma","Yürüme Sorunu","Baston Kullanımı","Düşme Öyküsü","Kalça-Femur Kırığı","Dekübit Riski"],["Kasık Ağrısı","Dizüri","Tremor","Noktüri","Polidipsi","Poliüri","Dispepsi","Boyda Kısalma","Fekal İnkontinans","İnatçı Kabızlık","Sık İshal","Kusma","Bulantı","Gaz","Şişkinlik","Karın Ağrısı","Memede Kitle","Memede Akıntı","Memede Ağrı","Diğer"]],"cognition":[["İlaç Takibinde Zorlanma","Hobilere İlgide Azalma","Kelime Bulma Güçlüğü","İsimleri Unutma","İnsanları Karıştırma","Torun Adları","Gazete, Kitap, TV Takibinde Sorun","Eşya Kaybetme"],["Hesap, Alışveriş","Aynı Konuları Tekrar Tekrar Sorma","Yeni Olayları Hatırlayamama","Kişilik Değişikliği","Yolları Karıştırma","Kaybolma","Adresleri Unutma","Evde Odaları Karıştırma","Afazi","Apraksi","Agnozi"]],"behavior":["Halüsinasyon","Sanrı","Anksiyete","Ajitasyon","Uyku Sorunu","Amaçsız Gezinme"],"mood":["Uyku Süresi","Uykuyu Başlatmada Güçlük","Uykuyu Sürdürmede Güçlük","Uyanma Sebebi","Sık Ağlama","İsteksizlik","Can Sıkıntısı","Somatik Yakınmalarda Artış","Ölüm İsteği","İntihar Düşüncesi"],"exam":[["Genel Durum",["Şuur","Kooperasyon","Oryantasyon","Ödem","İkter","Siyanoz","LA","Solukluk"]],["Baş ve Boyun",["Pupiller","Ağız İçi","LAP","Karotis Üfürümü","Tiroid"]],["Kardiyovasküler Sistem",["Sağ Kol Tansiyon","Sol Kol Tansiyon","Ortostatik Hipotansiyon","Nabız","S1","S2","Ek Ses","Üfürüm","Boyun Venöz Dolgunluk","Pretibial Ödem","Nabızlar"]],["Solunum Sistemi",["Ral","Ronküs","Siyanoz","Solunum Sayısı"]],["Batın",["Hepatomegali","Splenomegali","Traube Alanı","Asit","Hassasiyet","Defans","Rebound","Kitle"]],["Meme Muayenesi",["Aksiller LAP","Meme Muayenesi"]],["Lokomotor Sistem",["Ekstremite Uzunluğu Simetrisi","Deformite","Hareket Kısıtlılığı","Artrit","Artralji"]]],"neuro":[["Motor",["Üst Ekstremite","Alt Ekstremite"]],["Duyu",["Yüzeyel","Derin"]],["Patolojik Refleksler",["Mayerson","Palmomental Refleks","Yakalama Refleksi","Babinski (Taban Deri Refleksi)","Romberg"]],["Ekstrapiramidal Bulgular",["Bradikinezi","Rijidite","Alt Beden Yarısı Parkinsonizmi","İstirahat Tremoru","Postural Tremor","İntentional Tremor","Postural İnstabilite"]],["Göz Hareketleri",["Horizontal Bakış Kısıtlılığı","Vertikal Bakış Kısıtlılığı","Nistagmus"]],["Serebellar Testler",["Disdiadokinezi","Ataksi","Dizartri","Ardışık Hareketler"]]]};
 const LEGACY_HISTORY=[["Göz",["Katarakt","Glokom","Makular Dejenerasyon"]],["Kardiyovasküler",["KAH","MI","Bypass Öyküsü","Hipertansiyon","Aritmi","Kalp Yetmezliği"]],["Üriner",["Böbrek Hastalığı","Prostat Hastalığı","Sık İYE"]],["Pulmoner",["Bronşiyal Astım","KOAH"]],["Gastrointestinal",["Peptik Ülser","Karaciğer Hastalığı","Kolelitiyazis"]],["Lokomotor",["Osteoartrit","Osteoporoz","Fraktür"]],["Nöro-Psikiyatrik",["SVO","Parkinson","Epilepsi","Demans","Depresyon"]],["Endokrin",["Hipertiroidi","Hipotiroidi","Guatr","DM"]],["Diğer",["Kanser"]]];
 const LEGACY_TO_NEW={
  "oz_0_0":"dx_0_0","oz_0_1":"dx_0_1","oz_0_2":"dx_0_2",
@@ -92,6 +92,36 @@ function historyOptionList(){
    return '<label class="disease-option" for="'+id+'"><input type="checkbox" data-field id="'+id+'">'+
     '<span class="disease-name">'+esc(name)+'</span></label>';
   }).join("")+'</div></fieldset>').join("")+'</div></details>';
+}
+
+const FAMILY_CONDITIONS=["DM","HT","HL","Koroner Arter Hastalığı","SVO","KBH","Demans","Depresyon","Osteoporoz","Osteoporotik Kırık"];
+function familySection(){
+ return '<div class="family-columns">'+["Anne","Baba"].map((parent,p)=>
+  '<fieldset class="family-parent"><legend>'+parent+'</legend><div class="family-choices">'+
+  FAMILY_CONDITIONS.map((name,i)=>{
+   const id="fam_"+(p===0?"m":"f")+"_"+i;
+   return '<label class="family-choice" for="'+id+'"><input id="'+id+'" type="checkbox" data-field>'+
+    '<span>'+esc(name)+'</span></label>';
+  }).join("")+'</div></fieldset>').join("")+'</div>'+
+  area("familyExtra","Soygeçmiş Ek Açıklama","",2);
+}
+function sexScreening(sex,markup){
+ return '<div class="sex-screen" data-sex-screen="'+sex+'" data-inactive="true">'+
+  '<div class="sex-screen-title">'+sex+' hastalara yönelik taramalar</div>'+
+  markup+'</div>';
+}
+function screeningWide(label,dateId,resultId){
+ return screeningField(label,dateId,resultId).replace('class="preventive-item"','class="preventive-item screening-wide"');
+}
+function dxaSection(){
+ return '<div class="dxa-section">'+
+  '<div class="preventive-item dxa-status-card"><div class="preventive-title">DXA Ölçümü</div>'+
+  '<div class="preventive-status" role="radiogroup" aria-label="DXA ölçümü yapıldı mı">'+
+  '<label class="preventive-status-choice"><input type="radio" data-field name="tarama_5_status" id="tarama_5_status_no" value="Yok"><span>Yok</span></label>'+
+  '<label class="preventive-status-choice"><input type="radio" data-field name="tarama_5_status" id="tarama_5_status_yes" value="Var"><span>Var</span></label></div></div>'+
+  '<div id="dxaDetails" hidden><div id="dxaList" class="dxa-list"></div>'+
+  '<div class="dxa-actions"><button type="button" class="action" id="addDxa" data-add-dxa>+ DXA Ölçümü Ekle</button></div>'+
+  '</div></div>';
 }
 function riskQuestion(id,label){
  return '<div class="risk-row"><label class="risk-choice" for="'+id+'"><input type="checkbox" id="'+id+'" data-field> '+esc(label)+'</label>'+
@@ -270,45 +300,50 @@ function build(){
    area("hikaye","Hikayesi","span2",7)+'</div>');
  byId("page1").innerHTML=printInstitutionHeader(2)+
   '<div class="page-title"><h2>2. Soygeçmiş, Alışkanlıklar ve Koruyucu Hekimlik</h2><small>İTF.HB.FR.168 • Sayfa 2/4</small></div>'+
-  block("Soygeçmiş",checks(DATA.family,"aile","two"))+
+  block("Soygeçmiş",familySection())+
   block("Koruyucu Hekimlik",
-   '<div class="preventive-subsection"><h4>İmmünizasyon (Aşılamalar)</h4>'+
-    datedRows(DATA.vaccines,"asi",[1,0,2,3,4])+
-   '</div><div class="preventive-subsection"><h4>Taramalar</h4>'+
-    '<div class="preventive-grid">'+
-    screeningField("Endoskopi","endo_date","endo_result")+
-    screeningField("Kolonoskopi","tarama_3_date","tarama_3_result")+
-    '<div class="preventive-item"><div class="preventive-title">Diğer (Gaitada Gizli Kan, Rektosigmoidoskopi)</div>'+
-     '<div class="preventive-two">'+
-      screeningField("Gaitada Gizli Kan","tarama_1_date","tarama_1_result")+
-      screeningField("Rektosigmoidoskopi","tarama_2_date","tarama_2_result")+
-     '</div></div>'+
-    screeningField("Toraks BT","toraksbt_date","toraksbt_result")+
-    screeningField("Abdominal US (AAA Taraması)","tarama_7_date","tarama_7_result")+
-    '<div class="sex-only" data-sex-only="Kadın" hidden>'+
-     screeningField("Pelvik Tarama (Pap-smear)","tarama_6_date","tarama_6_result")+
-     screeningField("Mamografi","tarama_0_date","tarama_0_result")+
+   '<div class="preventive-subsection"><h4>İmmünizasyon (Aşılar)</h4>'+
+    datedRows(DATA.vaccines,"asi",[1,0,2,3,4,5])+
+   '</div>'+
+   '<div class="preventive-subsection"><h4>Taramalar</h4>'+
+    '<div class="screening-primary">'+
+    screeningWide("Endoskopi","endo_date","endo_result")+
+    screeningWide("Kolonoskopi","tarama_3_date","tarama_3_result")+
     '</div>'+
-    '<div class="sex-only" data-sex-only="Erkek" hidden>'+
-     screeningField("Prostat Taraması","tarama_4_date","tarama_4_result")+
+    '<div id="colonoscopyAlternatives" class="colonoscopy-alternatives" hidden>'+
+    '<h5>Kolonoskopi yapılmadığında alternatif taramalar</h5>'+
+    '<div class="screening-alt-grid">'+
+     screeningField("Gaitada Gizli Kan","tarama_1_date","tarama_1_result")+
+     screeningField("Rektosigmoidoskopi","tarama_2_date","tarama_2_result")+
+    '</div></div>'+
+    '<div class="screening-standard-grid">'+
+     screeningField("Toraks BT","toraksbt_date","toraksbt_result")+
+     screeningField("Abdominal US (AAA Taraması)","tarama_7_date","tarama_7_result")+
     '</div>'+
-    '</div></div>')+
+    '<div class="screening-sex-grid">'+
+     sexScreening("Kadın",
+      screeningField("Pelvik Tarama (Pap-smear)","tarama_6_date","tarama_6_result")+
+      screeningField("Mamografi","tarama_0_date","tarama_0_result"))+
+     sexScreening("Erkek",screeningField("Prostat Taraması","tarama_4_date","tarama_4_result"))+
+    '</div>'+
+    '<div class="other-screenings">'+area("otherScreenings","Diğer Taramalar (tür, tarih ve sonuç)","",2)+'</div>'+
+   '</div>')+
   block("Osteoporoz Sorgusu",
-   '<p class="field-help">Soygeçmiş, sigara ve alkol yanıtları buraya otomatik aktarılır; gerekirse osteoporoz sorgusunda ayrıca değiştirilebilir.</p>'+
-   '<div class="risk-list">'+
+   '<p class="field-help">Soygeçmiş ve alışkanlıklar ile bağlantılıdır; osteoporoz sorgusu yanıtları ayrıca düzenlenebilir.</p>'+
+   '<div class="risk-list osteo-risk-list">'+
     riskQuestion("osteoParent","Anne / babada kalça kırığı")+
+    riskQuestion("osteoDental","Diş muayenesi yapıldı")+
     riskQuestion("osteoSmoke","Sigara kullanımı")+
     riskQuestion("osteoAlcohol","Alkol kullanımı")+
     riskQuestion("osteoFall","Düşme öyküsü")+
     riskQuestion("osteoFracture","Kırık öyküsü")+
-    riskQuestion("osteoDental","Diş muayenesi yapıldı")+
     '</div>'+
     '<div class="sex-only female-menopause" data-sex-only="Kadın" hidden>'+
      '<label class="risk-choice"><input id="menopozSwitch" type="checkbox" data-field> Menopoz bilgisini ekle</label>'+
      '<div id="menopozDetail" hidden>'+f("menopozAge","Menopoz Yaşı","number","","Yaş")+'</div>'+
     '</div>'+
-    '<div class="preventive-subsection"><h4>DXA Ölçümü</h4>'+
-    screeningField("DXA (tarih, bölge, T-skorları)","tarama_5_date","tarama_5_result")+
+    '<div class="preventive-subsection"><h4>DXA Ölçümleri</h4>'+
+     dxaSection()+
     '</div>');
  byId("page2").innerHTML=printInstitutionHeader(3)+
   '<div class="page-title"><h2>3. Sistem Sorgulaması, Kognitif ve Duygudurum</h2><small>İTF.HB.FR.168 • Sayfa 3/4</small></div>'+
