@@ -1274,3 +1274,77 @@ button.action.danger:hover{background:#ffebe7}
  }
  #page2 .elimination-group+.elimination-group{margin-top:7px;padding-top:5px}
 }
+
+/* Requested eight fixed rows of system review, confined to initial examination tab 3. */
+@media screen{
+ #page2 .symptom-review-rows{display:grid;gap:9px;min-width:0}
+ #page2 .symptom-review-row{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;
+  align-items:stretch;min-width:0
+ }
+ #page2 .symptom-review-row>.checknote,
+ #page2 .symptom-breast-group{
+  min-width:0;box-sizing:border-box;height:100%
+ }
+ #page2 .symptom-review-row>.checknote{
+  display:flex;flex-direction:column;justify-content:space-between;padding:7px 8px
+ }
+ #page2 .symptom-review-row>.checknote .check-head{
+  align-items:flex-start;min-height:33px
+ }
+ #page2 .symptom-review-row>.checknote .check-head span{
+  overflow-wrap:anywhere;line-height:1.25
+ }
+ #page2 .symptom-review-row>.checknote .note-input{margin-top:auto}
+ #page2 .symptom-review-remaining{
+  border-top:1px solid #d9e6ed;padding-top:10px;margin-top:5px
+ }
+ #page2 .symptom-review-remaining h4{
+  margin:0 0 4px;color:#245676;font-size:.9rem
+ }
+ #page2 .symptom-review-remaining .field-help{margin:0 0 9px}
+ #page2 .symptom-breast-group{
+  border:1px solid #d1e0e8;border-radius:7px;
+  padding:5px 7px 7px;background:#f9fcfe;margin:0;min-width:0
+ }
+ #page2 .symptom-breast-group legend{
+  padding:0 3px;color:#315674;font-size:.73rem;line-height:1.2;font-weight:750
+ }
+ #page2 .symptom-breast-choices{display:grid;gap:3px}
+ #page2 .symptom-breast-choice .checknote{
+  padding:3px 4px;gap:2px;border-color:#e1eaee
+ }
+ #page2 .symptom-breast-choice .check-head{
+  min-height:23px;font-size:.74rem;gap:5px
+ }
+ #page2 .symptom-breast-choice .check-head input{
+  width:15px;height:15px
+ }
+ #page2 .symptom-breast-choice .note-input{
+  min-height:26px;height:26px;padding:3px 5px;font-size:.72rem
+ }
+}
+@media screen and (max-width:1350px){
+ #page2 .symptom-review-row{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media screen and (max-width:1050px){
+ #page2 .symptom-review-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media screen and (max-width:680px){
+ #page2 .symptom-review-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media screen and (max-width:420px){
+ #page2 .symptom-review-row{grid-template-columns:minmax(0,1fr)}
+}
+@media print{
+ #page2 .symptom-review-rows{display:grid;gap:4px}
+ #page2 .symptom-review-row{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px
+ }
+ #page2 .symptom-review-row>.checknote,
+ #page2 .symptom-breast-group{padding:3px;break-inside:avoid}
+ #page2 .symptom-breast-group legend{font-size:7px}
+ #page2 .symptom-breast-choices{display:grid;gap:2px}
+ #page2 .symptom-breast-choice .checknote{padding:2px}
+ #page2 .symptom-breast-choice .note-input{height:16px;min-height:16px}
+}
