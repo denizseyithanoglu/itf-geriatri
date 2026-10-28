@@ -195,13 +195,10 @@ function dxaSection(){
 let dxaSequence=0;
 const DXA_FIELDS=[
  ["date","Tarih / Yıl"],
- ["device","DXA Çekim Yeri / Cihazı"],
- ["lumbar_t","L1–4 total T-skoru"],
- ["lumbar_bmd","L1–4 total BMD (g/cm²)"],
- ["neck_t","Femur boyun T-skoru"],
- ["neck_bmd","Femur boyun BMD (g/cm²)"],
- ["hip_t","Femur total T-skoru"],
- ["hip_bmd","Femur total BMD (g/cm²)"]
+ ["device","Çekim Yeri / Cihaz"],
+ ["lumbar_t","T-skoru"],["lumbar_bmd","BMD (g/cm²)"],
+ ["neck_t","T-skoru"],["neck_bmd","BMD (g/cm²)"],
+ ["hip_t","T-skoru"],["hip_bmd","BMD (g/cm²)"]
 ];
 function makeDxaEntry(explicitId=null){
  const list=byId("dxaList");if(!list)return;
@@ -211,12 +208,21 @@ function makeDxaEntry(explicitId=null){
  if(list.querySelector('[data-dxa-id="'+id+'"]'))return;
  const entry=document.createElement("div");
  entry.className="dxa-entry";entry.dataset.dxaId=String(id);
- const field=([key,label])=>'<div class="field dxa-field dxa-'+key+'"><label for="dxa_'+id+'_'+key+'">'+esc(label)+'</label>'+
-  '<input type="text" data-field id="dxa_'+id+'_'+key+'" autocomplete="off"'+
-  (key.endsWith("_t")?" placeholder="+"\"T-skoru\"":key.endsWith("_bmd")?" placeholder="+"\"BMD\"":"")+'></div>';
+ const field=(key,label)=>{
+  return '<div class="field dxa-field dxa-'+key+'"><label for="dxa_'+id+'_'+key+'">'+esc(label)+'</label>'+
+   '<input type="text" data-field id="dxa_'+id+'_'+key+'" autocomplete="off"'+
+   (key.endsWith("_t")?' placeholder="T-skoru"':key.endsWith("_bmd")?' placeholder="BMD"':"")+'></div>';
+ };
+ const pair=(heading,t,bmd)=>'<fieldset class="dxa-metric-group"><legend>'+heading+'</legend>'+
+  '<div class="dxa-pair">'+field(t,"T-skoru")+field(bmd,"BMD (g/cm²)")+'</div></fieldset>';
  entry.innerHTML='<div class="dxa-entry-heading"><strong class="dxa-index"></strong>'+
   '<button type="button" class="dxa-remove" data-remove-dxa>Sil</button></div>'+
-  '<div class="dxa-entry-grid">'+DXA_FIELDS.map(field).join("")+'</div>'+
+  '<div class="dxa-entry-grid">'+field("date","Tarih / Yıl")+field("device","Çekim Yeri / Cihaz")+
+  '<div class="dxa-metrics">'+
+   pair("L1–4 total","lumbar_t","lumbar_bmd")+
+   pair("Femur boyun","neck_t","neck_bmd")+
+   pair("Femur total","hip_t","hip_bmd")+
+  '</div></div>'+
   '<div class="field dxa-note"><label for="dxa_'+id+'_note">Ek Not</label>'+
   '<textarea rows="2" data-field id="dxa_'+id+'_note" placeholder="Cihaz, ölçüm, rapor veya klinik not..."></textarea></div>';
  list.appendChild(entry);numberDxaEntries();
@@ -233,14 +239,18 @@ function resetDxaEntries(){byId("dxaList")?.replaceChildren();}
 function dxaSummaries(){
  return Array.from(byId("dxaList")?.querySelectorAll(".dxa-entry")||[]).map((entry,i)=>{
   const id=entry.dataset.dxaId;
-  const values=DXA_FIELDS.map(([key,label])=>{
-   const value=byId("dxa_"+id+"_"+key)?.value.trim()||"";
-   return value?label+": "+value:"";
-  }).filter(Boolean);
-  const note=byId("dxa_"+id+"_note")?.value.trim()||"";
-  if(note)values.push("Ek Not: "+note);
-  return (i+1)+". DXA Ölçümü"+(values.length?" — "+values.join("; "):"");
- });
+  const field=key=>byId("dxa_"+id+"_"+key)?.value.trim()||"";
+  const parts=[];
+  if(field("date"))parts.push("Tarih: "+field("date"));
+  if(field("device"))parts.push("Cihaz/Yer: "+field("device"));
+  for(const [label,t,bmd] of [["L1–4 total","lumbar_t","lumbar_bmd"],
+    ["Femur boyun","neck_t","neck_bmd"],["Femur total","hip_t","hip_bmd"]]){
+   const v=[field(t)?"T-skoru "+field(t):"",field(bmd)?"BMD "+field(bmd):""].filter(Boolean);
+   if(v.length)parts.push(label+": "+v.join(", "));
+  }
+  if(field("note"))parts.push("Not: "+field("note"));
+  return parts.length?(i+1)+". ölçüm ("+parts.join("; ")+")":"";
+ }).filter(Boolean);
 }
 function syncDxaFields(){
  const yes=byId("tarama_5_status_yes")?.checked;
@@ -993,13 +1003,33 @@ function formatSummaryValue(raw,type){
 }
 function summarizedBlockItems(block){
  if(block.querySelector(".family-columns")){
-  const values=Array.from(block.querySelectorAll(".family-choice input:checked")).map(input=>{
-   const parent=input.id.startsWith("fam_m_")?"Anne":"Baba";
-   const i=Number(input.id.split("_").at(-1));
-   return parent+" — "+(FAMILY_CONDITIONS[i]||"Soygeçmiş");
-  });
+  const inputs=Array.from(block.querySelectorAll(".family-choice input:checked"));
+  const parent=(key,label)=>inputs.filter(input=>input.id.startsWith("fam_"+key+"_")).map(input=>
+    FAMILY_CONDITIONS[Number(input.id.split("_").at(-1))]||"Soygeçmiş");
+  const lines=[];
+  for(const [key,label] of [["m","Anne"],["f","Baba"]]){
+   const selected=parent(key,label);
+   if(selected.length)lines.push(label+": "+selected.join(", "));
+  }
   const note=byId("familyExtra")?.value.trim()||"";
-  return [...values,...(note?["Soygeçmiş Ek Açıklama: "+note]:[])];
+  if(note)lines.push("Soygeçmiş Ek Açıklama: "+note);
+  return lines;
+ }
+ if(block.querySelector("#dxaList")){
+  const results=[];
+  block.querySelectorAll(".risk-row").forEach(row=>{
+   const input=row.querySelector('input[type="checkbox"]');
+   const title=row.querySelector(".risk-choice")?.textContent.trim()||"Bulgu";
+   const note=row.querySelector(".field input")?.value.trim()||"";
+   if(input?.checked||note)results.push(title+(input?.checked?": Var":": Not girildi")+(note?" ("+note+")":""));
+  });
+  const menopause=byId("menopozAge")?.value.trim()||"";
+  if(byId("menopozSwitch")?.checked&&menopause)results.push("Menopoz yaşı: "+menopause);
+  const dxa=byId("tarama_5_status_yes")?.checked?
+    "DXA: Var"+(dxaSummaries().length?" — "+dxaSummaries().join(" | "):""):
+    byId("tarama_5_status_no")?.checked?"DXA: Yok":"";
+  if(dxa)results.push(dxa);
+  return results.length?["Osteoporoz sorgusu: "+results.join("; ")]:[];
  }
  if(block.querySelector("#preliminaryList")){
   const values=dynamicList("preliminary");
@@ -1029,13 +1059,8 @@ function summarizedBlockItems(block){
    const title=item.querySelector(".preventive-title")?.textContent.trim()||"Tarama";
    const selection=item.querySelector('input[data-preventive-choice]:checked');
    if(!selection)return;
-   if(selection.value==="Yok"){items.push(title+": Yok");return;}
-   const text=Array.from(item.querySelectorAll(".preventive-fields input[data-field]")).map(input=>{
-    const value=formatSummaryValue(input.value,input.type);
-    const label=input.closest(".field")?.querySelector("label")?.textContent.trim()||"Bilgi";
-    return value?label+": "+value:"";
-   }).filter(Boolean);
-   items.push(title+": Var"+(text.length?" — "+text.join("; "):""));
+   const line=preventiveCardSummary(item);
+   if(line)items.push(line);
   }else if(item.classList.contains("risk-row")){
    const checkbox=item.querySelector('input[type="checkbox"]');
    const title=item.querySelector(".risk-choice")?.textContent.trim()||"Osteoporoz";
