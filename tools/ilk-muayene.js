@@ -804,9 +804,9 @@ function saveFeedback(message,kind="success"){
 function save(manual=false){
  let saved=false;
  try{
-  sessionStorage.setItem(STORE,JSON.stringify({version:6,values:readData(),entries:{
+  sessionStorage.setItem(STORE,JSON.stringify({version:7,values:readData(),entries:{
    diagnosis:entryIds("diagnosis"),medication:entryIds("medication"),surgery:entryIds("surgery"),
-   preliminary:entryIds("preliminary")
+   preliminary:entryIds("preliminary"),dxa:dxaIds()
   },surgerySources:surgeryLinks(),riskOverrides,confirmed,active:step,savedAt:new Date().toISOString()}));
   saved=true;
  }catch(error){
@@ -861,7 +861,7 @@ function resetSection(section){
  if(section.querySelector("#medicationList")){removeEntries("medication");makeEntry("medication");}
  if(section.querySelector("#surgeryList")){removeEntries("surgery");makeEntry("surgery");syncSurgeryDateInputs();}
  if(section.querySelector("#preliminaryList")){removeEntries("preliminary");makeEntry("preliminary");}
- if(section.querySelector("#osteoParent"))riskOverrides={};
+ if(section.querySelector("#osteoParent")){riskOverrides={};resetDxaEntries();}
  if(section.querySelector("#basvuru"))initializeFirstPageDefaults();
  syncPreventiveFields();
  updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
@@ -882,7 +882,7 @@ function resetPage(){
    for(const type of ["diagnosis","medication","surgery"])removeEntries(type);
    initializeFirstPageDefaults();
   }
-  if(current===1)riskOverrides={};
+  if(current===1){riskOverrides={};resetDxaEntries();}
   if(current===3){removeEntries("preliminary");makeEntry("preliminary");}
   syncPreventiveFields();
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
@@ -900,7 +900,7 @@ function resetAll(){
    else el.value="";
   });
   for(const type of ["diagnosis","medication","surgery","preliminary"])removeEntries(type);
-  confirmed={};riskOverrides={};
+  confirmed={};riskOverrides={};resetDxaEntries();
   initializeFirstPageDefaults();syncPreventiveFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();
   try{sessionStorage.removeItem(STORE);}catch(error){}
   go(0);
@@ -915,6 +915,15 @@ function formatSummaryValue(raw,type){
  return s;
 }
 function summarizedBlockItems(block){
+ if(block.querySelector(".family-columns")){
+  const values=Array.from(block.querySelectorAll(".family-choice input:checked")).map(input=>{
+   const parent=input.id.startsWith("fam_m_")?"Anne":"Baba";
+   const i=Number(input.id.split("_").at(-1));
+   return parent+" — "+(FAMILY_CONDITIONS[i]||"Soygeçmiş");
+  });
+  const note=byId("familyExtra")?.value.trim()||"";
+  return [...values,...(note?["Soygeçmiş Ek Açıklama: "+note]:[])];
+ }
  if(block.querySelector("#preliminaryList")){
   const values=dynamicList("preliminary");
   return values.length?["Ön Tanılar: "+values.join(", ")]:[];
@@ -936,7 +945,7 @@ function summarizedBlockItems(block){
  }
  const items=[];
  block.querySelectorAll(".checknote,.preventive-item,.risk-row,.risk-choice,.field").forEach(item=>{
-  if(item.closest("[data-sex-only][hidden], #menopozDetail[hidden]"))return;
+  if(item.closest("[data-sex-only][hidden], #menopozDetail[hidden], [data-sex-screen][data-inactive='true'], #colonoscopyAlternatives[hidden]"))return;
   if(item.classList.contains("field")&&item.closest(".dynamic-entry,.risk-row,.preventive-item"))return;
   if(item.classList.contains("preventive-item")){
    if(!item.hasAttribute("data-preventive-item"))return;
@@ -982,6 +991,10 @@ function summarizedBlockItems(block){
    }
   }
  });
+ if(block.querySelector("#dxaList")){
+  if(byId("tarama_5_status_yes")?.checked)items.push("DXA: Var",...dxaSummaries().filter(x=>!x.endsWith("DXA Ölçümü")));
+  else if(byId("tarama_5_status_no")?.checked)items.push("DXA: Yok");
+ }
  return items;
 }
 function makeSummaryNode(tag,txt,cls=""){
@@ -1145,7 +1158,7 @@ function initialize(){
  build();
  let restored;
  try{restored=JSON.parse(sessionStorage.getItem(STORE)||"null");}catch(e){restored=null;}
- if([2,3,4,5,6].includes(restored?.version)){
+ if([2,3,4,5,6,7].includes(restored?.version)){
   for(const type of ["diagnosis","medication"])(restored.entries?.[type]||[]).slice(0,200).forEach(id=>makeEntry(type,id));
   if(restored.version>=5){
    const links=Array.isArray(restored.surgerySources)?restored.surgerySources:[];
@@ -1154,12 +1167,16 @@ function initialize(){
     makeEntry("surgery",id,source);
    });
   }
-  if(restored.version===6)(restored.entries?.preliminary||[]).slice(0,200).forEach(id=>makeEntry("preliminary",id));
+  if(restored.version>=6)(restored.entries?.preliminary||[]).slice(0,200).forEach(id=>makeEntry("preliminary",id));
+  if(restored.version===7)(restored.entries?.dxa||[]).slice(0,40).forEach(id=>makeDxaEntry(id));
   const old=restored.version<4?migrateLegacyDraft(restored.values||{}):restored.values||{};
   const migrated=restored.version>=5?old:migrateBeforeV5(old);
-  hydrate(restored.version===6?migrated:migrateLegacyPreliminary(migrated));
+  const converted=migrateHistoryAndDxa(restored.version>=6?migrated:migrateLegacyPreliminary(migrated),restored.version);
+  if(restored.version<7&&converted.tarama_5_status_yes===true)makeDxaEntry(1);
+  hydrate(converted);
   riskOverrides=restored.version>=3?restored.riskOverrides||{}:{};
-  confirmed=restored.version===6?restored.confirmed||{}:{};
+  if(restored.version<7&&converted.aile_8===true)riskOverrides.osteoParent=true;
+  confirmed=restored.version===7?restored.confirmed||{}:{};
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }else if(restored?.version===1){
   const old=restored.values||{};
@@ -1169,7 +1186,10 @@ function initialize(){
    byId("diag_"+id+"_date").value=old["tanitarih_"+i]||"";
   }
   if((old.ilaclar||"").trim()){makeEntry("medication");byId("med_"+entrySequence+"_name").value=old.ilaclar;}
-  hydrate(migrateLegacyPreliminary(migrateBeforeV5(migrateLegacyDraft(old))));confirmed={};
+  const converted=migrateHistoryAndDxa(migrateLegacyPreliminary(migrateBeforeV5(migrateLegacyDraft(old))),1);
+  if(converted.tarama_5_status_yes===true)makeDxaEntry(1);
+  hydrate(converted);confirmed={};
+  if(converted.aile_8===true)riskOverrides.osteoParent=true;
   step=Number.isInteger(restored.active)?Math.max(0,Math.min(3,restored.active)):0;
  }
  initializeFirstPageDefaults();
@@ -1221,6 +1241,14 @@ function initialize(){
    if(checkbox){checkbox.checked=false;refreshEntryCounts();save();}
    return;
   }
+  const addDxa=event.target.closest("[data-add-dxa]");
+  if(addDxa){makeDxaEntry();save();return;}
+  const removeDxa=event.target.closest("[data-remove-dxa]");
+  if(removeDxa){
+   removeDxa.closest(".dxa-entry")?.remove();
+   if(!dxaIds().length)makeDxaEntry();
+   numberDxaEntries();save();return;
+  }
   const add=event.target.closest("[data-add-entry]");
   if(add){makeEntry(add.dataset.addEntry);save();return;}
   const remove=event.target.closest("[data-remove-entry]");
@@ -1234,18 +1262,23 @@ function initialize(){
  });
  byId("historyCatalog").addEventListener("toggle",syncHistoryPicker);
  byId("surgeryCatalog").addEventListener("toggle",syncSurgeryPicker);
+ byId("pages").addEventListener("focusin",event=>setSexFromScreen(event.target));
  byId("pages").addEventListener("input",event=>{
   // Keep the active date input mounted so users can type normally without losing focus.
   if(event.target.matches("[data-disease-date]")){updateCompactPrintLists();save();return;}
   if(event.target.id==="tc")event.target.value=event.target.value.replace(/\D/g,"").slice(0,11);
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
+  if(["sigaraDurum","alkolDurum"].includes(event.target.name)||["osteoSmoke","osteoAlcohol"].includes(event.target.id))onRiskOrHabitsChanged(event.target);
+  setSexFromScreen(event.target);
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
  });
  byId("pages").addEventListener("change",event=>{
   if(event.target.matches("[data-disease-date]")){updateCompactPrintLists();save();return;}
   if(["osteoParent","osteoSmoke","osteoAlcohol"].includes(event.target.id))riskOverrides[event.target.id]=true;
+  if(["sigaraDurum","alkolDurum"].includes(event.target.name)||["osteoSmoke","osteoAlcohol"].includes(event.target.id))onRiskOrHabitsChanged(event.target);
+  setSexFromScreen(event.target);
   if(event.target.matches("[data-surgery-choice]"))addSurgeryFromPicker(event.target);
-  if(event.target.matches("[data-preventive-choice]"))syncPreventiveFields();
+  if(event.target.matches("[data-preventive-choice]")||event.target.name==="tarama_5_status")syncPreventiveFields();
   updateDerivedFields();updateSexSpecific();syncOsteoporosisRisk();refreshEntryCounts();save();
  });
  window.addEventListener("pagehide",()=>save());
