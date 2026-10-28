@@ -222,7 +222,7 @@ function migrateHistoryAndDxa(values,version){
   if(history.length)out.familyExtra=[out.familyExtra,"Önceki soygeçmiş (ebeveyn belirtilmemiş): "+history.join(", ")].filter(Boolean).join("\n");
   if(out.aile_8===true&&!out.osteoParent)out.osteoParent=true;
   // The previous DXA had a single date and note; transfer to measurement 1.
-  if(out.tarama_5_date||out.tarama_5_result){
+  if((out.tarama_5_date||out.tarama_5_result)&&out.tarama_5_status_no!==true){
    out.tarama_5_status_yes=true;
    out.dxa_1_date=out.tarama_5_date||"";
    out.dxa_1_note=out.tarama_5_result||"";
