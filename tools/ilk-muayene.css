@@ -986,3 +986,163 @@ button.action.danger:hover{background:#ffebe7}
  }
  .preventive-status+.preventive-fields{margin-top:2px}
 }
+
+/* First-visit clinical catalogs: denser six-column selection without changing the overall form typography. */
+@media screen{
+ .disease-catalog .disease-options{grid-template-columns:repeat(6,minmax(0,1fr));gap:3px 5px}
+ .disease-catalog .disease-option{
+  padding:4px 5px;gap:5px;min-height:30px;
+  font-size:.73rem;line-height:1.2;
+ }
+ .disease-catalog .disease-option input{width:15px;height:15px}
+ .disease-catalog>.history-catalog-content{padding:7px 9px;gap:7px}
+ .disease-catalog .disease-group{padding:5px 7px 7px}
+ .disease-catalog .disease-group legend{font-size:.78rem}
+ .mobile-tab-nav{display:none}
+ .family-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+ .family-parent{
+  border:1px solid #cbdfe9;border-radius:9px;background:#f9fcfe;
+  min-width:0;margin:0;padding:12px 13px 13px;
+ }
+ .family-parent legend{color:#224f70;font-size:1rem;font-weight:800;padding:0 8px}
+ .family-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .family-choice{
+  display:flex;align-items:center;gap:7px;min-width:0;
+  border:1px solid #d9e6ec;border-radius:7px;background:white;
+  padding:8px 9px;color:#2a4d65;font-size:.85rem;line-height:1.25;cursor:pointer
+ }
+ .family-choice input{width:18px;height:18px;flex:0 0 18px;margin:0;accent-color:#25634d}
+ .family-choice:has(input:checked){border-color:#a0ceae;background:#edf8ef;color:#1d5b3b;font-weight:750}
+ .family-columns+.field{margin-top:10px}
+ .screening-primary{display:grid;grid-template-columns:1fr;gap:9px}
+ .screening-wide{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.9fr);
+  grid-template-rows:auto 1fr;gap:4px 15px;align-items:center
+ }
+ .screening-wide>.preventive-title{grid-column:1;grid-row:1}
+ .screening-wide>.preventive-status{grid-column:1;grid-row:2;margin:0;align-self:start}
+ .screening-wide>.preventive-fields{
+  grid-column:2;grid-row:1 / span 2;
+  grid-template-columns:minmax(100px,.65fr) minmax(0,2.6fr);
+  align-self:center;margin-top:0
+ }
+ .screening-wide>.preventive-fields[hidden]{display:none!important}
+ .colonoscopy-alternatives{
+  margin:9px 0 12px;padding:11px;
+  border:1px solid #c9dae5;border-radius:9px;background:#f3f8fc
+ }
+ .colonoscopy-alternatives[hidden]{display:none!important}
+ .colonoscopy-alternatives h5{font-size:.84rem;color:#234e6f;margin:0 0 9px}
+ .screening-alt-grid,.screening-standard-grid,.screening-sex-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px
+ }
+ .screening-sex-grid{align-items:stretch}
+ .sex-screen{
+  padding:9px;border:1px solid #cad8e2;border-radius:9px;
+  background:#f8fbfd;min-width:0;display:grid;gap:9px;align-content:start
+ }
+ .sex-screen-title{font-size:.86rem;font-weight:800;color:#285573;padding:0 3px}
+ .sex-screen[data-inactive="true"]{background:#f0f2f4;border-color:#d3d9de}
+ .sex-screen[data-inactive="true"]>.sex-screen-title{color:#6c7c89}
+ .sex-screen[data-inactive="true"] .preventive-item{background:#f5f6f7;border-color:#d9dee2}
+ .sex-screen[data-inactive="true"] .preventive-status-choice{background:#f0f2f5;color:#667785}
+ .sex-screen[data-inactive="false"]{background:#f7fbff;border-color:#a7cade}
+ .other-screenings{margin-top:14px}
+ .osteo-risk-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .dxa-status-card{margin-bottom:10px}
+ .dxa-details[hidden],#dxaDetails[hidden]{display:none!important}
+ .dxa-list{display:grid;gap:12px}
+ .dxa-entry{
+  border:1px solid #cedfe9;border-radius:9px;background:#fcfefe;
+  padding:12px;break-inside:avoid
+ }
+ .dxa-entry-heading{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:0 0 11px;padding-bottom:7px;border-bottom:1px solid #d9e5ed;color:#255677
+ }
+ .dxa-index{font-size:.92rem}
+ .dxa-remove{
+  background:#fff4f2;color:#9f413c;border:1px solid #dfb9b5;
+  border-radius:7px;padding:5px 11px;min-height:33px;font-weight:750
+ }
+ .dxa-remove[hidden]{display:none!important}
+ .dxa-entry-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;align-items:end}
+ .dxa-date{grid-column:span 2}
+ .dxa-device{grid-column:span 4}
+ .dxa-field label{font-size:.77rem;line-height:1.3;min-height:34px;display:flex;align-items:end}
+ .dxa-field input{font-size:.86rem;min-height:39px}
+ .dxa-note{margin-top:10px}
+ .dxa-note textarea{min-height:66px}
+ .dxa-actions{display:flex;justify-content:flex-end;margin-top:10px}
+ .dxa-actions button{min-width:170px}
+}
+@media screen and (max-width:1380px){
+ .disease-catalog .disease-options{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media screen and (max-width:1050px){
+ .mobile-tab-nav{
+  display:flex;position:sticky;top:0;z-index:150;
+  width:100%;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;
+  background:#f3f7fa;border:1px solid #cfdfe9;border-radius:9px;
+  padding:8px;margin:0 0 11px;box-shadow:0 3px 12px #173b5d12
+ }
+ .mobile-tab{
+  flex:1 0 100px;display:flex;justify-content:center;align-items:center;gap:5px;
+  min-width:0;min-height:40px;padding:7px 9px;
+  color:#234f71;background:white;border:1px solid #c7d8e4;
+  border-left:4px solid #aabac6;border-radius:7px;
+  font:750 .78rem/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;
+  white-space:nowrap;cursor:pointer
+ }
+ .mobile-tab span{font-weight:850}
+ .mobile-tab[data-progress="partial"]{border-left-color:#d9aa43}
+ .mobile-tab[data-progress="full"]{border-left-color:#31936d}
+ .mobile-tab[aria-current="step"]{background:#e8f2fb;border-color:#5885ad}
+ .side .tabs{display:none!important}
+ .side h2{font-size:.88rem;margin:0 0 7px}
+ .side{position:static}
+ .disease-catalog .disease-options{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .dxa-entry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .dxa-date,.dxa-device{grid-column:span 1}
+ .dxa-field label{min-height:0}
+}
+@media screen and (max-width:650px){
+ .disease-catalog .disease-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .family-columns,.screening-alt-grid,.screening-standard-grid,.screening-sex-grid{
+  grid-template-columns:minmax(0,1fr)
+ }
+ .screening-wide{grid-template-columns:minmax(0,1fr);grid-template-rows:auto}
+ .screening-wide>.preventive-title,.screening-wide>.preventive-status,.screening-wide>.preventive-fields{
+  grid-column:1;grid-row:auto
+ }
+ .screening-wide>.preventive-fields{margin-top:7px;grid-template-columns:minmax(82px,.8fr) minmax(0,2fr)}
+ .mobile-tab{flex:0 0 112px}
+}
+@media screen and (max-width:420px){
+ .disease-catalog .disease-options{grid-template-columns:minmax(0,1fr)}
+ .family-choices{grid-template-columns:minmax(0,1fr)}
+ .dxa-entry-grid{grid-template-columns:minmax(0,1fr)}
+ .dxa-date,.dxa-device{grid-column:1}
+}
+@media print{
+ .mobile-tab-nav{display:none!important}
+ .disease-catalog .disease-options{grid-template-columns:repeat(4,minmax(0,1fr));gap:2px}
+ .disease-catalog .disease-option{font-size:7px;padding:2px}
+ .family-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ .family-parent{padding:5px;border:1px solid #aaa}
+ .family-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .family-choice{padding:2px;font-size:7px}
+ .screening-primary,.screening-wide{display:block}
+ .screening-wide>.preventive-fields{display:grid;grid-template-columns:1fr 2fr}
+ .colonoscopy-alternatives[hidden],#dxaDetails[hidden]{display:none!important}
+ .screening-alt-grid,.screening-standard-grid,.screening-sex-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+ .dxa-entry{padding:4px;border:1px solid #ccc;border-radius:0;break-inside:avoid}
+ .dxa-entry-heading{margin:0 0 3px}
+ .dxa-entry-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+ .dxa-date,.dxa-device{grid-column:auto}
+ .dxa-field label{font-size:6.5px;min-height:0}
+ .dxa-field input{font-size:7px;min-height:17px;height:17px;padding:2px}
+ .dxa-note{margin-top:3px}
+ .dxa-note textarea{min-height:25px;font-size:7px}
+ .dxa-actions,.dxa-remove{display:none!important}
+}
