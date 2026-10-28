@@ -1348,3 +1348,19 @@ button.action.danger:hover{background:#ffebe7}
  #page2 .symptom-breast-choice .checknote{padding:2px}
  #page2 .symptom-breast-choice .note-input{height:16px;min-height:16px}
 }
+
+/* Tab 3: full-width free-text field for remaining system-review findings. */
+@media screen{
+ #page2 .symptom-review-other{
+  margin-top:6px;padding-top:12px;border-top:1px solid #d9e6ed;
+  min-width:0
+ }
+ #page2 .symptom-review-other>.field{width:100%;min-width:0}
+ #page2 .symptom-review-other textarea{
+  width:100%;min-height:100px;resize:vertical
+ }
+}
+@media print{
+ #page2 .symptom-review-other{margin-top:4px;padding-top:5px}
+ #page2 .symptom-review-other textarea{min-height:36px}
+}
