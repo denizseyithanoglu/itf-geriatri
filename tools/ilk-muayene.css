@@ -1146,3 +1146,11 @@ button.action.danger:hover{background:#ffebe7}
  .dxa-note textarea{min-height:25px;font-size:7px}
  .dxa-actions,.dxa-remove{display:none!important}
 }
+
+@media print{
+ /* Keep the unselected sex-specific screening visible in the interface but omit it from patient printouts. */
+ .sex-screen[data-inactive="true"]{display:none!important}
+ .screening-sex-grid:has(.sex-screen:not([data-inactive="true"])){display:block}
+ .sex-screen[data-inactive="false"]{border:0;padding:2px 0;background:white}
+ .sex-screen[data-inactive="false"] .preventive-item{break-inside:avoid}
+}
