@@ -1216,3 +1216,61 @@ button.action.danger:hover{background:#ffebe7}
  .dxa-pair{display:grid;grid-template-columns:1fr 1fr;gap:3px}
  .dxa-pair .field label{font-size:6px}
 }
+
+/* Tab 3 only: row-major system review with six questions per row at desktop width.
+   Existing question IDs, note inputs and overall form colors/typography stay intact. */
+@media screen{
+ #page2 .symptom-six-grid{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:8px;align-items:stretch;min-width:0
+ }
+ #page2 .symptom-six-grid .checknote{
+  min-width:0;height:100%;box-sizing:border-box;
+  padding:7px 8px;justify-content:space-between
+ }
+ #page2 .symptom-six-grid .check-head{
+  min-width:0;align-items:flex-start;min-height:36px
+ }
+ #page2 .symptom-six-grid .check-head span{
+  overflow-wrap:anywhere;line-height:1.26
+ }
+ #page2 .symptom-six-grid .note-input{margin-top:auto}
+ #page2 .elimination-group+.elimination-group{
+  margin-top:16px;padding-top:14px;border-top:1px solid #d9e6ed
+ }
+ #page2 .elimination-group h4{
+  color:#245676;font-size:.96rem;line-height:1.4;margin:0 0 10px
+ }
+ #page2 .sleep-question-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;min-width:0;align-items:stretch
+ }
+ #page2 .sleep-question-grid .checknote{height:100%;box-sizing:border-box}
+}
+@media screen and (max-width:1350px){
+ #page2 .symptom-six-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media screen and (max-width:1050px){
+ #page2 .symptom-six-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media screen and (max-width:680px){
+ #page2 .symptom-six-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #page2 .sleep-question-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media screen and (max-width:420px){
+ #page2 .symptom-six-grid,#page2 .sleep-question-grid{
+  grid-template-columns:minmax(0,1fr)
+ }
+}
+@media print{
+ #page2 .symptom-six-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px
+ }
+ #page2 .symptom-six-grid .checknote{padding:3px;break-inside:avoid}
+ #page2 .symptom-six-grid .check-head{min-height:0;font-size:8px}
+ #page2 .symptom-six-grid .note-input{min-height:17px;height:17px}
+ #page2 .sleep-question-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px
+ }
+ #page2 .elimination-group+.elimination-group{margin-top:7px;padding-top:5px}
+}
