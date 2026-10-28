@@ -1231,6 +1231,7 @@ function summarizedBlockItems(block){
    const value=item.querySelector(".note-input")?.value.trim()||"";
    if(!checkbox?.checked&&!value)return;
    let label=item.querySelector(".check-head span")?.textContent.trim()||"Bulgu";
+   if(item.closest(".symptom-breast-group"))label="Memede "+label;
    const group=item.closest(".group")?.querySelector("h4")?.textContent.trim();
    if(group)label=group+" — "+label;
    items.push(label+(checkbox?.checked?"": " (yalnızca not)")+(value?": "+value:""));
