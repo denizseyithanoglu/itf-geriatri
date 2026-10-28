@@ -339,6 +339,44 @@ function riskQuestion(id,label){
  return '<div class="risk-row"><label class="risk-choice" for="'+id+'"><input type="checkbox" id="'+id+'" data-field> '+esc(label)+'</label>'+
  f(id+"_note","Açıklama / tarih")+'</div>';
 }
+
+// Page 3: group existing symptom checkboxes by clinical theme without changing
+// their IDs, so previously saved responses and notes still restore correctly.
+const MICTURITION_SYMPTOMS=new Set([
+ "Üriner İnkontinans","Kaç Kez","Sıkışma","Stres (Öksürme, Ikınma)","Gece",
+ "BPH Semptomları","Kesik Kesik İdrar","Sık İdrar","Çatallanma",
+ "Tam Boşaltamama Hissi","İdrar Debisinde Azalma","Kasık Ağrısı",
+ "Dizüri","Noktüri","Polidipsi","Poliüri"
+]);
+const DEFECATION_SYMPTOMS=new Set(["Fekal İnkontinans","İnatçı Kabızlık","Sık İshal"]);
+function systemSymptomGroups(){
+ const all=DATA.symptoms.flatMap((group,i)=>group.map((name,j)=>({
+  name,id:"ss_"+i+"_"+j
+ })));
+ return {
+  general:all.filter(x=>!MICTURITION_SYMPTOMS.has(x.name)&&!DEFECATION_SYMPTOMS.has(x.name)),
+  urine:all.filter(x=>MICTURITION_SYMPTOMS.has(x.name)),
+  bowel:all.filter(x=>DEFECATION_SYMPTOMS.has(x.name))
+ };
+}
+function symptomGrid(items){
+ return '<div class="symptom-six-grid">'+items.map(x=>check(x.name,x.id)).join("")+'</div>';
+}
+function eliminationSection(groups){
+ return '<div class="elimination-group"><h4>Miksiyon (İdrar Yapma) Sorgusu</h4>'+
+  symptomGrid(groups.urine)+'</div>'+
+  '<div class="elimination-group"><h4>Defekasyon (Dışkılama) Sorgusu</h4>'+
+  symptomGrid(groups.bowel)+'</div>';
+}
+function sleepSection(){
+ const questions=[
+  ["Uyku Sorunu","dav_4"],
+  ...DATA.mood.slice(0,4).map((name,i)=>[name,"duygu_"+i]),
+  ["REM Uyku Davranış Bozukluğu","uykuRBD"]
+ ];
+ return '<div class="sleep-question-grid">'+
+  questions.map(([name,id])=>check(name,id)).join("")+'</div>';
+}
 function twoColumns(arr,prefix){return '<div class="symptom-columns" style="grid-template-columns:repeat('+arr.length+',minmax(0,1fr))">'+arr.map((group,i)=>
  '<div class="checklist">'+group.map((label,j)=>check(label,prefix+'_'+i+'_'+j)).join('')+'</div>').join('')+'</div>';}
 
@@ -558,18 +596,23 @@ function build(){
     '<div class="preventive-subsection"><h4>DXA Ölçümleri</h4>'+
      dxaSection()+
     '</div>');
+ const symptomGroups=systemSymptomGroups();
  byId("page2").innerHTML=printInstitutionHeader(3)+
-  '<div class="page-title"><h2>3. Sistem Sorgulaması, Kognitif ve Duygudurum</h2><small>İTF.HB.FR.168 • Sayfa 3/4</small></div>'+
-  block("Sistem Sorgulaması",twoColumns(DATA.symptoms,"ss"))+
-  block("Kognitif Değerlendirme",
+  '<div class="page-title"><h2>3. Sistem Sorgulaması, Uyku, Biliş ve Duygudurum</h2><small>İTF.HB.FR.168 • Sayfa 3/4</small></div>'+
+  block("Sistem Sorgulaması",symptomGrid(symptomGroups.general))+
+  block("Miksiyon ve Defekasyon Sorgusu",eliminationSection(symptomGroups))+
+  block("Uyku Sorgusu",sleepSection())+
+  block("Unutkanlık ve Bilişsel Değerlendirme",
    '<div class="fields">'+
     radio("unutkanlik","Unutkanlık",["Var","Yok"])+
     radio("etki","Günlük hayatını etkiliyor mu?",["Evet","Hayır"])+
     radio("ilerleme","Son 6 ayda ilerleme var mı?",["Evet","Hayır"])+
     area("neunutuyor","Unutkanlık varsa neleri unutuyor, ne zamandır?","span3",2)+
    '</div>'+twoColumns(DATA.cognition,"kog")+
-   '<div class="group" style="margin-top:12px"><h4>Ek Bilişsel / Davranışsal Bulgular</h4>'+checks(DATA.behavior,"dav","two")+'</div>')+
-  block("Duygu-Durum Değerlendirmesi",checks(DATA.mood,"duygu","two"));
+   '<div class="group" style="margin-top:12px"><h4>Ek Bilişsel / Davranışsal Bulgular</h4>'+
+    DATA.behavior.map((name,i)=>name==="Uyku Sorunu"?"":check(name,"dav_"+i)).join("")+'</div>')+
+  block("Duygudurum Değerlendirmesi",
+   checks(DATA.mood.slice(4).map(x=>x),"duygu_tmp","two").replace(/duygu_tmp_(\d+)/g,(_,n)=>"duygu_"+(Number(n)+4)));
  byId("page3").innerHTML=printInstitutionHeader(4)+
   '<div class="page-title"><h2>4. Fizik Muayene ve Ön Tanılar</h2><small>İTF.HB.FR.168 • Sayfa 4/4</small></div>'+
   block("Fizik Muayene",grouped(DATA.exam,"fm"))+
