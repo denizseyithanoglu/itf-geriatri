@@ -546,14 +546,18 @@ function renderSelectedDiagnoses(){
  const selections=checkedDiseases();
  list.innerHTML=selections.map((item,i)=>{
   const id="dxdate_"+item.id;
-  return '<div class="selected-diagnosis">'+
-   '<strong class="selected-number">'+(i+1)+'.</strong>'+
-   '<span class="selected-diagnosis-name">'+esc(item.name)+'</span>'+
-   '<label class="selected-diagnosis-date"><span>Tanı tarihi</span>'+
+  return '<div class="dynamic-entry catalog-diagnosis-row"><div class="entry-body">'+
+   '<strong class="entry-title" aria-label="Kayıt numarası">'+(i+1)+'.</strong>'+
+   '<div class="entry-fields">'+
+   '<div class="field entry-field-name"><label for="catalog_name_'+item.id+'">Hastalık / Tanı</label>'+
+   '<input type="text" id="catalog_name_'+item.id+'" value="'+esc(item.name)+'" readonly'+
+   ' aria-label="'+esc(item.name)+' (hastalık listesinden seçildi)"></div>'+
+   '<div class="field entry-field-date"><label for="'+id+'">Tanı Tarihi</label>'+
    '<input type="text" data-field data-disease-date id="'+id+'" value="'+esc(dates[id]||"")+'"'+
    ' placeholder="Yıl / tarih / Hatırlamıyor" autocomplete="off"'+
-   ' aria-label="'+esc(item.name)+' tanı tarihi veya açıklaması"></label>'+
-   '<button type="button" data-unselect-disease="'+esc(item.id)+'" aria-label="'+esc(item.name)+' seçimini sil" title="Seçimi sil">Sil</button></div>';
+   ' aria-label="'+esc(item.name)+' tanı tarihi veya açıklaması"></div></div>'+
+   '<button type="button" class="entry-remove" data-unselect-disease="'+esc(item.id)+'"'+
+   ' aria-label="'+esc(item.name)+' seçimini sil" title="Seçimi sil">Sil</button></div></div>';
  }).join("");
  list.hidden=!selections.length;
 }
@@ -1142,14 +1146,15 @@ function handleEntryKeyboardShortcut(event){
  if(!input?.matches?.('input[data-field]'))return;
  const row=input.closest(".dynamic-entry");
  let type=null;
- if(row){
+ if(input.matches("[data-disease-date]")){
+  // A catalog-selected diagnosis is visually a standard row, but its date is
+  // still the last editable field and Enter adds a manual diagnosis.
+  type="diagnosis";
+ }else if(row){
   type=row.dataset.entryType;
   if(!ENTRY_META[type])return;
   const inputs=Array.from(row.querySelectorAll("input[data-field]"));
   if(inputs[inputs.length-1]!==input)return;
- }else if(input.matches("[data-disease-date]")){
-  // The selected-disease table also has a second (date) text box.
-  type="diagnosis";
  }else return;
  event.preventDefault();
  makeEntry(type);
