@@ -2250,6 +2250,7 @@
 .kgd-import-actions button{min-height:42px;padding:9px 14px;border:1px solid #9ab5a4;
  border-radius:7px;background:#f5faf7;color:#285b4d;font:inherit;font-weight:750;cursor:pointer}
 #kgdImportConfirm{background:#285b4d;color:white;border-color:#285b4d}
+.kgd-import-success{padding:11px 14px;margin:0 0 15px;border:1px solid #a9d1b6;background:#ecf7ef;color:#21583a;border-radius:8px;font-size:.88rem;font-weight:680}
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><div class="kgd-workspace" id="kgdWorkspace"><aside class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite" hidden></div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><div class="wizard-mobile-jump"><label for="wizardMobileSelect">Bölüm seçiniz</label><select id="wizardMobileSelect" aria-label="KGD bölüm seçimi"></select></div>
 <button type="button" id="wizardClearAll" class="wizard-reset-all">Bütün KGD'yi Sıfırla</button>
 <dialog class="kgd-reset-dialog" id="kgdResetDialog" aria-labelledby="kgdResetDialogTitle" aria-describedby="kgdResetDialogText">
@@ -5985,6 +5986,7 @@ function initKGDWizard(){wizardReady=true;const tabs=$("wizardTabs");tabs.onclic
    examination page. sessionStorage stays inside this browser tab and origin.
    A confirmation is required; existing answers are never silently replaced. */
 const KGD_FIRST_VISIT_PENDING_KEY="itf_first_visit_to_kgd_pending_v1";
+const KGD_FIRST_VISIT_NOTICE_KEY="itf_first_visit_to_kgd_notice_v1";
 function readFirstVisitImport(){
  let pending=null;
  try{
@@ -6048,9 +6050,27 @@ function importFirstVisitValues(pending){
   moreText=oldMoreText;
   return {saved:false,transferred,kept};
  }
- try{sessionStorage.removeItem(KGD_FIRST_VISIT_PENDING_KEY);}catch(e){}
+ try{
+  sessionStorage.removeItem(KGD_FIRST_VISIT_PENDING_KEY);
+  sessionStorage.setItem(KGD_FIRST_VISIT_NOTICE_KEY,JSON.stringify({transferred,kept}));
+ }catch(e){}
  location.reload();
  return {saved:true,transferred,kept};
+}
+function showFirstVisitImportNotice(){
+ let status;
+ try{
+  status=JSON.parse(sessionStorage.getItem(KGD_FIRST_VISIT_NOTICE_KEY)||"null");
+  sessionStorage.removeItem(KGD_FIRST_VISIT_NOTICE_KEY);
+ }catch(e){return;}
+ if(!status||!Number.isInteger(status.transferred))return;
+ const notice=document.createElement("div");
+ notice.className="kgd-import-success";notice.setAttribute("role","status");
+ notice.textContent="✓ İlk Muayene Formu'ndan "+status.transferred+
+  " kayıt aktarıldı."+(status.kept?" Mevcut KGD'deki "+status.kept+
+  " dolu kayıt korundu.":"")+" Aktarılan bilgileri klinik olarak doğrulayınız.";
+ const target=document.getElementById("kgdWorkspaceContent")||document.querySelector("main");
+ if(target)target.prepend(notice);
 }
 function offerFirstVisitImport(){
  const pending=readFirstVisitImport();
@@ -6103,6 +6123,6 @@ function offerFirstVisitImport(){
 }
 
 $("printFinal").onclick=()=>printKGD(null,"summary");$("printFinalDetailed").onclick=()=>printKGD(null,"detailed");$("emailFinal").onclick=emailOnly;
-const loadedKGDDraft=readKGDDraft();restoreKGDDraft(loadedKGDDraft);render();applyScaleValues(draftScales);fullRender();reorderClinicalSections();installEqHealthVAS();syncMNAAnthropometry();initMNAControls();summarize();initKGDWizard();offerFirstVisitImport();
+const loadedKGDDraft=readKGDDraft();restoreKGDDraft(loadedKGDDraft);render();applyScaleValues(draftScales);fullRender();reorderClinicalSections();installEqHealthVAS();syncMNAAnthropometry();initMNAControls();summarize();initKGDWizard();showFirstVisitImportNotice();offerFirstVisitImport();
 
 </script></body></html>
