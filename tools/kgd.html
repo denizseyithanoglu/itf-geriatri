@@ -2235,6 +2235,21 @@
 #physicalSection .physical-unable-choice:has(input:focus-visible){
  outline:2px solid #285b4d;outline-offset:2px
 }
+
+/* Session-only, consent-based transfer preview, restricted to Online KGD. */
+.kgd-import-dialog{width:min(610px,calc(100vw - 30px));max-height:min(84vh,780px);
+ border:1px solid #acc9b8;border-radius:13px;background:#fff;color:#22382f;
+ padding:21px 23px;box-shadow:0 14px 46px #15291e55;font:inherit}
+.kgd-import-dialog::backdrop{background:#172921a6}
+.kgd-import-dialog h2{font-size:1.23rem;line-height:1.35;margin:0 0 14px;color:#245846}
+.kgd-import-dialog p{line-height:1.5;font-size:.89rem}
+.kgd-import-warning,.kgd-import-info{padding:11px 13px;border-radius:8px;background:#fff4dd;
+ border:1px solid #e3c78c}
+.kgd-import-info{background:#ecf6ef;border-color:#b9d9c3}
+.kgd-import-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin:20px 0 5px}
+.kgd-import-actions button{min-height:42px;padding:9px 14px;border:1px solid #9ab5a4;
+ border-radius:7px;background:#f5faf7;color:#285b4d;font:inherit;font-weight:750;cursor:pointer}
+#kgdImportConfirm{background:#285b4d;color:white;border-color:#285b4d}
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><div class="kgd-workspace" id="kgdWorkspace"><aside class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite" hidden></div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><div class="wizard-mobile-jump"><label for="wizardMobileSelect">Bölüm seçiniz</label><select id="wizardMobileSelect" aria-label="KGD bölüm seçimi"></select></div>
 <button type="button" id="wizardClearAll" class="wizard-reset-all">Bütün KGD'yi Sıfırla</button>
 <dialog class="kgd-reset-dialog" id="kgdResetDialog" aria-labelledby="kgdResetDialogTitle" aria-describedby="kgdResetDialogText">
@@ -5965,7 +5980,129 @@ function initKGDWizard(){wizardReady=true;const tabs=$("wizardTabs");tabs.onclic
  $("wizardClearAll").onclick=()=>{const dialog=$("kgdResetDialog");if(typeof dialog.showModal==="function")dialog.showModal();else if(confirm("Bütün KGD'yi sıfırlıyorsunuz. Emin misiniz?"))resetEntireKGD()};
  $("kgdResetCancel").onclick=()=>$("kgdResetDialog").close();
  $("kgdResetConfirm").onclick=()=>resetEntireKGD();document.addEventListener("input",e=>{if(!e.target.closest(".wizard-shell,.wizard-footer"))writeKGDDraft()});document.addEventListener("change",e=>{if(!e.target.closest(".wizard-shell,.wizard-footer"))writeKGDDraft()});document.addEventListener("click",e=>{if(e.target.closest("#fullFields button,#sections button,#extraScales button,#fullGds button,#physicalSection button"))writeKGDDraft()});window.addEventListener("pagehide",()=>writeKGDDraft());showWizardStep(wizardStep);draftEnabled=true;writeKGDDraft()}
+
+/* One-time import offered only after a manual transfer action on the initial
+   examination page. sessionStorage stays inside this browser tab and origin.
+   A confirmation is required; existing answers are never silently replaced. */
+const KGD_FIRST_VISIT_PENDING_KEY="itf_first_visit_to_kgd_pending_v1";
+function readFirstVisitImport(){
+ let pending=null;
+ try{
+  const raw=sessionStorage.getItem(KGD_FIRST_VISIT_PENDING_KEY);
+  if(!raw||raw.length>120000)return null;
+  pending=JSON.parse(raw);
+ }catch(e){return null;}
+ if(!pending||pending.version!==1||pending.from!=="ilk-muayene"||
+  !Number.isFinite(pending.createdAt)||Date.now()-pending.createdAt>15*60*1000||
+  pending.createdAt>Date.now()+60000||!pending.text||
+  typeof pending.text!=="object"||Array.isArray(pending.text)||
+  !Array.isArray(pending.medications))return null;
+ const allowed=/^(?:clinical_0_(?:0|1|2|3|4|5|6)|clinical_1_(?:0|1)|clinical_2_6|clinical_3_(?:0|1|2|3|13)|clinical_4_17|clinical_6_(?:3|4|5|6|7|8|9|10|11|13|14|15|16|18|20)|patient(?:Address|Profession)|historyFracture|alcoholQuantity)$/;
+ const text={};
+ for(const [key,value] of Object.entries(pending.text)){
+  if(!allowed.test(key)||typeof value!=="string"||value.length>1800)continue;
+  const cleaned=value.trim();
+  if(cleaned)text[key]=cleaned;
+ }
+ const medications=pending.medications.slice(0,100).filter(v=>typeof v==="string"&&v.trim())
+  .map(v=>v.trim().slice(0,250));
+ if(!Object.keys(text).length&&!medications.length)return null;
+ return {text,medications};
+}
+function firstVisitPatientMismatch(incoming){
+ const check=(key,normalized=false)=>{
+  const old=String(moreText[key]??"").trim();
+  const next=String(incoming[key]??"").trim();
+  if(!old||!next)return false;
+  return (normalized?old.replace(/\s+/g," ").toLocaleLowerCase("tr-TR"):old)!==
+   (normalized?next.replace(/\s+/g," ").toLocaleLowerCase("tr-TR"):next);
+ };
+ return check("clinical_0_1")||check("clinical_0_0",true)||check("clinical_0_3");
+}
+function importFirstVisitValues(pending){
+ const oldMoreText=moreText;
+ const draft={...moreText};
+ const empty=v=>v===undefined||v===null||String(v).trim()==="";
+ let transferred=0,kept=0;
+ for(const [key,value] of Object.entries(pending.text)){
+  // The automatically initialized KGD date is not a clinical answer.
+  const defaultDate=key==="clinical_0_2"&&draft[key]===localKGDToday();
+  if(empty(draft[key])||defaultDate){draft[key]=value;transferred++;}
+  else kept++;
+ }
+ if(pending.medications.length){
+  const rows=Array.isArray(draft.medicationRows)?draft.medicationRows:[];
+  const hasRows=rows.some(x=>String(x??"").trim());
+  const legacyMeds=String(draft.clinical_6_19??"").trim();
+  if(!hasRows&&!legacyMeds){
+   draft.medicationRows=[...pending.medications];
+   draft.clinical_6_19=pending.medications.map((s,i)=>(i+1)+". "+s).join("\n");
+   transferred+=pending.medications.length;
+  }else kept+=pending.medications.length;
+ }
+ moreText=draft;
+ // The existing KGD scoring and rendering pipeline recalculates counts,
+ // physical indices, sex-specific decisions and all dependency panels on reload.
+ draftConfirmedSteps={};
+ if(!writeKGDDraft()){
+  moreText=oldMoreText;
+  return {saved:false,transferred,kept};
+ }
+ try{sessionStorage.removeItem(KGD_FIRST_VISIT_PENDING_KEY);}catch(e){}
+ location.reload();
+ return {saved:true,transferred,kept};
+}
+function offerFirstVisitImport(){
+ const pending=readFirstVisitImport();
+ if(!pending){
+  try{sessionStorage.removeItem(KGD_FIRST_VISIT_PENDING_KEY);}catch(e){}
+  return;
+ }
+ const different=firstVisitPatientMismatch(pending.text);
+ const existing=Object.entries(moreText).filter(([key,value])=>
+  key!=="clinical_0_2"&&key!=="medicationRows"&&
+  key!=="clinical_6_1"&&key!=="clinical_6_2"&&
+  value!==undefined&&value!==null&&String(value).trim()!=="").length;
+ const dialog=document.createElement("dialog");
+ dialog.id="kgdFirstVisitImportDialog";dialog.className="kgd-import-dialog";
+ const fieldCount=Object.keys(pending.text).length;
+ dialog.innerHTML='<h2>İlk Muayene Formu’ndan KGD’ye Aktarım</h2>'+
+  '<p><b>'+fieldCount+' ortak alan</b> ve <b>'+pending.medications.length+
+  ' ilaç kaydı</b> aktarılmak üzere hazırlandı.</p>'+
+  '<p>Kimlik, demografi, hastalık, ilaç, soygeçmiş ve ilgili ölçüm/alışkanlık bilgileri aktarılabilir. '+
+  'KGD’ye özgü değerlendirme ölçekleri aktarılmaz veya otomatik doldurulmaz.</p>'+
+  (different?'<p class="kgd-import-warning"><b>Aktarım engellendi:</b> KGD taslağındaki kimlik veya doğum tarihi İlk Muayene Formu ile uyuşmuyor. '+
+   'Farklı hastaların kayıtlarını birleştirmemek için önce mevcut KGD taslağını kontrol edip gerekiyorsa sıfırlayınız.</p>':
+   existing?'<p class="kgd-import-warning"><b>Mevcut KGD taslağında '+existing+
+    ' dolu alan var.</b> Yalnızca boş alanlara veri eklenir; mevcut bilgiler ve test sonuçları değiştirilmez. Aynı hasta olduğunu doğrulayınız.</p>':
+   '<p class="kgd-import-info">Aktarım yalnızca bu tarayıcı sekmesinin geçici depolamasında yapılır. Bilgiler sunucuya gönderilmez.</p>')+
+  '<div class="kgd-import-actions"><button type="button" id="kgdImportDismiss">Aktarma, KGD’de Kal</button>'+
+  (!different?'<button type="button" id="kgdImportConfirm">Onayla ve Aktar</button>':"")+'</div>'+
+  '<p id="kgdImportStatus" role="status" aria-live="polite"></p>';
+ document.body.appendChild(dialog);
+ const discard=()=>{
+  try{sessionStorage.removeItem(KGD_FIRST_VISIT_PENDING_KEY);}catch(e){}
+  dialog.close();dialog.remove();
+ };
+ dialog.querySelector("#kgdImportDismiss").onclick=discard;
+ dialog.addEventListener("cancel",()=>{try{sessionStorage.removeItem(KGD_FIRST_VISIT_PENDING_KEY);}catch(e){}});
+ const confirmButton=dialog.querySelector("#kgdImportConfirm");
+ if(confirmButton)confirmButton.onclick=()=>{
+  if(firstVisitPatientMismatch(pending.text))return;
+  const result=importFirstVisitValues(pending);
+  if(!result.saved){
+   const status=dialog.querySelector("#kgdImportStatus");
+   if(status)status.textContent="Aktarım kaydedilemedi. Tarayıcı depolaması kullanılamıyor olabilir.";
+  }
+ };
+ if(typeof dialog.showModal==="function")dialog.showModal();
+ else if(!different&&window.confirm("İlk Muayene bilgilerini KGD'nin yalnızca boş alanlarına aktaralım mı?")){
+  const result=importFirstVisitValues(pending);
+  if(!result.saved)alert("Aktarım kaydedilemedi.");
+ }else discard();
+}
+
 $("printFinal").onclick=()=>printKGD(null,"summary");$("printFinalDetailed").onclick=()=>printKGD(null,"detailed");$("emailFinal").onclick=emailOnly;
-const loadedKGDDraft=readKGDDraft();restoreKGDDraft(loadedKGDDraft);render();applyScaleValues(draftScales);fullRender();reorderClinicalSections();installEqHealthVAS();syncMNAAnthropometry();initMNAControls();summarize();initKGDWizard();
+const loadedKGDDraft=readKGDDraft();restoreKGDDraft(loadedKGDDraft);render();applyScaleValues(draftScales);fullRender();reorderClinicalSections();installEqHealthVAS();syncMNAAnthropometry();initMNAControls();summarize();initKGDWizard();offerFirstVisitImport();
 
 </script></body></html>
