@@ -1422,6 +1422,96 @@ function handleEntryKeyboardShortcut(event){
  byId(meta.prefix+"_"+entrySequence+"_name")?.focus();
 }
 
+
+/* Explicit, one-way handoff to Online KGD. No network transfer and no automatic
+   copying of patient data. The next page asks for confirmation before importing. */
+const FIRST_VISIT_KGD_BRIDGE="itf_first_visit_to_kgd_pending_v1";
+function firstVisitKGDTransferPayload(){
+ const fields={},get=id=>String(byId(id)?.value??"").trim();
+ const set=(key,value)=>{
+  const v=String(value??"").trim();
+  if(v)fields[key]=v.slice(0,1800);
+ };
+ const date=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)?v.slice(8,10)+"."+v.slice(5,7)+"."+v.slice(0,4):"";
+ for(const [id,key] of [
+  ["ad","clinical_0_0"],["tc","clinical_0_1"],
+  ["telefon","clinical_0_5"],["boy","clinical_1_0"],["kilo","clinical_1_1"],
+  ["meslegi","patientProfession"],["adres","patientAddress"]
+ ])set(key,get(id));
+ set("clinical_0_2",date(get("basvuru")));
+ set("clinical_0_3",date(get("dogumtarihi")));
+ set("clinical_0_4",sexValue());
+ const education={"Okuryazar Değil":"Okur-yazar değil","Okuryazar":"Okur-yazar",
+  "İlkokul":"İlkokul","Ortaokul":"Ortaokul","Lise":"Lise",
+  "Ön Lisans":"Ön lisans","Lisans":"Üniversite","Yüksek Lisans":"Yüksek lisans",
+  "Doktora":"Doktora"};
+ if(education[get("egitim")])set("clinical_0_6",education[get("egitim")]);
+ const smoking=selectedRadio("sigaraDurum"),alcohol=selectedRadio("alkolDurum");
+ if(smoking==="Aktif kullanıyor")set("clinical_3_0","Evet");
+ if(smoking==="Hiç kullanmadı")set("clinical_3_0","Hayır");
+ if(smoking==="Aktif kullanıyor"&&get("sigaraMiktar"))set("clinical_3_1",get("sigaraMiktar"));
+ if(alcohol==="Var")set("clinical_3_2","Evet");
+ if(alcohol==="Yok")set("clinical_3_2","Hayır");
+ if(alcohol==="Var"&&get("alkolMiktar"))set("alcoholQuantity",get("alkolMiktar"));
+ if(["Var","Yok"].includes(get("gozluk")))set("clinical_3_3",get("gozluk")==="Var"?"Evet":"Hayır");
+ if(get("isitmeCihazi"))set("clinical_3_13",get("isitmeCihazi")==="Yok"?"Hayır":"Evet");
+ const family=[];
+ for(const [p,label] of [["m","Anne"],["f","Baba"]]){
+  const selected=FAMILY_CONDITIONS.filter((_,i)=>byId("fam_"+p+"_"+i)?.checked);
+  if(selected.length)family.push(label+": "+selected.join(", "));
+ }
+ if(get("familyExtra"))family.push(get("familyExtra"));
+ if(family.length)set("clinical_6_20",family.join("; "));
+ if(byId("ss_1_17")?.checked||byId("osteoFall")?.checked)set("clinical_2_6","Evet");
+ if(byId("ss_1_18")?.checked||byId("ss_0_19")?.checked||byId("osteoFracture")?.checked)
+  set("historyFracture","Evet");
+ if(byId("dav_4")?.checked)set("clinical_4_17","Evet");
+ // Exact or highly recognizable diagnoses only; unknown/ambiguous diagnoses
+ // remain in KGD's free-text "Diğer Hastalıklar" without forced classification.
+ const diagnoses=[
+  ...checkedDiseases().map(d=>d.name),
+  ...entryIds("diagnosis").map(i=>get("diag_"+i+"_name"))
+ ].filter(Boolean);
+ const other=[],seen=new Set();
+ for(const name of diagnoses){
+  const norm=name.toLocaleLowerCase("tr-TR").replace(/\s+/g," ").trim();
+  if(seen.has(norm))continue;seen.add(norm);
+  let key=null;
+  if(/^(t[12]dm\b|dm\b|diyabet|diabetes)/iu.test(norm))key=7;
+  else if(/^(ht\b|hipertansiyon)/iu.test(norm))key=8;
+  else if(/^(hl\b|dislipidemi|hiperlipidemi)/iu.test(norm))key=6;
+  else if(/^(hipotiroidi)/iu.test(norm))key=9;
+  else if(/^(kah\b|mi\b|koroner arter|miyokard infarktüsü|iskemik kalp)/iu.test(norm))key=10;
+  else if(/^(af\b|aritmi)/iu.test(norm))key=3;
+  else if(/^(kky\b|kalp yetmezliği|konjestif kalp)/iu.test(norm))key=11;
+  else if(/^(kbh\b|kronik böbrek)/iu.test(norm))key=13;
+  else if(/^(oa\b|osteoartrit)/iu.test(norm))key=14;
+  else if(/^(op\b|osteoporoz)/iu.test(norm))key=15;
+  else if(/^(iskemik svh|hemorajik svh|svo\b|svh\b|inme\b|serebrovasküler)/iu.test(norm))key=16;
+  else if(/demans|alzheimer|lewy cisimcikli/iu.test(norm))key=4;
+  else if(/^(depresyon)/iu.test(norm))key=5;
+  if(key!==null)set("clinical_6_"+key,"Evet");
+  else other.push(name);
+ }
+ if(other.length)set("clinical_6_18",other.join("; ").slice(0,1800));
+ const medications=entryIds("medication").map(id=>{
+  const name=get("med_"+id+"_name"),dose=get("med_"+id+"_dose");
+  return [name,dose].filter(Boolean).join(" — ").slice(0,250);
+ }).filter(Boolean).slice(0,100);
+ return {version:1,createdAt:Date.now(),from:"ilk-muayene",text:fields,medications};
+}
+function transferFirstVisitToKGD(){
+ const payload=firstVisitKGDTransferPayload();
+ const count=Object.keys(payload.text).length+payload.medications.length;
+ if(!count){toast("Önce KGD'ye aktarılabilecek bir alan doldurunuz.",true);return;}
+ if(!save())return;
+ try{
+  sessionStorage.setItem(FIRST_VISIT_KGD_BRIDGE,JSON.stringify(payload));
+ }catch(e){toast("Aktarım hazırlanamadı: tarayıcı oturum depolaması kullanılamıyor.",true);return;}
+ // Same-tab navigation is essential because sessionStorage is tab-scoped.
+ window.location.assign("kgd.html");
+}
+
 function initialize(){
  build();
  let restored;
@@ -1474,6 +1564,7 @@ function initialize(){
  byId("prev").addEventListener("click",()=>{save();go(step-1);save();});
  byId("next").addEventListener("click",()=>{save();go(step+1);save();});
  byId("save").addEventListener("click",()=>save(true));
+ byId("transferToKGD").addEventListener("click",transferFirstVisitToKGD);
  byId("print").addEventListener("click",printWholeForm);
  byId("printSummaryBottom").addEventListener("click",printOneSummary);
  byId("copySummaryBottom").addEventListener("click",copyOneSummary);
