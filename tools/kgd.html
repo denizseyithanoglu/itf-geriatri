@@ -2990,7 +2990,8 @@ function sarcoStatus(){
 function kgdPhysicalReportLabel(index,label){
  const labels={
   2:"BIA yağ (%)",7:"TUG (sn)",8:"OYH (m/sn)",
-  10:"HGS (kg)",16:"5-CST (sn)",24:"SPPB Toplam"
+  10:"HGS (kg)",16:"5-CST (sn)",24:"SPPB Toplam",
+  26:"Kesin Sarkopeni (SMM/boy²)"
  };
  return labels[index]||label;
 }
@@ -5075,7 +5076,7 @@ function renderA4Detailed(){const col=[];const add=(title,rows)=>{if(!rows.lengt
    ["SMM/boy²",kgdPhysicalIndexValue(physicalStatus.smmi,"kg/m²",physicalStatus.mass)],
    ["SMM/kilo",kgdPhysicalIndexValue(physicalStatus.smmw,"%",physicalStatus.massW)],
    ["SMM/BKİ",kgdPhysicalIndexValue(physicalStatus.smmbmi,"",physicalStatus.massBMI,3)],
-   ["Sarkopenik obezite",moreText.sarcopenicObesity]
+   ["Sarkopenik Obezite (SMM/kilo)",moreText.sarcopenicObesity]
   );
  }add(sec[0],entries)}for(const form of forms){const rows=form.items.map((name,i)=>{const node=$(form.id+"_"+i);if(!node||node.value==="")return null;const opt=node.options[node.selectedIndex];return [name,opt?.textContent||node.value]}).filter(Boolean);const vals=form.items.map((_,i)=>$(form.id+"_"+i)?.value??"");if(vals.every(x=>x!==""))rows.unshift(["Toplam puan",scaleTotal(form,vals)+"/"+form.max]);add(form.tr,rows)}for(let j=0;j<3;j++){const list=additional[j];if(!list)continue;const rows=list[1].map((q,i)=>[q,moreAnswers["additional_"+j+"_"+i]]).filter(([a,v])=>v!==undefined);add(list[0],rows)}add("Saat çizme",[["Puan",moreAnswers.clock??"Eksik"],["Not",moreText["clock-notes"]||""]].filter(x=>x[1]!==""));const mm=additional[mmseVariant==="standard"?3:4][1];add("MMSE ("+(mmseVariant==="standard"?"Standart":"Eğitimsiz")+")",mm.map((original,i)=>{const q=mmseVariant==="standard"&&mmseAttentionMode==="world"&&i>=13&&i<18?mmseWorldLetters[i-13]:original;const key=mmseAnswerKey(i);let v=moreAnswers[key],spoken=moreText["response_"+key];return [q,((v!==undefined?v+"p":"")+(spoken?" — "+spoken:"")).trim()]}).filter(x=>x[1]));add("GDS-30",gds30.map((q,i)=>[String(i+1)+". "+q,moreAnswers["gds30_"+i]===undefined?null:moreAnswers["gds30_"+i]==="1"?"Evet":"Hayır"]).filter(x=>x[1]!==null));const holder=$("printSheet");holder.innerHTML='<header class="print-head"><strong>İTF Geriatri — Kapsamlı Geriatrik Değerlendirme Özeti</strong><span>'+new Date().toLocaleDateString("tr-TR")+'</span></header><div class="report-columns">'+col.join("")+'</div><footer>Yerel tarayıcıda hazırlanmış özet; klinisyen tarafından kontrol edilmelidir.</footer>'}
 
@@ -5212,6 +5213,9 @@ item("9. GDS-30 — Duygudurum",[["GDS-30 Puanı",gd===null?"__":gd+"/30"+(gd<=1
 const sarco=sarcoStatus();
 const phys=clinical(1).map(([label,value],i)=>[kgdPhysicalReportLabel(i,label),
   kgdPhysicalAnnotatedValue(i,i===5?document.getElementById("bmiOut")?.textContent:value,sarco)]);
+phys.splice(27,0,
+ ["Kesin Sarkopeni (SMM/kilo)",moreText.sarcopeniaConfirmedW],
+ ["Kesin Sarkopeni (SMM/BKİ)",moreText.sarcopeniaConfirmedBMI]);
 const formatSarco=(value,suffix="",digits=2,low=null)=>
  value===null?"__":kgdPhysicalIndexValue(value,suffix,low,digits);
 item("10. Fiziksel Ölçümler ve Performans",[...phys,
@@ -5220,7 +5224,7 @@ item("10. Fiziksel Ölçümler ve Performans",[...phys,
  ["SMM / Boy²",formatSarco(sarco.smmi," kg/m²",2,sarco.mass)],
  ["SMM / kilo",formatSarco(sarco.smmw," %",2,sarco.massW)],
  ["SMM / BKİ",formatSarco(sarco.smmbmi,"",3,sarco.massBMI)],
- ["Sarkopenik obezite",moreText.sarcopenicObesity??"__"]]);
+ ["Sarkopenik Obezite (SMM/kilo)",moreText.sarcopenicObesity??"__"]]);
 return '<header class="summary-full-header"><h2>KGD Özeti — Tüm Bölümler</h2><p>__ = Henüz girilmedi. Önceki sekmelere dönerek tüm bilgileri düzenleyebilirsiniz.</p></header>'+rows.join("");
 }
 function summarize(){syncHistoryCounts();const t=texts.tr,lost=[];let complete=0;let out='<h2>'+safe(t.summary)+'</h2><p class="muted">'+safe(t.date)+': '+new Date().toLocaleDateString("tr-TR")+'</p>';for(const s of forms){const vals=s.items.map((_,i)=>$(s.id+"_"+i).value);const ready=vals.every(v=>v!=="");if(ready)complete++;const score=ready?scaleTotal(s,vals):null;out+='<div class="result"><strong>'+safe(s.tr)+': '+(ready?score+" / "+s.max+" ("+(meaning(s,score)||"Klinik yorum gerekli")+")":safe(t.incomplete))+'</strong>';if(ready){out+='<div>'+safe(t.meaning)+': '+safe(meaning(s,score))+'</div>';const lostHere=[];s.items.forEach((it,i)=>{let val=scaleItemScore(s,i,vals[i]);const deficit=(s.id==="adl"||s.id==="iadl"||s.id==="mna")?val<(s.id==="mna"?[2,3,2,2,2,3][i]:1):val>0;if(deficit)lostHere.push(it)});out+='<p class="muted">'+safe(t.domains)+': '+safe(lostHere.length?lostHere.join("; "):t.none)+'</p>'}out+='</div>';}
@@ -5392,14 +5396,19 @@ function compactKGDStep(i,inline=false){
    const short=["Boy","Kilo","Yağ (%)","FFM","BMR","BKİ","FAS","TUG","OYH","OYH algısı","HGS","HGS algısı","Kol","Bel","Kalça","Baldır","5-CST","Romberg","Postural instabilite","SPPB 1a","SPPB 1b","SPPB 1c","SPPB 2","SPPB 3","SPPB","Olası sarkopeni","Kesin sarkopeni","Ciddi sarkopeni"];
    const r=sarcoStatus();
    return simple("Fiziksel Performans",[
-    ...comprehensive[1][1].map((_,j)=>[kgdPhysicalReportLabel(j,short[j]),
-      kgdPhysicalAnnotatedValue(j,j===5?$("bmiOut")?.textContent:field(1,j),r)]),
+    ...comprehensive[1][1].flatMap((_,j)=>{
+      const item=[kgdPhysicalReportLabel(j,short[j]),
+        kgdPhysicalAnnotatedValue(j,j===5?$("bmiOut")?.textContent:field(1,j),r)];
+      return j===26?[item,
+        ["Kesin Sarkopeni (SMM/kilo)",moreText.sarcopeniaConfirmedW],
+        ["Kesin Sarkopeni (SMM/BKİ)",moreText.sarcopeniaConfirmedBMI]]:[item];
+    }),
     ["Yaş",kgdRecordedAge()],["Cinsiyet",moreText.clinical_0_4],
     ["SMM",r.smm===null?null:r.smm.toFixed(2)+" kg"],
     ["SMM/boy²",kgdPhysicalIndexValue(r.smmi,"kg/m²",r.mass)],
     ["SMM/kilo",kgdPhysicalIndexValue(r.smmw,"%",r.massW)],
     ["SMM/BKİ",kgdPhysicalIndexValue(r.smmbmi,"",r.massBMI,3)],
-    ["Sarkopenik obezite",moreText.sarcopenicObesity]
+    ["Sarkopenik Obezite (SMM/kilo)",moreText.sarcopenicObesity]
    ]);
  }
  return "";
@@ -5546,12 +5555,17 @@ function kgdDetailedScale(id){
 function kgdDetailedClinical(j,indices,title){
  const status=j===1?sarcoStatus():null;
  return kgdDetailedBlock(title||comprehensive[j][0],
-  (indices||comprehensive[j][1].map((_,i)=>i)).map(k=>[
-   status?kgdPhysicalReportLabel(k,comprehensive[j][1][k]):comprehensive[j][1][k],
-   status?
-    kgdPhysicalAnnotatedValue(k,moreText["clinical_"+j+"_"+k],status):
-    moreText["clinical_"+j+"_"+k]
-  ]));
+  (indices||comprehensive[j][1].map((_,i)=>i)).flatMap(k=>{
+   const entry=[
+    status?kgdPhysicalReportLabel(k,comprehensive[j][1][k]):comprehensive[j][1][k],
+    status?
+     kgdPhysicalAnnotatedValue(k,moreText["clinical_"+j+"_"+k],status):
+     moreText["clinical_"+j+"_"+k]
+   ];
+   return status&&k===26?[entry,
+    ["Kesin Sarkopeni (SMM/kilo)",moreText.sarcopeniaConfirmedW],
+    ["Kesin Sarkopeni (SMM/BKİ)",moreText.sarcopeniaConfirmedBMI]]:[entry];
+  }));
 }
 function kgdDetailedExtra(j,title,indices){
  return kgdDetailedBlock(title,indices.map(i=>{
@@ -5649,7 +5663,7 @@ function kgdDetailedPrintStep(step){
     ["SMM / boy²",kgdPhysicalIndexValue(sarcoStatus().smmi,"kg/m²",sarcoStatus().mass)],
     ["SMM / kilo",kgdPhysicalIndexValue(sarcoStatus().smmw,"%",sarcoStatus().massW)],
     ["SMM / BKİ",kgdPhysicalIndexValue(sarcoStatus().smmbmi,"",sarcoStatus().massBMI,3)],
-    ["Sarkopenik obezite",moreText.sarcopenicObesity]
+    ["Sarkopenik Obezite (SMM/kilo)",moreText.sarcopenicObesity]
    ]);
  }
  return "";
