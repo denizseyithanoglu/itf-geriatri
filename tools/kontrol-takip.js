@@ -106,11 +106,12 @@ function buildStatusItems(container,items,prefix){
  root.innerHTML=items.map(([id,label,sex])=>
   '<div class="status-card" data-sex="'+(sex||"")+'" data-card="'+prefix+'_'+id+'">'+
   '<strong>'+esc(label)+'</strong>'+
-  '<select id="'+prefix+'_'+id+'_status" data-save aria-label="'+esc(label)+' durumu">'+
-   options(STATUS_OPTIONS,"")+'</select>'+
+  (prefix==="screen"
+   ?answerButtons(prefix+"_"+id+"_status",label,["Yok","Var","Reddetti"])
+   :'<select id="'+prefix+'_'+id+'_status" data-save aria-label="'+esc(label)+' durumu">'+
+     options(STATUS_OPTIONS,"")+'</select>')+
   '<input id="'+prefix+'_'+id+'_note" data-save type="text" autocomplete="off"'+
-  ' placeholder="'+(prefix==="ger"?"Ek bilgi / süre / sıklık":"Tarih, sonuç veya ek not")+
-  '" aria-label="'+esc(label)+' ayrıntısı"></div>').join("");
+  ' placeholder="Tarih, sonuç veya ek not" aria-label="'+esc(label)+' ayrıntısı"></div>').join("");
 }
 function answerButtons(key,label,opts){
  return '<div class="answer-buttons" role="group" aria-label="'+esc(label)+'">'+
@@ -160,7 +161,7 @@ function syncScreeningSex(){
   const required=card.dataset.sex;
   const inactive=!!required&&sex!==required;
   card.dataset.inactive=String(inactive);
-  card.querySelectorAll("input,select").forEach(input=>input.disabled=Boolean(sex&&inactive));
+  card.querySelectorAll("input,select,button").forEach(input=>input.disabled=Boolean(sex&&inactive));
  });
 }
 function capture(){
