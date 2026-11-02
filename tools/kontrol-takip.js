@@ -191,7 +191,7 @@ function loadDraft(){
  if(!draft||draft.version!==1||!draft.fields||!draft.groups)return false;
  changing=true;
  try{
-  Object.entries(draft.fields).forEach(([id,value])=>{
+  Object.entries(legacyDraftFields(draft)).forEach(([id,value])=>{
    const el=$(id);if(el?.hasAttribute("data-save"))el.value=String(value??"");
   });
   GROUPS.forEach(group=>{
@@ -204,6 +204,142 @@ function loadDraft(){
  }finally{changing=false}
  return true;
 }
+function appendLegacyNotes(base,items){
+ return [String(base||"").trim(),...items.filter(populated)].filter(Boolean).join("\n");
+}
+function legacyDraftFields(draft){
+ const fields={...(draft.fields||{})},groups=draft.groups||{};
+ if(!("patientExtra" in fields)){
+  fields.patientExtra=appendLegacyNotes("",[
+   fields.literacy?"Önceki eğitim: "+fields.literacy:"",
+   fields.household?"Önceki yaşam: "+fields.household:""
+  ]);
+ }
+ for(const name of ["vision","hearing"]){
+  const target="ger_"+name+"_note";
+  if(!fields[target]&&fields[name])fields[target]=fields[name];
+ }
+ for(const [id,,kind] of GERIATRIC){
+  const key="ger_"+id+"_status";
+  if(!["binary","problem"].includes(kind))continue;
+  if(kind==="binary"){
+   if(fields[key]==="Var")fields[key]="Evet";
+   else if(fields[key]==="Yok")fields[key]="Hayır";
+   else if(fields[key]==="Bilinmiyor")fields[key]="";
+  }else if(fields[key]==="Bilinmiyor")fields[key]="";
+ }
+ if(fields.ger_appetite_status==="Var"||fields.ger_appetite_status==="Yok"){
+  fields.ger_appetite_note=appendLegacyNotes(fields.ger_appetite_note,[
+   "Önceki kayıt: "+fields.ger_appetite_status
+  ]);
+  fields.ger_appetite_status="";
+ }
+ if(!fields.labNarrative){
+  const prior=Array.isArray(groups.labs)?groups.labs:[];
+  fields.labNarrative=appendLegacyNotes("",[
+   ...prior.map(x=>[x.test,x.value,x.detail].filter(populated).join(" — ")),
+   fields.labNote||""
+  ]);
+ }
+ if(!fields.followupNarrative){
+  const prior=Array.isArray(groups.followup)?groups.followup:[];
+  fields.followupNarrative=prior.map(x=>[x.recommendation,x.status,x.result].filter(populated).join(" — ")).filter(Boolean).join("\n");
+ }
+ if(!fields.planNarrative){
+  const prior=Array.isArray(groups.plan)?groups.plan:[];
+  const items=prior.map(x=>[x.type,x.note].filter(populated).join(": ")).filter(Boolean);
+  if(fields.nextVisit)items.push("Kontrol: "+fields.nextVisit);
+  fields.planNarrative=numberedPlan(items);
+ }
+ return fields;
+}
+function planItems(str){
+ return String(str||"").split(/\r?\n/).map(s=>s.replace(/^\s*\d+[.)]\s*/,"").trim()).filter(Boolean);
+}
+function numberedPlan(lines){
+ return lines.map((line,i)=>(i+1)+". "+line).join("\n");
+}
+function addPlanOnEnter(event){
+ if(event.key!=="Enter"||event.shiftKey||event.ctrlKey||event.metaKey||event.isComposing)return;
+ const area=event.target;
+ if(area?.id!=="planNarrative")return;
+ event.preventDefault();
+ const before=area.value.slice(0,area.selectionStart),after=area.value.slice(area.selectionEnd);
+ const previous=planItems(before).length;
+ if(!previous&&before.trim()===""){
+  area.value="1. "+after;area.setSelectionRange(3,3);
+ }else{
+  const next=previous+1;
+  const insertion="\n"+next+". ";
+  const at=area.selectionStart;
+  area.setRangeText(insertion,area.selectionStart,area.selectionEnd,"end");
+ }
+ area.dispatchEvent(new Event("input",{bubbles:true}));
+}
+let planVisible=false;
+function updateScratchStatus(){
+ const area=$("scratchText"),status=$("scratchStatus");
+ if(!area||!status)return;
+ const draft=planItems(area.value);
+ if(!draft.length){status.textContent="Geçici not";return}
+ const plan=new Set(planItems(val("planNarrative")).map(s=>s.toLocaleLowerCase("tr-TR")));
+ const awaiting=draft.filter(s=>!plan.has(s.toLocaleLowerCase("tr-TR"))).length;
+ status.textContent=awaiting?awaiting+" not PLAN'a aktarılmayı bekliyor":"✓ PLAN'a aktarıldı";
+}
+function transferScratchToPlan(){
+ const scratch=planItems(val("scratchText"));
+ if(!scratch.length){updateScratchStatus();return 0}
+ const current=planItems(val("planNarrative"));
+ const known=new Set(current.map(s=>s.toLocaleLowerCase("tr-TR")));
+ let count=0;
+ for(const line of scratch){
+  const normalized=line.toLocaleLowerCase("tr-TR");
+  if(known.has(normalized))continue;
+  current.push(line);known.add(normalized);count++;
+ }
+ if(count){
+  $("planNarrative").value=numberedPlan(current);
+  renderNote();saveDraft();
+ }
+ updateScratchStatus();
+ return count;
+}
+function initScratchAndPlan(){
+ const panel=$("scratchNote"),toggle=$("scratchToggle"),content=$("scratchContent");
+ const setExpanded=expanded=>{
+  panel.dataset.collapsed=String(!expanded);
+  toggle.setAttribute("aria-expanded",String(expanded));
+  $("scratchChevron").textContent=expanded?"−":"+";
+  content.hidden=!expanded;
+ };
+ setExpanded(!window.matchMedia?.("(max-width: 700px)")?.matches);
+ toggle.onclick=()=>setExpanded(toggle.getAttribute("aria-expanded")!=="true");
+ $("scratchTransfer").onclick=()=>{
+  const count=transferScratchToPlan();
+  if(count)notify(count+" muayene notu PLAN bölümüne aktarıldı.");
+  else if(!val("scratchText"))notify("Post-it üzerinde henüz not bulunmuyor.",true);
+  else notify("Bu notlar zaten PLAN bölümünde bulunuyor.");
+ };
+ const activate=()=>{
+  if(planVisible)return;
+  planVisible=true;
+  const count=transferScratchToPlan();
+  if(count)notify(count+" muayene notu PLAN'a otomatik aktarıldı.");
+ };
+ if("IntersectionObserver" in window){
+  const observer=new IntersectionObserver(entries=>{
+   for(const entry of entries){
+    if(entry.target.id!=="planSection")continue;
+    if(entry.isIntersecting)activate();
+    else planVisible=false;
+   }
+  },{threshold:0.1});
+  observer.observe($("planSection"));
+ }
+ $("planSection").addEventListener("focusin",activate);
+ updateScratchStatus();
+}
+
 function textPair(name,detail){
  return [name,detail].filter(populated).join(detail&&name?" — ":"");
 }
@@ -227,16 +363,16 @@ function generateNote(){
   entries.forEach((entry,i)=>push((i+1)+". "+entry));
  };
  const intro=[];
+ if(val("tc"))intro.push("T.C. Kimlik No: "+val("tc"));
  if(val("patientName"))intro.push("Hasta: "+val("patientName"));
  if(val("visitDate"))intro.push("Kontrol Tarihi: "+datedDate(val("visitDate")));
  const demographic=[
   val("age")?val("age")+" yaş":null,
-  val("sex")||null,
-  val("literacy")?val("literacy"):null,
-  val("household")?"Kimle yaşıyor: "+val("household"):null
+  val("sex")||null
  ].filter(Boolean);
  if(intro.length)push(intro.join(" | "));
- if(demographic.length)push("Yaş/Cinsiyet, eğitim ve yaşam: "+demographic.join(" · "));
+ if(demographic.length)push("Yaş/Cinsiyet: "+demographic.join(" · "));
+ if(val("patientExtra"))push("Ek Notlar: "+val("patientExtra"));
  const diagnoses=records("diseases").map(x=>x.name+(x.date?" ("+x.date+")":"")).filter(Boolean);
  const surgeries=records("surgeries").map(x=>x.name+(x.date?" ("+x.date+")":"")).filter(Boolean);
  list("HASTALIKLAR",diagnoses);
@@ -260,23 +396,20 @@ function generateNote(){
  if(val("vaccinesOther"))vaccines.push(["Diğer aşılar",val("vaccinesOther")]);
  if(vaccines.length){push("AŞILAMALAR:");vaccines.forEach(([n,v])=>push(n+": "+v))}
  if(val("chiefComplaint"))push("AKTİF YAKINMA: "+val("chiefComplaint"));
- const geriatric=GERIATRIC.map(([id,name])=>[name,statusDetail("ger",id)]).filter(([,v])=>v);
- if(val("height"))geriatric.push(["Boy",val("height")+" cm"]);
- if(val("weight"))geriatric.push(["Kilo",val("weight")+" kg"]);
- if(val("adl"))geriatric.push(["GYA",val("adl")+"/6"]);
- if(val("iadl"))geriatric.push(["EGYA",val("iadl")+"/8"]);
- if(val("vision"))geriatric.push(["Görme",val("vision")]);
- if(val("hearing"))geriatric.push(["İşitme",val("hearing")]);
- if(val("geriatricOther"))geriatric.push(["Diğer",val("geriatricOther")]);
+ const geriatric=GERIATRIC.map(([id,name,kind])=>{
+   if(kind==="measure"){
+    const value=val(id);
+    return [name,value?(value+(id==="height"?" cm":id==="weight"?" kg":id==="adl"?"/6":"/8")):""];
+   }
+   if(kind==="text")return [name,val("ger_"+id+"_note")];
+   return [name,statusDetail("ger",id)];
+ }).filter(([,v])=>populated(v));
+ if(val("geriatricOther"))geriatric.push(["Ek Not",val("geriatricOther")]);
  if(geriatric.length){push("GERİATRİK SORGU:");geriatric.forEach(([n,v])=>push(n+": "+v))}
- const follow=records("followup").map(x=>[x.recommendation,x.status,x.result].filter(populated).join(" — ")).filter(Boolean);
- list("TAKİP — ÖNCEKİ ÖNERİLER",follow);
- const labs=records("labs").map(x=>[x.test,x.value,x.detail].filter(populated).join(" — ")).filter(Boolean);
- if(val("labNote"))labs.push(val("labNote"));
- if(labs.length){push("LABORATUVAR:");labs.forEach(x=>push("• "+x))}
- const plan=records("plan").map(x=>[x.type,x.note].filter(populated).join(": ")).filter(Boolean);
- if(val("nextVisit"))plan.push("Kontrol: "+val("nextVisit"));
- list("PLAN",plan);
+ if(val("labNarrative")){push("LABORATUVAR:");push(val("labNarrative"))}
+ if(val("followupNarrative")){push("TAKİP — ÖNCEKİ ÖNERİLER:");push(val("followupNarrative"))}
+ const plan=planItems(val("planNarrative"));
+ if(plan.length){push("PLAN:");push(plan.map((line,i)=>(i+1)+". "+line).join("\n"))}
  return lines.length?lines.join("\n"):"Henüz veri girilmedi. Formu doldurdukça klinik not burada oluşacaktır.";
 }
 function statusDetailFromFields(a,b){
