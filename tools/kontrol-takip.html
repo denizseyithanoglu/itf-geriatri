@@ -86,20 +86,20 @@
   <label class="field"><span>Geriatrik Sorgu – Ek Not</span><textarea id="geriatricOther" data-save rows="2" placeholder="Diğer geriatrik bulgular"></textarea></label>
  </section>
  <section class="form-section">
-  <div class="section-head"><span class="section-num">06</span><h2>TAKİP — Önceki Önerilerin Değerlendirilmesi</h2></div>
-  <p class="section-hint">Önceki muayenede önerilen işlemi, yapılıp yapılmadığını ve sonucunu ayrı ayrı kaydedin.</p>
-  <div id="followupRows" class="repeat-list" data-repeat="followup"></div>
-  <button type="button" class="add-btn no-print" data-add="followup">+ Takip Maddesi Ekle</button>
-  <h3>Laboratuvar</h3>
-  <div id="labsRows" class="repeat-list" data-repeat="labs"></div>
-  <button type="button" class="add-btn no-print" data-add="labs">+ Laboratuvar Sonucu Ekle</button>
-  <label class="field other-note"><span>Laboratuvar – Toplu Yorum / Diğer Bulgular</span><textarea id="labNote" data-save rows="2" placeholder="Örn. Hemoglobin, böbrek fonksiyonu, önemli değişimler…"></textarea></label>
+  <div class="section-head"><span class="section-num">06</span><h2>LABORATUVAR ve TAKİP</h2></div>
+  <label class="field narrative-field"><span>Laboratuvar Sonuçları ve Önemli Bulgular</span>
+   <textarea id="labNarrative" data-save rows="6" placeholder="Örn. 10.2026: HGB 11,2 g/dL; kreatinin 1,1 mg/dL. Önceki değerlere göre değişim…"></textarea>
+  </label>
+  <label class="field narrative-field"><span>TAKİP — Önceki Önerilerin Değerlendirilmesi</span>
+   <textarea id="followupNarrative" data-save rows="7" placeholder="Önceki öneriler, yapılıp yapılmadığı, sonuçlar, başvurular, ilaç değişiklikleri…"></textarea>
+  </label>
  </section>
  <section class="form-section">
   <div class="section-head"><span class="section-num">07</span><h2>PLAN</h2></div>
-  <div id="planRows" class="repeat-list" data-repeat="plan"></div>
-  <button type="button" class="add-btn no-print" data-add="plan">+ Plan Maddesi Ekle</button>
-  <label class="field other-note"><span>Kontrol Zamanı / Son Not</span><textarea id="nextVisit" data-save rows="2" placeholder="Örn. 3 ay sonra laboratuvar sonuçlarıyla kontrol"></textarea></label>
+  <p class="section-hint">İlk maddeyi yazın; Enter'a bastığınızda otomatik olarak sonraki numaralı madde açılır.</p>
+  <label class="field narrative-field"><span>Plan ve Kontrol Önerileri</span>
+   <textarea id="planNarrative" data-save rows="9" placeholder="1. Laboratuvar tetkikleri…"></textarea>
+  </label>
  </section>
  </div>
  <section class="note-section" id="noteSection" aria-labelledby="noteHeading">
