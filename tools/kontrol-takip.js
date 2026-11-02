@@ -39,7 +39,7 @@ const GERIATRIC=[
  ["urinary","Üriner İnkontinans","binary"],
  ["fecal","Fekal İnkontinans","binary"],
  ["constipation","Kabızlık","binary"],
- ["sleep","Uyku Sorunu","binary"],
+ ["sleep","Uyku","binary"],
  ["rbd","REM Uyku Davranış Bozukluğu","binary"],
  ["memory","Unutkanlık (yeni başlangıç / son 6 ayda artış)","binary"],
  ["anhedonia","Anhedoni","binary"],
@@ -254,7 +254,7 @@ function legacyDraftFields(draft){
  return fields;
 }
 function planItems(str){
- return String(str||"").split(/\r?\n/).map(s=>s.replace(/^\s*\d+[.)]\s*/,"").trim()).filter(Boolean);
+ return String(str||"").split(/\r?\n/).map(s=>s.replace(/^\s*(?:(?:\d+[.)]|[-•*])\s*)+/,"").trim()).filter(Boolean);
 }
 function numberedPlan(lines){
  return lines.map((line,i)=>(i+1)+". "+line).join("\n");
