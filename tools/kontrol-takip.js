@@ -273,6 +273,12 @@ function planItems(str){
 function numberedPlan(lines){
  return lines.map((line,i)=>(i+1)+". "+line).join("\n");
 }
+function ensureFirstNumber(area){
+ if(/^\s*\d+[.)](?:\s|$)/.test(area.value))return;
+ const start=area.selectionStart,end=area.selectionEnd;
+ area.value="1. "+area.value;
+ area.setSelectionRange(start+3,end+3);
+}
 function addPlanOnEnter(event){
  if(event.key!=="Enter"||event.shiftKey||event.ctrlKey||event.metaKey||event.isComposing)return;
  const area=event.target;
@@ -419,7 +425,7 @@ function generateNote(){
  }).filter(([,v])=>populated(v));
  if(val("geriatricOther"))geriatric.push(["Ek Not",val("geriatricOther")]);
  if(geriatric.length){push("GERİATRİK SORGU:");geriatric.forEach(([n,v])=>push(n+": "+v))}
- if(val("labNarrative")){push("LABORATUVAR:");push(val("labNarrative"))}
+ if(val("labNarrative")){push("LABORATUVAR VE TETKİKLER:");push(val("labNarrative"))}
  if(val("followupNarrative")||val("planNarrative"))push("\nTAKİP/PLAN:");
  if(val("followupNarrative")){push("Takip — Önceki Önerilerin Değerlendirilmesi:");push(val("followupNarrative"))}
  const plan=planItems(val("planNarrative"));
@@ -481,7 +487,12 @@ function init(){
  loadDraft();
  syncScreeningSex();updateAnswerButtons();
  renderNote();initScratchAndPlan();
- ["planNarrative","medicationsNarrative"].forEach(id=>$(id).addEventListener("keydown",addPlanOnEnter));
+ ["planNarrative","medicationsNarrative"].forEach(id=>{
+  const area=$(id);
+  area.addEventListener("focus",()=>ensureFirstNumber(area));
+  area.addEventListener("input",event=>{if(!event.isComposing)ensureFirstNumber(area)});
+  area.addEventListener("keydown",addPlanOnEnter);
+ });
  document.addEventListener("input",event=>{
   if(!event.target.closest(".form-paper")&&event.target.id!=="scratchText")return;
   clearTimeout(saveTimer);
