@@ -143,7 +143,8 @@ function buildGeriatric(){
   }
   if(kind==="text"){
    return '<label class="geriatric-item geriatric-free"><strong>'+esc(label)+'</strong>'+
-    '<input type="text" data-save id="ger_'+key+'_note" autocomplete="off" placeholder="Örn. 130/80 mmHg"></label>';
+    '<input type="text" data-save id="ger_'+key+'_note" inputmode="numeric" autocomplete="off" maxlength="7" aria-describedby="homeBPHint" placeholder="130/80">\n'+
+    '<small id="homeBPHint">Sistolik: 40–210 · Diyastolik: 10–120 mmHg</small></label>';
   }
   const choices=kind==="appetite"?["İyi","Orta","Kötü"]:
    kind==="problem"?["Yok","Var"]:["Evet","Hayır"];
@@ -486,6 +487,7 @@ function resetSection(section){
  section.querySelectorAll("[data-save]").forEach(field=>{
   if(field.type==="checkbox"||field.type==="radio")field.checked=false;
   else field.value="";
+  field.setCustomValidity?.("");
  });
  syncScreeningSex();updateAnswerButtons();updateScratchStatus();
  renderNote();saveDraft();
@@ -495,10 +497,42 @@ function setDefaultVisitDate(now=new Date()){
  if(val("visitDate"))return;
  $("visitDate").value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
 }
+function formatHomeBP(value,inputType=""){
+ if(inputType.startsWith("delete")||value.includes("/"))return value;
+ if(!/^\d{2,3}$/.test(value))return value;
+ const systolic=Number(value);
+ return systolic>=40&&systolic<=210?value+"/":value;
+}
+function homeBPError(value){
+ if(!value.trim())return "";
+ const parts=value.trim().split("/");
+ if(!/^\d{2,3}$/.test(parts[0])||Number(parts[0])<40||Number(parts[0])>210)
+  return "Sistolik değer 40–210 mmHg arasında olmalıdır.";
+ if(parts.length!==2||!/^\d{2,3}$/.test(parts[1])||Number(parts[1])<10||Number(parts[1])>120)
+  return "Diyastolik değer 10–120 mmHg arasında olmalıdır.";
+ return "";
+}
+function initHomeBP(){
+ const field=$("ger_homeBP_note");
+ field.addEventListener("input",event=>{
+  if(event.isComposing)return;
+  const atEnd=field.selectionStart===field.value.length&&field.selectionEnd===field.value.length;
+  if(atEnd){
+   const formatted=formatHomeBP(field.value,event.inputType||"");
+   if(formatted!==field.value){field.value=formatted;field.setSelectionRange(formatted.length,formatted.length)}
+  }
+  field.setCustomValidity(homeBPError(field.value));
+ });
+ field.addEventListener("change",()=>{
+  field.setCustomValidity(homeBPError(field.value));
+  if(field.validationMessage)field.reportValidity();
+ });
+}
 function init(){
  buildStatusItems("screeningCards",SCREENINGS,"screen");
  buildStatusItems("vaccineCards",VACCINES,"vax");
  buildGeriatric();
+ initHomeBP();
  GROUPS.forEach(group=>addRow(group));
  loadDraft();
  setDefaultVisitDate();
