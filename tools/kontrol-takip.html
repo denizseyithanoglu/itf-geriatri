@@ -29,13 +29,20 @@
  <div class="form-paper" id="formPaper">
  <section class="form-section">
   <div class="section-head"><span class="section-num">01</span><h2>Hasta Bilgileri ve Kısa Özgeçmiş</h2></div>
-  <div class="grid three">
+  <div class="patient-primary">
+   <label class="field"><span>T.C. Kimlik No <small>(isteğe bağlı)</small></span><input id="tc" data-save type="text" inputmode="numeric" maxlength="11" autocomplete="off" placeholder="11 haneli"></label>
    <label class="field"><span>Hasta Adı Soyadı <small>(isteğe bağlı)</small></span><input id="patientName" data-save autocomplete="off" placeholder="Ad Soyad"></label>
-   <label class="field"><span>Kontrol Tarihi</span><input type="date" id="visitDate" data-save></label>
    <label class="field"><span>Yaş</span><input id="age" data-save type="number" min="0" max="130" step="1" placeholder="Yaş"></label>
-   <label class="field"><span>Cinsiyet</span><select id="sex" data-save><option value="">Seçilmedi</option><option>Kadın</option><option>Erkek</option></select></label>
-   <label class="field"><span>Okuryazarlık / Eğitim</span><select id="literacy" data-save><option value="">Seçilmedi</option><option>Okuryazar değil</option><option>Okuryazar</option><option>İlkokul</option><option>Ortaokul</option><option>Lise</option><option>Üniversite</option><option>Diğer</option></select></label>
-   <label class="field"><span>Kimle Yaşıyor?</span><input id="household" data-save placeholder="Yalnız, eşiyle, çocuklarıyla…"></label>
+   <div class="field"><span id="sexLabel">Cinsiyet</span><input id="sex" type="hidden" data-save value="">
+    <div class="answer-buttons gender-buttons" role="group" aria-labelledby="sexLabel">
+     <button type="button" data-sex-option="Kadın" aria-pressed="false">♀ Kadın</button>
+     <button type="button" data-sex-option="Erkek" aria-pressed="false">♂ Erkek</button>
+    </div>
+   </div>
+  </div>
+  <div class="patient-secondary">
+   <label class="field"><span>Kontrol Tarihi</span><input type="date" id="visitDate" data-save></label>
+   <label class="field"><span>Ek Notlar</span><textarea id="patientExtra" data-save rows="2" placeholder="Hasta bilgileri ve anamnez için kısa ek açıklama…"></textarea></label>
   </div>
   <h3>Hastalıklar</h3><div class="repeat-list" id="diseasesRows" data-repeat="diseases"></div>
   <button type="button" class="add-btn no-print" data-add="diseases">+ Hastalık Ekle</button>
@@ -75,17 +82,7 @@
  <section class="form-section">
   <div class="section-head"><span class="section-num">05</span><h2>Aktif Yakınma ve Geriatrik Sorgu</h2></div>
   <label class="field"><span>Aktif Yakınması</span><textarea id="chiefComplaint" data-save rows="3" placeholder="Mevcut yakınmalar, süre ve gelişimi"></textarea></label>
-  <div id="geriatricCards" class="geriatric-grid"></div>
-  <div class="grid four measurements">
-   <label class="field"><span>Boy (cm)</span><input type="number" id="height" data-save min="0" step="0.1" placeholder="cm"></label>
-   <label class="field"><span>Kilo (kg)</span><input type="number" id="weight" data-save min="0" step="0.1" placeholder="kg"></label>
-   <label class="field"><span>GYA (/6)</span><input type="number" id="adl" data-save min="0" max="6" step="1" placeholder="0–6"></label>
-   <label class="field"><span>EGYA (/8)</span><input type="number" id="iadl" data-save min="0" max="8" step="1" placeholder="0–8"></label>
-  </div>
-  <div class="grid two">
-   <label class="field"><span>Görme</span><textarea id="vision" data-save rows="2" placeholder="Mevcut durum ve son göz muayenesi…"></textarea></label>
-   <label class="field"><span>İşitme</span><textarea id="hearing" data-save rows="2" placeholder="Mevcut durum, cihaz önerisi ve son muayene…"></textarea></label>
-  </div>
+  <div id="geriatricCards" class="geriatric-questions" aria-label="Geriatrik değerlendirme soruları"></div>
   <label class="field"><span>Geriatrik Sorgu – Ek Not</span><textarea id="geriatricOther" data-save rows="2" placeholder="Diğer geriatrik bulgular"></textarea></label>
  </section>
  <section class="form-section">
