@@ -204,7 +204,7 @@ function generateNote(){
   ["Tedaviler",val("treatments")]
  ].filter(([,v])=>populated(v));
  if(background.length){push("OSTEOPOROZ, KIRIK, DİŞLER VE TEDAVİLER:");background.forEach(([k,v])=>push(k+": "+v))}
- const screenings=SCREENINGS.map(([id,name])=>[name,statusDetail("screen",id)]).filter(([,v])=>v);
+ const screenings=SCREENINGS.map(([id,name,sex])=>[name,sex&&val("sex")&&sex!==val("sex")?"":statusDetail("screen",id)]).filter(([,v])=>v);
  if(val("screeningOther"))screenings.push(["Diğer taramalar",val("screeningOther")]);
  if(screenings.length){push("TARAMALAR:");screenings.forEach(([n,v])=>push(n+": "+v))}
  const vaccines=VACCINES.map(([id,name])=>[name,statusDetail("vax",id)]).filter(([,v])=>v);
