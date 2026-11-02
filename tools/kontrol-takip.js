@@ -166,7 +166,12 @@ function datedDate(iso){
  return /^\d{4}-\d{2}-\d{2}$/.test(iso)?iso.slice(8)+"."+iso.slice(5,7)+"."+iso.slice(0,4):iso;
 }
 function generateNote(){
- const lines=[],push=txt=>{if(populated(txt))lines.push(txt)};
+ const lines=[],push=txt=>{
+  if(!populated(txt))return;
+  if(lines.length&&/^(?:HASTALIKLAR|AMELİYATLAR|ALIŞKANLIKLAR|İLAÇLAR|OSTEOPOROZ|TARAMALAR|AŞILAMALAR|AKTİF YAKINMA|GERİATRİK SORGU|TAKİP|LABORATUVAR|PLAN)(?::| —)/.test(txt))
+   lines.push("");
+  lines.push(txt);
+ };
  const list=(title,entries)=>{
   if(!entries.length)return;
   push(title+":");
@@ -183,8 +188,8 @@ function generateNote(){
  ].filter(Boolean);
  if(intro.length)push(intro.join(" | "));
  if(demographic.length)push("Yaş/Cinsiyet, eğitim ve yaşam: "+demographic.join(" · "));
- const diagnoses=records("diseases").map(x=>textPair(x.name,x.date?"("+x.date+")":"")).filter(Boolean);
- const surgeries=records("surgeries").map(x=>textPair(x.name,x.date?"("+x.date+")":"")).filter(Boolean);
+ const diagnoses=records("diseases").map(x=>x.name+(x.date?" ("+x.date+")":"")).filter(Boolean);
+ const surgeries=records("surgeries").map(x=>x.name+(x.date?" ("+x.date+")":"")).filter(Boolean);
  list("HASTALIKLAR",diagnoses);
  list("AMELİYATLAR",surgeries);
  const habits=[];
