@@ -250,3 +250,10 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
 /* Date completes the identity row; extra notes use the full second row. */
 .patient-secondary{grid-template-columns:minmax(0,1fr)}
 @media screen{.note-content{font-size:16px}}
+
+/* Measurements share one card; output type applies to preview, copy and print. */
+.anthro-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.anthro-fields label{display:grid;gap:5px;font-size:.75rem;min-width:0}
+.anthro-fields output{padding:9px 5px;background:#edf5f9;border-radius:6px;color:#244e6e;font-weight:750;min-height:39px}
+.toolbar-actions{align-items:end}
+.note-mode select{min-height:39px;padding:7px}

@@ -48,14 +48,10 @@ const GERIATRIC=[
  ["hearing","İşitme Sorunu","problem"]
 ];
 const GERIATRIC_GROUPS=[
- ["fall","fear","cane"],
- ["dizziness","orthostasis","homeBP"],
- ["appetite","height","weight"],
- ["loss","swallow","urinary"],
- ["fecal","constipation","sleep"],
- ["rbd","memory","anhedonia"],
- ["adl","iadl","vision"],
- ["hearing"]
+ ["fall","fear","cane"],["dizziness","orthostasis","homeBP"],
+ ["appetite","anthropometry","loss"],["swallow","urinary","fecal"],
+ ["constipation","sleep","rbd"],["memory","anhedonia","adl"],
+ ["iadl","vision","hearing"]
 ];
 const STATUS_OPTIONS=["","Var","Yok","Yapıldı","Yapılmadı","Önerildi","Reddetti","Bilinmiyor"];
 const REPEATS={
@@ -133,7 +129,16 @@ function buildGeriatric(){
  const root=$("geriatricCards");
  const byKey=Object.fromEntries(GERIATRIC.map(item=>[item[0],item]));
  const card=(id)=>{
+  if(id==="anthropometry")return '<div class="geriatric-item anthropometry"><strong>Boy / Kilo / BKİ</strong><div class="anthro-fields">'+
+   '<label>Boy (cm)<input id="height" data-save type="number" min="0" step="0.1" placeholder="cm"></label>'+
+   '<label>Kilo (kg)<input id="weight" data-save type="number" min="0" step="0.1" placeholder="kg"></label>'+
+   '<label>BKİ (kg/m²)<output id="bmiValue" aria-live="polite">—</output></label></div></div>';
   const [key,label,kind]=byKey[id];
+  if(key==="adl"||key==="iadl"){
+   const max=key==="adl"?6:8;
+   return '<label class="geriatric-item geriatric-measure"><strong>'+esc(label)+'</strong><select id="'+key+'" data-save><option value="">Seçilmedi</option>'+
+    Array.from({length:max+1},(_,n)=>'<option value="'+n+'">'+n+'</option>').join("")+'</select></label>';
+  }
   if(kind==="measure"){
    const bounds={height:'min="0" step="0.1"',weight:'min="0" step="0.1"',
     adl:'min="0" max="6" step="1"',iadl:'min="0" max="8" step="1"'};
@@ -381,6 +386,47 @@ function statusDetail(prefix,id){
 function datedDate(iso){
  return /^\d{4}-\d{2}-\d{2}$/.test(iso)?iso.slice(8)+"."+iso.slice(5,7)+"."+iso.slice(0,4):iso;
 }
+function calculateBMI(height,weight){
+ const h=Number(String(height).replace(",",".")),w=Number(String(weight).replace(",","."));
+ if(!Number.isFinite(h)||!Number.isFinite(w)||h<=0||w<=0)return "";
+ return (w/((h/100)**2)).toFixed(1);
+}
+function updateBMI(){
+ const output=$("bmiValue");
+ if(output)output.textContent=calculateBMI(val("height"),val("weight")).replace(".",",")||"—";
+}
+const SHORT_LABELS={
+ "T.C. Kimlik No":"TC","Hasta":"Ad","Kontrol Tarihi":"T","Yaş/Cinsiyet":"Y/C",
+ "Ek Notlar":"Ek","HASTALIKLAR":"Tanı","AMELİYATLAR":"Op","ALIŞKANLIKLAR":"Alışk",
+ "İLAÇLAR":"İlaç","OSTEOPOROZ, KIRIK, DİŞLER VE TEDAVİLER":"Kemik/diş",
+ "Osteoporoz sorgusu":"OP/DXA","Kırık öyküsü":"Kırık","Tedaviler":"Ted","Diğer notlar":"Ek",
+ "TARAMALAR":"Tar","AŞILAMALAR":"Aşı","AKTİF YAKINMA":"Şik","GERİATRİK SORGU":"GS",
+ "LABORATUVAR VE TETKİKLER":"Lab/Tet","TAKİP/PLAN":"Takip/Plan",
+ "Takip — Önceki Önerilerin Değerlendirilmesi":"Takip","PLAN":"Plan",
+ "Düşme (son 6 ay içinde)":"Düşme/6ay","Düşme Korkusu":"Düşme kork.",
+ "Baston Kullanımı":"Baston","Baş Dönmesi":"Baş dön.","Ortostatizm":"Ortost","Evde TA":"TA",
+ "Boy (cm)":"Boy","Kilo (kg)":"Kilo","Kilo Kaybı":"Kilo kaybı","Çiğneme / Yutma Güçlüğü":"Çiğn/yutma",
+ "Üriner İnkontinans":"Üİ","Fekal İnkontinans":"Fİ","Kabızlık":"Kabız",
+ "REM Uyku Davranış Bozukluğu":"RDB","Unutkanlık (yeni başlangıç / son 6 ayda artış)":"Unutkanlık/6ay",
+ "GYA (/6)":"GYA","EGYA (/8)":"EGYA","Görme Sorunu":"Görme sor.","İşitme Sorunu":"İşitme sor.",
+ "Gastroskopi / Endoskopi":"EGD","Kolonoskopi":"Kolonosk","Abdominal Aort Anevrizması":"AAA",
+ "Mamografi":"Mammo","Pnömokok":"Pnöm","İnfluenza":"Grip","Herpes Zoster":"Zona",
+ "Diğer taramalar":"Ek tar","Diğer aşılar":"Ek aşı","Ek Not":"Ek","Sigara Ek Bilgi":"Sigara ek"
+};
+function generateSummaryNote(){
+ return generateNote().split("\n").map(line=>{
+  let text=line.trim();
+  for(const [full,short] of Object.entries(SHORT_LABELS)){
+   if(text.startsWith(full+":")){text=short+text.slice(full.length);break}
+  }
+  // Abbreviate only structured answers; preserve free-text findings, doses and negations.
+  text=text.replace(/: (Evet|Hayır|Var|Yok|Reddetti)(?= —|$)/,(_,answer)=>": "+({Evet:"+",Hayır:"−",Var:"+",Yok:"−",Reddetti:"Ret"}[answer]));
+  return text;
+ }).filter(Boolean).join(" | ");
+}
+function selectedNote(){
+ return val("noteMode")==="summary"?generateSummaryNote():generateNote();
+}
 function generateNote(){
  const lines=[],push=txt=>{
   if(!populated(txt))return;
@@ -434,6 +480,8 @@ function generateNote(){
    if(kind==="text")return [name,val("ger_"+id+"_note")];
    return [name,statusDetail("ger",id)];
  }).filter(([,v])=>populated(v));
+ const bmi=calculateBMI(val("height"),val("weight"));
+ if(bmi)geriatric.push(["BKİ",bmi.replace(".",",")+" kg/m²"]);
  if(val("geriatricOther"))geriatric.push(["Ek Not",val("geriatricOther")]);
  if(geriatric.length){push("GERİATRİK SORGU:");geriatric.forEach(([n,v])=>push(n+": "+v))}
  if(val("labNarrative")){push("LABORATUVAR VE TETKİKLER:");push(val("labNarrative"))}
@@ -448,7 +496,10 @@ function statusDetailFromFields(a,b){
  return [status,note].filter(populated).join(status&&note?" — ":"");
 }
 function renderNote(){
- $("noteContent").textContent=generateNote();
+ updateBMI();
+ const text=selectedNote();
+ $("noteContent").textContent=text;
+ if($("noteCount"))$("noteCount").textContent=text.length+" karakter";
 }
 function notify(message,error=false){
  const root=$("toast");
@@ -458,7 +509,7 @@ function notify(message,error=false){
 }
 async function copyNote(){
  transferScratchToPlan();
- const text=generateNote();
+ const text=selectedNote();
  if(text.startsWith("Henüz veri girilmedi")){notify("Önce formu doldurun.",true);return}
  try{
   if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);
@@ -590,6 +641,7 @@ function init(){
    renumber(group);renderNote();saveDraft();
   }
  });
+ $("noteMode").addEventListener("change",renderNote);
  $("saveDraft").onclick=()=>saveDraft(true);
  $("showNote").onclick=()=>{transferScratchToPlan();renderNote();$("noteSection").scrollIntoView({behavior:"smooth",block:"start"})};
  $("copyNote").onclick=copyNote;$("copyNoteBottom").onclick=copyNote;
