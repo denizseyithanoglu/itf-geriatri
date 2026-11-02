@@ -287,7 +287,7 @@ function ensureFirstNumber(area){
 function addPlanOnEnter(event){
  if(event.key!=="Enter"||event.shiftKey||event.ctrlKey||event.metaKey||event.isComposing)return;
  const area=event.target;
- if(!["planNarrative","medicationsNarrative"].includes(area?.id))return;
+ if(!["planNarrative","medicationsNarrative","scratchText"].includes(area?.id))return;
  event.preventDefault();
  const before=area.value.slice(0,area.selectionStart),after=area.value.slice(area.selectionEnd);
  const previous=planItems(before).length;
@@ -346,7 +346,6 @@ function initScratchAndPlan(){
   else notify("Bu notlar zaten PLAN bölümünde bulunuyor.");
  };
  const activate=()=>{
-  if(planVisible)return;
   planVisible=true;
   const count=transferScratchToPlan();
   if(count)notify(count+" muayene notu PLAN'a otomatik aktarıldı.");
@@ -362,6 +361,7 @@ function initScratchAndPlan(){
   observer.observe($("planSection"));
  }
  $("planSection").addEventListener("focusin",activate);
+ $("scratchText").addEventListener("blur",()=>{if(planVisible)transferScratchToPlan()});
  updateScratchStatus();
 }
 
@@ -451,6 +451,7 @@ function notify(message,error=false){
  toastTimer=setTimeout(()=>{root.hidden=true},3500);
 }
 async function copyNote(){
+ transferScratchToPlan();
  const text=generateNote();
  if(text.startsWith("Henüz veri girilmedi")){notify("Önce formu doldurun.",true);return}
  try{
@@ -464,6 +465,7 @@ async function copyNote(){
  }catch(e){notify("Kopyalama başarısız. Not metnini seçip kopyalayabilirsiniz.",true)}
 }
 function printNote(){
+ transferScratchToPlan();
  renderNote();window.print();
 }
 function requestReset(){
@@ -497,7 +499,7 @@ function init(){
  setDefaultVisitDate();
  syncScreeningSex();updateAnswerButtons();
  renderNote();initScratchAndPlan();
- ["planNarrative","medicationsNarrative"].forEach(id=>{
+ ["planNarrative","medicationsNarrative","scratchText"].forEach(id=>{
   const area=$(id);
   area.addEventListener("focus",()=>ensureFirstNumber(area));
   area.addEventListener("input",event=>{if(!event.isComposing)ensureFirstNumber(area)});
@@ -550,7 +552,7 @@ function init(){
   }
  });
  $("saveDraft").onclick=()=>saveDraft(true);
- $("showNote").onclick=()=>{renderNote();$("noteSection").scrollIntoView({behavior:"smooth",block:"start"})};
+ $("showNote").onclick=()=>{transferScratchToPlan();renderNote();$("noteSection").scrollIntoView({behavior:"smooth",block:"start"})};
  $("copyNote").onclick=copyNote;$("copyNoteBottom").onclick=copyNote;
  $("printNote").onclick=printNote;$("printNoteBottom").onclick=printNote;
  $("resetForm").onclick=requestReset;
