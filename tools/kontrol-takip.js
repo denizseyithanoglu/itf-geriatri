@@ -48,9 +48,14 @@ const GERIATRIC=[
  ["hearing","İşitme Sorunu","problem"]
 ];
 const GERIATRIC_GROUPS=[
- ["fall","fear","cane","dizziness","orthostasis","homeBP","vision","hearing"],
- ["appetite","height","weight","loss","swallow","adl","iadl"],
- ["urinary","fecal","constipation","sleep","rbd","memory","anhedonia"]
+ ["fall","fear","cane"],
+ ["dizziness","orthostasis","homeBP"],
+ ["appetite","height","weight"],
+ ["loss","swallow","urinary"],
+ ["fecal","constipation","sleep"],
+ ["rbd","memory","anhedonia"],
+ ["adl","iadl","vision"],
+ ["hearing"]
 ];
 const STATUS_OPTIONS=["","Var","Yok","Yapıldı","Yapılmadı","Önerildi","Reddetti","Bilinmiyor"];
 const REPEATS={
@@ -147,7 +152,7 @@ function buildGeriatric(){
    '<input id="ger_'+key+'_note" data-save autocomplete="off" type="text" placeholder="Açıklama" aria-label="'+esc(label)+' açıklaması"></div></div>';
  };
  root.innerHTML=GERIATRIC_GROUPS.map(keys=>
-  '<div class="geriatric-column">'+keys.map(card).join("")+'</div>').join("");
+  '<div class="geriatric-row">'+keys.map(card).join("")+'</div>').join("");
 }
 
 function syncScreeningSex(){
@@ -479,12 +484,17 @@ function resetSection(section){
  renderNote();saveDraft();
  notify(title+" bölümü sıfırlandı.");
 }
+function setDefaultVisitDate(now=new Date()){
+ if(val("visitDate"))return;
+ $("visitDate").value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
+}
 function init(){
  buildStatusItems("screeningCards",SCREENINGS,"screen");
  buildStatusItems("vaccineCards",VACCINES,"vax");
  buildGeriatric();
  GROUPS.forEach(group=>addRow(group));
  loadDraft();
+ setDefaultVisitDate();
  syncScreeningSex();updateAnswerButtons();
  renderNote();initScratchAndPlan();
  ["planNarrative","medicationsNarrative"].forEach(id=>{
