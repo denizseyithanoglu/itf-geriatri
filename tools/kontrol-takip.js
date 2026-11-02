@@ -452,27 +452,42 @@ function init(){
  buildGeriatric();
  GROUPS.forEach(group=>addRow(group));
  loadDraft();
- syncScreeningSex();
- renderNote();
+ syncScreeningSex();updateAnswerButtons();
+ renderNote();initScratchAndPlan();
+ $("planNarrative").addEventListener("keydown",addPlanOnEnter);
  document.addEventListener("input",event=>{
-  if(!event.target.closest(".form-paper"))return;
+  if(!event.target.closest(".form-paper")&&event.target.id!=="scratchText")return;
   clearTimeout(saveTimer);
-  renderNote();
+  renderNote();updateScratchStatus();
   saveTimer=setTimeout(()=>saveDraft(),320);
  });
  document.addEventListener("change",event=>{
   if(!event.target.closest(".form-paper"))return;
   if(event.target.id==="sex")syncScreeningSex();
+  updateAnswerButtons();updateScratchStatus();
   renderNote();saveDraft();
  });
  document.getElementById("screeningCards").addEventListener("focusin",event=>{
   const card=event.target.closest("[data-sex]");
   if(card?.dataset.sex&&!val("sex")){
    $("sex").value=card.dataset.sex;
-   syncScreeningSex();saveDraft();renderNote();
+   syncScreeningSex();updateAnswerButtons();saveDraft();renderNote();
   }
  });
  document.addEventListener("click",event=>{
+  const sexChoice=event.target.closest("[data-sex-option]");
+  if(sexChoice){
+   const value=sexChoice.dataset.sexOption;
+   $("sex").value=val("sex")===value?"":value;
+   syncScreeningSex();updateAnswerButtons();renderNote();saveDraft();return;
+  }
+  const answer=event.target.closest("[data-answer-target]");
+  if(answer&&!answer.disabled){
+   const key=answer.dataset.answerTarget,input=$(key);
+   if(!input)return;
+   input.value=input.value===answer.dataset.answerValue?"":answer.dataset.answerValue;
+   updateAnswerButtons();renderNote();saveDraft();return;
+  }
   const add=event.target.closest("[data-add]");
   if(add){const row=addRow(add.dataset.add);row?.querySelector("input,select")?.focus();saveDraft();return}
   const del=event.target.closest("[data-remove]");
