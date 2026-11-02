@@ -90,3 +90,117 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
  .note-content{font:10pt/1.4 Arial,sans-serif;white-space:pre-wrap;overflow:visible;min-height:0}
  .note-content::before{content:"İSTANBUL TIP FAKÜLTESİ — GERİATRİ BİLİM DALI\A ONLINE KONTROL / TAKİP NOTU";display:block;white-space:pre;font:bold 12pt/1.45 Arial;letter-spacing:.015em;margin-bottom:12px;border-bottom:1px solid #bbb;padding-bottom:9px}
 }
+
+
+/* Updated demographics, button-based screening and geriatric assessment. */
+.patient-primary{
+ display:grid;grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(70px,.48fr) minmax(170px,1fr);
+ align-items:end;gap:10px 12px;min-width:0
+}
+.patient-secondary{
+ display:grid;grid-template-columns:minmax(160px,.35fr) minmax(0,1.65fr);
+ gap:12px;align-items:start;margin-top:11px
+}
+.patient-secondary .field textarea{min-height:64px}
+.answer-buttons{display:flex;align-items:stretch;gap:5px;min-width:0;max-width:100%}
+.answer-buttons button{
+ flex:1 1 0;min-width:0;min-height:37px;
+ border:1px solid #afc6d4;border-radius:6px;background:#fff;
+ color:#355c74;padding:6px 8px;font-size:.78rem;font-weight:750;
+ white-space:normal;line-height:1.25
+}
+.answer-buttons button[aria-pressed="true"]{
+ background:#e4f3e9;color:#1d6246;border:1px solid #6aab84;
+ box-shadow:inset 0 0 0 1px #81bea0
+}
+.answer-buttons button:hover:not(:disabled){border-color:#4a8a76;background:#f2faf5}
+.gender-buttons button{min-height:40px}
+#screeningCards.status-grid{grid-template-columns:minmax(0,1fr)}
+#screeningCards .status-card{
+ grid-template-columns:minmax(140px,.65fr) minmax(230px,1fr) minmax(200px,2fr);
+ gap:12px;align-items:center
+}
+#screeningCards .status-card .answer-buttons{width:100%}
+.status-card[data-inactive="true"] .answer-buttons button{background:#f0f2f4;color:#758b96;border-color:#d2dbe0}
+.geriatric-questions{display:grid;gap:9px;margin:13px 0 15px}
+.geriatric-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.geriatric-row[data-columns="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.geriatric-row .geriatric-item{
+ display:grid;grid-template-columns:1fr;align-content:start;min-width:0;
+ border:1px solid #d4e3e9;border-radius:8px;padding:9px 10px;background:#fafeff
+}
+.geriatric-row .geriatric-item>strong{font-size:.81rem;min-height:36px;line-height:1.3}
+.geriatric-row .question-line{
+ display:grid;grid-template-columns:minmax(110px,.85fr) minmax(0,1.13fr);gap:7px;min-width:0
+}
+.geriatric-row .question-line .answer-buttons{gap:4px}
+.geriatric-row .question-line .answer-buttons button{min-height:38px;padding:5px 4px;font-size:.75rem}
+.geriatric-row .question-line input{min-height:38px}
+.geriatric-row .geriatric-measure input,
+.geriatric-row .geriatric-free input{min-height:38px}
+.narrative-field{margin:12px 0}
+.narrative-field textarea{
+ display:block;min-height:135px;width:100%;font-size:.91rem;line-height:1.55;
+ padding:12px 14px;resize:vertical;border-radius:8px
+}
+#labNarrative{min-height:150px}
+#followupNarrative{min-height:180px}
+#planNarrative{min-height:235px;line-height:1.7}
+/* Compact floating post-it for examination notes. */
+.scratch-note{
+ position:fixed;top:135px;right:15px;z-index:140;
+ width:min(284px,calc(100vw - 24px));max-width:100%;
+ border:1px solid #d5bc68;border-radius:5px;
+ background:#fff7ca;color:#534722;
+ box-shadow:0 6px 27px #233c3d30;
+ transform:rotate(-.5deg)
+}
+.scratch-heading{background:#f4e7a8;border-bottom:1px solid #e4cf79}
+.scratch-heading>button{
+ display:flex;align-items:center;gap:6px;padding:9px 10px;width:100%;
+ border:0;background:transparent;color:#655221;
+ text-align:left;font-weight:850;font-size:.86rem
+}
+.scratch-heading button:hover{background:#f9edb6}
+#scratchChevron{margin-left:auto;font-size:1.2rem;line-height:1}
+.scratch-content{padding:9px 10px 10px}
+.scratch-content[hidden]{display:none!important}
+.scratch-hint{display:block;font-size:.72rem;color:#715f37;line-height:1.4;margin-bottom:6px}
+#scratchText{
+ display:block;box-sizing:border-box;width:100%;min-height:125px;max-height:44vh;
+ padding:8px 9px;font:400 .84rem/1.4 "Segoe UI",sans-serif;
+ color:#51411c;border:1px solid #dfcd91;border-radius:4px;
+ background:#fffbdf;resize:vertical
+}
+.scratch-bottom{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:7px}
+#scratchStatus{font-size:.7rem;line-height:1.3;color:#766027;max-width:160px}
+#scratchTransfer{
+ flex-shrink:0;border:1px solid #bcab69;border-radius:5px;padding:5px 7px;
+ background:#fbefbd;color:#665324;font-weight:750;font-size:.7rem
+}
+#scratchTransfer:hover{background:#f5e5a3}
+.scratch-note[data-collapsed="true"]{width:auto}
+@media(max-width:1050px){
+ .patient-primary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .patient-secondary{grid-template-columns:minmax(130px,.5fr) minmax(0,1.5fr)}
+ .geriatric-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .geriatric-row[data-columns="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .scratch-note{top:110px;right:10px;width:min(255px,calc(100vw - 20px))}
+}
+@media(max-width:700px){
+ #screeningCards .status-card{grid-template-columns:minmax(110px,.55fr) minmax(0,1.45fr)}
+ #screeningCards .status-card>input{grid-column:1 / -1}
+ .geriatric-row,.geriatric-row[data-columns="2"]{grid-template-columns:minmax(0,1fr)}
+ .geriatric-row .geriatric-item>strong{min-height:0}
+ .scratch-note{top:68px;right:9px;width:min(255px,calc(100vw - 18px))}
+}
+@media(max-width:470px){
+ .patient-primary{grid-template-columns:minmax(0,1fr)}
+ .patient-secondary{grid-template-columns:minmax(0,1fr)}
+ #screeningCards .status-card{grid-template-columns:minmax(0,1fr)}
+ #screeningCards .status-card>input{grid-column:auto}
+ .geriatric-row .question-line{grid-template-columns:minmax(0,1fr)}
+ .geriatric-row .answer-buttons{max-width:230px}
+ .scratch-note{top:58px}
+}
+@media print{.scratch-note{display:none!important}}
