@@ -1,4 +1,4 @@
-:root{--ink:#243a42;--deep:#244e6e;--green:#285b4d;--light:#f4f8fa;--line:#cbdfe8;--muted:#587081;font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+:root{--ink:#243a42;--deep:#244e6e;--green:#285b4d;--light:#f4f8fa;--line:#cbdfe8;--muted:#587081;font:17px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
 body{margin:0;background:#f1f6f8;color:var(--ink)}
 button,input,textarea,select{font:inherit}
@@ -227,7 +227,7 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
 
 /* Keep patient identity on one compact row at every breakpoint. */
 .patient-primary{
- grid-template-columns:minmax(110px,1fr) minmax(150px,2fr) 60px 140px;
+ grid-template-columns:minmax(120px,1fr) minmax(160px,2fr) 60px 145px 165px;
  gap:10px;overflow-x:auto;padding-bottom:4px
 }
 .patient-primary #age{padding:7px 6px;min-height:34px}
@@ -246,3 +246,7 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
 .geriatric-row .geriatric-measure input{max-width:90px;min-height:34px;padding:6px 8px}
 .geriatric-row .question-line{grid-template-columns:1fr}
 @media(max-width:700px){.geriatric-row{grid-template-columns:1fr}}
+
+/* Date completes the identity row; extra notes use the full second row. */
+.patient-secondary{grid-template-columns:minmax(0,1fr)}
+@media screen{.note-content{font-size:16px}}
