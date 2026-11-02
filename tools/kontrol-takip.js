@@ -23,24 +23,38 @@ const VACCINES=[
  ["rsv","RSV"],
  ["covid","COVID-19"]
 ];
+// Clinical order is row-major. Existing field IDs are preserved for draft restoration.
 const GERIATRIC=[
- ["fall","Düşme"],
- ["fear","Düşme Korkusu"],
- ["orthostasis","Ortostatizm"],
- ["dizziness","Baş Dönmesi"],
- ["appetite","İştah"],
- ["loss","Kilo Kaybı"],
- ["swallow","Yutma Güçlüğü"],
- ["urinary","Üriner İnkontinans"],
- ["fecal","Fekal İnkontinans"],
- ["constipation","Kabızlık"],
- ["sleep","Uyku"],
- ["rbd","REM Uyku Davranış Bozukluğu"],
- ["anhedonia","Anhedoni"],
- ["memory","Unutkanlık"]
+ ["fall","Düşme (son 6 ay içinde)","binary"],
+ ["fear","Düşme Korkusu","binary"],
+ ["cane","Baston Kullanımı","binary"],
+ ["dizziness","Baş Dönmesi","binary"],
+ ["orthostasis","Ortostatizm","binary"],
+ ["homeBP","Evde TA","text"],
+ ["appetite","İştah","appetite"],
+ ["height","Boy (cm)","measure"],
+ ["weight","Kilo (kg)","measure"],
+ ["loss","Kilo Kaybı","binary"],
+ ["swallow","Çiğneme / Yutma Güçlüğü","binary"],
+ ["urinary","Üriner İnkontinans","binary"],
+ ["fecal","Fekal İnkontinans","binary"],
+ ["constipation","Kabızlık","binary"],
+ ["sleep","Uyku Sorunu","binary"],
+ ["rbd","REM Uyku Davranış Bozukluğu","binary"],
+ ["memory","Unutkanlık (yeni başlangıç / son 6 ayda artış)","binary"],
+ ["anhedonia","Anhedoni","binary"],
+ ["adl","GYA (/6)","measure"],
+ ["iadl","EGYA (/8)","measure"],
+ ["vision","Görme Sorunu","problem"],
+ ["hearing","İşitme Sorunu","problem"]
+];
+const GERIATRIC_GROUPS=[
+ ["fall","fear","cane"],["dizziness","orthostasis","homeBP"],
+ ["appetite","height","weight"],["loss","swallow","urinary"],
+ ["fecal","constipation","sleep"],["rbd","memory","anhedonia"],
+ ["adl","iadl"],["vision","hearing"]
 ];
 const STATUS_OPTIONS=["","Var","Yok","Yapıldı","Yapılmadı","Önerildi","Reddetti","Bilinmiyor"];
-const QUESTION_OPTIONS=["","Var","Yok","Bilinmiyor"];
 const REPEATS={
  diseases:{container:"diseasesRows",columns:[["name","Hastalık / Tanı","text"],["date","Tanı Tarihi / Yıl","text"]]},
  surgeries:{container:"surgeriesRows",columns:[["name","Ameliyat","text"],["date","Tarih / Yıl","text"]]},
@@ -49,7 +63,7 @@ const REPEATS={
  labs:{container:"labsRows",columns:[["test","Parametre / Tetkik","text"],["value","Sonuç / Değer","text"],["detail","Tarih / Ek Açıklama","text"]]},
  plan:{container:"planRows",columns:[["type","Plan Türü","select",["","Öneri","Tetkik","Yönlendirme","İlaç Düzenlemesi","Kontrol","Diğer"]],["note","Plan Maddesi / Detay","text"]]}
 };
-const GROUPS=Object.keys(REPEATS);
+const GROUPS=["diseases","surgeries","medications"];
 let changing=false,saveTimer=0,toastTimer=0;
 function options(values,chosen){
  return values.map((v,i)=>'<option value="'+esc(v)+'"'+(String(chosen??"")===v?' selected':'')+'>'+
@@ -93,19 +107,53 @@ function buildStatusItems(container,items,prefix){
   '<div class="status-card" data-sex="'+(sex||"")+'" data-card="'+prefix+'_'+id+'">'+
   '<strong>'+esc(label)+'</strong>'+
   '<select id="'+prefix+'_'+id+'_status" data-save aria-label="'+esc(label)+' durumu">'+
-   options(prefix==="ger"?QUESTION_OPTIONS:STATUS_OPTIONS,"")+'</select>'+
+   options(STATUS_OPTIONS,"")+'</select>'+
   '<input id="'+prefix+'_'+id+'_note" data-save type="text" autocomplete="off"'+
   ' placeholder="'+(prefix==="ger"?"Ek bilgi / süre / sıklık":"Tarih, sonuç veya ek not")+
   '" aria-label="'+esc(label)+' ayrıntısı"></div>').join("");
 }
+function answerButtons(key,label,opts){
+ return '<div class="answer-buttons" role="group" aria-label="'+esc(label)+'">'+
+  '<input id="'+key+'" type="hidden" data-save value="">'+
+  opts.map(choice=>'<button type="button" data-answer-target="'+key+'" data-answer-value="'+esc(choice)+'"'+
+   ' aria-pressed="false">'+esc(choice)+'</button>').join("")+
+  '</div>';
+}
+function updateAnswerButtons(){
+ document.querySelectorAll("[data-answer-target]").forEach(button=>{
+  const selected=val(button.dataset.answerTarget)===button.dataset.answerValue;
+  button.setAttribute("aria-pressed",String(selected));
+ });
+ document.querySelectorAll("[data-sex-option]").forEach(button=>{
+  button.setAttribute("aria-pressed",String(val("sex")===button.dataset.sexOption));
+ });
+}
 function buildGeriatric(){
  const root=$("geriatricCards");
- root.innerHTML=GERIATRIC.map(([id,label])=>
- '<div class="geriatric-item"><strong>'+esc(label)+'</strong><div class="question-line">'+
- '<select id="ger_'+id+'_status" data-save aria-label="'+esc(label)+' durumu">'+options(QUESTION_OPTIONS,"")+'</select>'+
- '<input id="ger_'+id+'_note" data-save autocomplete="off" type="text" placeholder="Açıklama" aria-label="'+esc(label)+' ayrıntısı">'+
- '</div></div>').join("");
+ const byKey=Object.fromEntries(GERIATRIC.map(item=>[item[0],item]));
+ const card=(id)=>{
+  const [key,label,kind]=byKey[id];
+  if(kind==="measure"){
+   const bounds={height:'min="0" step="0.1"',weight:'min="0" step="0.1"',
+    adl:'min="0" max="6" step="1"',iadl:'min="0" max="8" step="1"'};
+   return '<label class="geriatric-item geriatric-measure"><strong>'+esc(label)+'</strong>'+
+    '<input type="number" id="'+key+'" data-save '+bounds[key]+' placeholder="'+
+    (key==="height"?"cm":key==="weight"?"kg":key==="adl"?"0–6":"0–8")+'"></label>';
+  }
+  if(kind==="text"){
+   return '<label class="geriatric-item geriatric-free"><strong>'+esc(label)+'</strong>'+
+    '<input type="text" data-save id="ger_'+key+'_note" autocomplete="off" placeholder="Örn. 130/80 mmHg"></label>';
+  }
+  const choices=kind==="appetite"?["İyi","Orta","Kötü"]:
+   kind==="problem"?["Yok","Var"]:["Evet","Hayır"];
+  return '<div class="geriatric-item" data-question="'+key+'"><strong>'+esc(label)+'</strong>'+
+   '<div class="question-line">'+answerButtons("ger_"+key+"_status",label,choices)+
+   '<input id="ger_'+key+'_note" data-save autocomplete="off" type="text" placeholder="Açıklama" aria-label="'+esc(label)+' açıklaması"></div></div>';
+ };
+ root.innerHTML=GERIATRIC_GROUPS.map(keys=>
+  '<div class="geriatric-row" data-columns="'+keys.length+'">'+keys.map(card).join("")+'</div>').join("");
 }
+
 function syncScreeningSex(){
  const sex=val("sex");
  document.querySelectorAll("#screeningCards [data-sex]").forEach(card=>{
