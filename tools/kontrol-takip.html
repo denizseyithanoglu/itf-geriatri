@@ -52,10 +52,8 @@
    <label class="field"><span>Kontrol Tarihi</span><input type="date" id="visitDate" data-save></label>
    <label class="field"><span>Ek Notlar</span><textarea id="patientExtra" data-save rows="2" placeholder="Hasta bilgileri ve anamnez için kısa ek açıklama…"></textarea></label>
   </div>
-  <h3>Hastalıklar</h3><div class="repeat-list" id="diseasesRows" data-repeat="diseases"></div>
-  <button type="button" class="add-btn no-print" data-add="diseases">+ Hastalık Ekle</button>
-  <h3>Ameliyatlar</h3><div class="repeat-list" id="surgeriesRows" data-repeat="surgeries"></div>
-  <button type="button" class="add-btn no-print" data-add="surgeries">+ Ameliyat Ekle</button>
+  <label class="field narrative-field"><span>Hastalıklar</span><textarea id="diseasesNarrative" data-save rows="4" placeholder="Tanı / işlem, tarih ve açıklamalar…"></textarea></label>
+  <label class="field narrative-field"><span>Ameliyatlar</span><textarea id="surgeriesNarrative" data-save rows="4" placeholder="Tanı / işlem, tarih ve açıklamalar…"></textarea></label>
   <h3>Alışkanlıklar</h3>
   <div class="grid two">
    <label class="field"><span>Sigara</span><select id="smoking" data-save><option value="">Seçilmedi</option><option>Hiç kullanmamış</option><option>Aktif kullanıyor</option><option>Bırakmış</option></select></label>
@@ -63,8 +61,7 @@
    <label class="field"><span>Alkol</span><select id="alcohol" data-save><option value="">Seçilmedi</option><option>Yok</option><option>Var</option><option>Bırakmış</option></select></label>
    <label class="field"><span>Alkol Ek Bilgi</span><input id="alcoholNote" data-save placeholder="Miktar / sıklık / bırakma tarihi"></label>
   </div>
-  <h3>İlaçlar</h3><div class="repeat-list" id="medicationsRows" data-repeat="medications"></div>
-  <button type="button" class="add-btn no-print" data-add="medications">+ İlaç Ekle</button>
+  <label class="field narrative-field"><span>İlaçlar</span><textarea id="medicationsNarrative" data-save rows="4" placeholder="1. İlaç adı — doz / kullanım sıklığı"></textarea></label>
  </section>
  <section class="form-section">
   <div class="section-head"><span class="section-num">02</span><h2>Osteoporoz, Dişler, Kırık ve Tedaviler</h2></div>
@@ -74,6 +71,7 @@
    <label class="field"><span>Kırık Öyküsü</span><textarea id="fractureHistory" data-save rows="2" placeholder="Var/Yok, tarih, bölge, travma mekanizması…"></textarea></label>
    <label class="field"><span>Tedaviler</span><textarea id="treatments" data-save rows="2" placeholder="Osteoporoz ve diğer mevcut tedaviler; başlangıç ve yanıt…"></textarea></label>
   </div>
+  <label class="field other-note"><span>Diğer Notlar</span><textarea id="osteoporosisOther" data-save rows="3" placeholder="Osteoporoz ile ilgili diğer notlar…"></textarea></label>
  </section>
  <section class="form-section">
   <div class="section-head"><span class="section-num">03</span><h2>Taramalar</h2></div>
@@ -85,7 +83,7 @@
   <div class="section-head"><span class="section-num">04</span><h2>Aşılamalar</h2></div>
   <p class="section-hint">Tarihi, öneriyi veya hastanın kabul / ret bilgisini açıklama alanına yazabilirsiniz.</p>
   <div id="vaccineCards" class="status-grid"></div>
-  <label class="field other-note"><span>Diğer Aşılar / Ek Not</span><textarea id="vaccinesOther" data-save rows="2" placeholder="Diğer aşılar, aşı durumu ve ek notlar"></textarea></label>
+  <label class="field other-note"><span>Diğer Aşılar / Ek Not</span><textarea id="vaccinesOther" data-save rows="2" placeholder="COVID-19 ve diğer aşılar, aşı durumu ve ek notlar"></textarea></label>
  </section>
  <section class="form-section">
   <div class="section-head"><span class="section-num">05</span><h2>Aktif Yakınma ve Geriatrik Sorgu</h2></div>
@@ -94,16 +92,16 @@
   <label class="field"><span>Geriatrik Sorgu – Ek Not</span><textarea id="geriatricOther" data-save rows="2" placeholder="Diğer geriatrik bulgular"></textarea></label>
  </section>
  <section class="form-section">
-  <div class="section-head"><span class="section-num">06</span><h2>LABORATUVAR ve TAKİP</h2></div>
+  <div class="section-head"><span class="section-num">06</span><h2>LABORATUVAR</h2></div>
   <label class="field narrative-field"><span>Laboratuvar Sonuçları ve Önemli Bulgular</span>
    <textarea id="labNarrative" data-save rows="6" placeholder="Örn. 10.2026: HGB 11,2 g/dL; kreatinin 1,1 mg/dL. Önceki değerlere göre değişim…"></textarea>
   </label>
+ </section>
+ <section class="form-section" id="planSection">
+  <div class="section-head"><span class="section-num">07</span><h2>TAKİP/PLAN</h2></div>
   <label class="field narrative-field"><span>TAKİP — Önceki Önerilerin Değerlendirilmesi</span>
    <textarea id="followupNarrative" data-save rows="7" placeholder="Önceki öneriler, yapılıp yapılmadığı, sonuçlar, başvurular, ilaç değişiklikleri…"></textarea>
   </label>
- </section>
- <section class="form-section" id="planSection">
-  <div class="section-head"><span class="section-num">07</span><h2>PLAN</h2></div>
   <p class="section-hint">İlk maddeyi yazın; Enter'a bastığınızda otomatik olarak sonraki numaralı madde açılır.</p>
   <label class="field narrative-field"><span>Plan ve Kontrol Önerileri</span>
    <textarea id="planNarrative" data-save rows="9" placeholder="1. Laboratuvar tetkikleri…"></textarea>

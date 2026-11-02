@@ -20,8 +20,7 @@ const VACCINES=[
  ["tetanus","Tetanoz"],
  ["influenza","İnfluenza"],
  ["zoster","Herpes Zoster"],
- ["rsv","RSV"],
- ["covid","COVID-19"]
+ ["rsv","RSV"]
 ];
 // Clinical order is row-major. Existing field IDs are preserved for draft restoration.
 const GERIATRIC=[
@@ -49,10 +48,9 @@ const GERIATRIC=[
  ["hearing","İşitme Sorunu","problem"]
 ];
 const GERIATRIC_GROUPS=[
- ["fall","fear","cane"],["dizziness","orthostasis","homeBP"],
- ["appetite","height","weight"],["loss","swallow","urinary"],
- ["fecal","constipation","sleep"],["rbd","memory","anhedonia"],
- ["adl","iadl"],["vision","hearing"]
+ ["fall","fear","cane","dizziness","orthostasis","homeBP","vision","hearing"],
+ ["appetite","height","weight","loss","swallow","adl","iadl"],
+ ["urinary","fecal","constipation","sleep","rbd","memory","anhedonia"]
 ];
 const STATUS_OPTIONS=["","Var","Yok","Yapıldı","Yapılmadı","Önerildi","Reddetti","Bilinmiyor"];
 const REPEATS={
@@ -63,7 +61,7 @@ const REPEATS={
  labs:{container:"labsRows",columns:[["test","Parametre / Tetkik","text"],["value","Sonuç / Değer","text"],["detail","Tarih / Ek Açıklama","text"]]},
  plan:{container:"planRows",columns:[["type","Plan Türü","select",["","Öneri","Tetkik","Yönlendirme","İlaç Düzenlemesi","Kontrol","Diğer"]],["note","Plan Maddesi / Detay","text"]]}
 };
-const GROUPS=["diseases","surgeries","medications"];
+const GROUPS=[];
 let changing=false,saveTimer=0,toastTimer=0;
 function options(values,chosen){
  return values.map((v,i)=>'<option value="'+esc(v)+'"'+(String(chosen??"")===v?' selected':'')+'>'+
@@ -106,10 +104,7 @@ function buildStatusItems(container,items,prefix){
  root.innerHTML=items.map(([id,label,sex])=>
   '<div class="status-card" data-sex="'+(sex||"")+'" data-card="'+prefix+'_'+id+'">'+
   '<strong>'+esc(label)+'</strong>'+
-  (prefix==="screen"
-   ?answerButtons(prefix+"_"+id+"_status",label,["Yok","Var","Reddetti"])
-   :'<select id="'+prefix+'_'+id+'_status" data-save aria-label="'+esc(label)+' durumu">'+
-     options(STATUS_OPTIONS,"")+'</select>')+
+  answerButtons(prefix+"_"+id+"_status",label,["Yok","Var","Reddetti"])+
   '<input id="'+prefix+'_'+id+'_note" data-save type="text" autocomplete="off"'+
   ' placeholder="Tarih, sonuç veya ek not" aria-label="'+esc(label)+' ayrıntısı"></div>').join("");
 }
@@ -152,7 +147,7 @@ function buildGeriatric(){
    '<input id="ger_'+key+'_note" data-save autocomplete="off" type="text" placeholder="Açıklama" aria-label="'+esc(label)+' açıklaması"></div></div>';
  };
  root.innerHTML=GERIATRIC_GROUPS.map(keys=>
-  '<div class="geriatric-row" data-columns="'+keys.length+'">'+keys.map(card).join("")+'</div>').join("");
+  '<div class="geriatric-column">'+keys.map(card).join("")+'</div>').join("");
 }
 
 function syncScreeningSex(){
@@ -209,6 +204,25 @@ function appendLegacyNotes(base,items){
 }
 function legacyDraftFields(draft){
  const fields={...(draft.fields||{})},groups=draft.groups||{};
+
+ for(const group of ["diseases","surgeries","medications"]){
+  const target=group+"Narrative";
+  if(!(target in fields)){
+   const entries=(Array.isArray(groups[group])?groups[group]:[]).map(x=>[x.name,x.date,x.dose].filter(populated).join(" — ")).filter(Boolean);
+   fields[target]=group==="medications"?numberedPlan(entries):entries.join("\n");
+  }
+ }
+ if(fields.vax_covid_status||fields.vax_covid_note){
+  fields.vaccinesOther=appendLegacyNotes(fields.vaccinesOther,["COVID-19: "+[fields.vax_covid_status,fields.vax_covid_note].filter(populated).join(" — ")]);
+ }
+ for(const [id] of VACCINES){
+  const key="vax_"+id+"_status",note="vax_"+id+"_note";
+  if(fields[key]&&!["Yok","Var","Reddetti"].includes(fields[key])){
+   fields[note]=appendLegacyNotes(fields[note],["Önceki durum: "+fields[key]]);
+   fields[key]="";
+  }
+ }
+
  if(!("patientExtra" in fields)){
   fields.patientExtra=appendLegacyNotes("",[
    fields.literacy?"Önceki eğitim: "+fields.literacy:"",
@@ -262,7 +276,7 @@ function numberedPlan(lines){
 function addPlanOnEnter(event){
  if(event.key!=="Enter"||event.shiftKey||event.ctrlKey||event.metaKey||event.isComposing)return;
  const area=event.target;
- if(area?.id!=="planNarrative")return;
+ if(!["planNarrative","medicationsNarrative"].includes(area?.id))return;
  event.preventDefault();
  const before=area.value.slice(0,area.selectionStart),after=area.value.slice(area.selectionEnd);
  const previous=planItems(before).length;
@@ -373,20 +387,19 @@ function generateNote(){
  if(intro.length)push(intro.join(" | "));
  if(demographic.length)push("Yaş/Cinsiyet: "+demographic.join(" · "));
  if(val("patientExtra"))push("Ek Notlar: "+val("patientExtra"));
- const diagnoses=records("diseases").map(x=>x.name+(x.date?" ("+x.date+")":"")).filter(Boolean);
- const surgeries=records("surgeries").map(x=>x.name+(x.date?" ("+x.date+")":"")).filter(Boolean);
- list("HASTALIKLAR",diagnoses);
- list("AMELİYATLAR",surgeries);
+ if(val("diseasesNarrative")){push("HASTALIKLAR:");push(val("diseasesNarrative"))}
+ if(val("surgeriesNarrative")){push("AMELİYATLAR:");push(val("surgeriesNarrative"))}
  const habits=[];
  if(val("smoking")||val("smokingNote"))habits.push("Sigara: "+statusDetailFromFields("smoking","smokingNote"));
  if(val("alcohol")||val("alcoholNote"))habits.push("Alkol: "+statusDetailFromFields("alcohol","alcoholNote"));
  if(habits.length)push("ALIŞKANLIKLAR: "+habits.join("; "));
- list("İLAÇLAR",records("medications").map(x=>textPair(x.name,x.dose)).filter(Boolean));
+ list("İLAÇLAR",planItems(val("medicationsNarrative")));
  const background=[
   ["Osteoporoz sorgusu",val("osteoporosis")],
   ["Dişler",textPair(val("teeth"),val("teethNote"))],
   ["Kırık öyküsü",val("fractureHistory")],
-  ["Tedaviler",val("treatments")]
+  ["Tedaviler",val("treatments")],
+  ["Diğer notlar",val("osteoporosisOther")]
  ].filter(([,v])=>populated(v));
  if(background.length){push("OSTEOPOROZ, KIRIK, DİŞLER VE TEDAVİLER:");background.forEach(([k,v])=>push(k+": "+v))}
  const screenings=SCREENINGS.map(([id,name,sex])=>[name,sex&&val("sex")&&sex!==val("sex")?"":statusDetail("screen",id)]).filter(([,v])=>v);
@@ -407,7 +420,8 @@ function generateNote(){
  if(val("geriatricOther"))geriatric.push(["Ek Not",val("geriatricOther")]);
  if(geriatric.length){push("GERİATRİK SORGU:");geriatric.forEach(([n,v])=>push(n+": "+v))}
  if(val("labNarrative")){push("LABORATUVAR:");push(val("labNarrative"))}
- if(val("followupNarrative")){push("TAKİP — ÖNCEKİ ÖNERİLER:");push(val("followupNarrative"))}
+ if(val("followupNarrative")||val("planNarrative"))push("\nTAKİP/PLAN:");
+ if(val("followupNarrative")){push("Takip — Önceki Önerilerin Değerlendirilmesi:");push(val("followupNarrative"))}
  const plan=planItems(val("planNarrative"));
  if(plan.length){push("PLAN:");push(plan.map((line,i)=>(i+1)+". "+line).join("\n"))}
  return lines.length?lines.join("\n"):"Henüz veri girilmedi. Formu doldurdukça klinik not burada oluşacaktır.";
@@ -454,7 +468,7 @@ function init(){
  loadDraft();
  syncScreeningSex();updateAnswerButtons();
  renderNote();initScratchAndPlan();
- $("planNarrative").addEventListener("keydown",addPlanOnEnter);
+ ["planNarrative","medicationsNarrative"].forEach(id=>$(id).addEventListener("keydown",addPlanOnEnter));
  document.addEventListener("input",event=>{
   if(!event.target.closest(".form-paper")&&event.target.id!=="scratchText")return;
   clearTimeout(saveTimer);
