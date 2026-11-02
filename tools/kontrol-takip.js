@@ -460,6 +460,19 @@ function requestReset(){
  try{sessionStorage.removeItem(DRAFT_KEY)}catch(e){}
  window.location.reload();
 }
+function resetSection(section){
+ if(!section)return;
+ const title=section.querySelector("h2")?.textContent||"Bu bölüm";
+ if(!window.confirm(title+" bölümündeki bilgiler sıfırlanacak. Emin misiniz?"))return;
+ clearTimeout(saveTimer);
+ section.querySelectorAll("[data-save]").forEach(field=>{
+  if(field.type==="checkbox"||field.type==="radio")field.checked=false;
+  else field.value="";
+ });
+ syncScreeningSex();updateAnswerButtons();updateScratchStatus();
+ renderNote();saveDraft();
+ notify(title+" bölümü sıfırlandı.");
+}
 function init(){
  buildStatusItems("screeningCards",SCREENINGS,"screen");
  buildStatusItems("vaccineCards",VACCINES,"vax");
@@ -489,6 +502,8 @@ function init(){
   }
  });
  document.addEventListener("click",event=>{
+  const reset=event.target.closest("[data-reset-section]");
+  if(reset){resetSection(reset.closest(".form-section"));return}
   const sexChoice=event.target.closest("[data-sex-option]");
   if(sexChoice){
    const value=sexChoice.dataset.sexOption;

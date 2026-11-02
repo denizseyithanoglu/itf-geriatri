@@ -218,3 +218,9 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
  #vaccineCards .status-card{grid-template-columns:1fr}
  #vaccineCards .status-card>input{grid-column:auto}
 }
+
+/* Bottom actions and section-local reset controls. */
+.shell>.toolbar{margin:18px 0 0}
+.section-head{flex-wrap:wrap}
+.section-head h2{flex:1 1 180px}
+.section-reset{margin-left:auto;flex:0 0 auto;font-size:.75rem;min-height:33px;padding:6px 10px}
