@@ -1,0 +1,92 @@
+:root{--ink:#243a42;--deep:#244e6e;--green:#285b4d;--light:#f4f8fa;--line:#cbdfe8;--muted:#587081;font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#f1f6f8;color:var(--ink)}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.6}
+a{color:var(--deep)}
+:focus-visible{outline:3px solid #cc933f!important;outline-offset:2px}
+.skip{position:absolute;left:8px;top:-100px;padding:10px;background:white;z-index:100}.skip:focus{top:8px}
+.masthead{background:#214f6b;color:#fff;border-bottom:4px solid #8dc6ab}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px clamp(15px,2.7vw,44px);background:#153c58}
+.topbar a{color:#f3f9ff;text-decoration:none;font-size:.83rem;font-weight:650}
+.topbar a:hover{text-decoration:underline}
+.brand{display:flex;align-items:center;gap:15px;padding:17px clamp(15px,2.7vw,44px)}
+.brand img{border-radius:50%;background:#fff;padding:4px;object-fit:contain;flex:0 0 64px}
+.brand h1{font-size:clamp(1.35rem,2.4vw,2rem);margin:0;font-weight:800;line-height:1.25}
+.brand p{margin:3px 0 0;font-size:.91rem;opacity:.9}
+.shell{width:min(1630px,100%);margin:0 auto;padding:17px clamp(12px,1.6vw,25px) 70px}
+.notice{padding:12px 15px;border-left:4px solid #bf973c;border-radius:7px;background:#fff5de;color:#5e4e23;font-size:.85rem;margin:0 0 13px}
+.toolbar{display:flex;gap:18px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:13px 16px;margin-bottom:13px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 9px #163e5710}
+.toolbar-title{display:flex;flex-direction:column;gap:2px;color:var(--deep)}.toolbar-title strong{font-size:1.02rem}.toolbar-title small{color:var(--muted);font-size:.76rem}
+.toolbar-actions{display:flex;flex-wrap:wrap;gap:7px}
+.btn{border:1px solid #9cb7c7;background:white;color:var(--deep);padding:9px 12px;min-height:39px;border-radius:7px;font-size:.81rem;font-weight:740}
+.btn:hover,.add-btn:hover{filter:brightness(.96)}
+.btn.primary{background:var(--green);color:white;border-color:var(--green)}
+.btn.danger{color:#9c3b34;border-color:#dcaca6;background:#fff6f4}
+.form-paper{display:grid;gap:14px}
+.form-section{background:#fff;border:1px solid var(--line);border-radius:11px;padding:17px 19px 18px;box-shadow:0 2px 9px #163e5711;min-width:0}
+.section-head{display:flex;align-items:center;gap:11px;border-bottom:1px solid #d9e7ed;padding:0 0 11px;margin-bottom:15px}
+.section-head h2{margin:0;color:var(--deep);font-size:1.14rem;line-height:1.3}
+.section-num{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:7px;color:white;background:#2e607f;font-weight:850;font-size:.9rem}
+h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
+.grid{display:grid;gap:10px 12px;min-width:0}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0;font-weight:600;color:#33566c;font-size:.81rem}
+.field>span{display:block}.field small{font-weight:400;color:#79909b}
+.field input,.field select,.field textarea,.repeat-row input,.repeat-row select,.status-card input,.status-card select,.geriatric-item input,.geriatric-item select{
+ width:100%;min-width:0;max-width:100%;padding:9px 10px;border:1px solid #b8ceda;border-radius:6px;background:#fff;color:#253c49;min-height:39px;font-size:.86rem;font-weight:450
+}
+.field textarea{resize:vertical;min-height:72px}
+.field input:focus,.field select:focus,.field textarea:focus,.repeat-row input:focus,.status-card input:focus{border-color:#4c8baf}
+.field textarea::placeholder,.field input::placeholder,.repeat-row input::placeholder,.status-card input::placeholder,.geriatric-item input::placeholder{color:#8c9da8;font-weight:400}
+.stack{display:grid;gap:7px}
+.repeat-list{display:grid;gap:7px}
+.repeat-row{display:grid;grid-template-columns:35px minmax(0,1fr) minmax(110px,.7fr) auto;align-items:end;gap:8px;border:1px solid #d6e4ea;border-radius:8px;padding:9px;background:#f9fcfd;min-width:0}
+.repeat-row[data-group="medications"]{grid-template-columns:35px minmax(0,1fr) minmax(0,1fr) auto}
+.repeat-row[data-group="followup"]{grid-template-columns:35px minmax(0,1.25fr) minmax(120px,.53fr) minmax(0,1.25fr) auto}
+.repeat-row[data-group="labs"]{grid-template-columns:35px minmax(0,1fr) minmax(0,.7fr) minmax(0,1.5fr) auto}
+.repeat-row[data-group="plan"]{grid-template-columns:35px minmax(120px,.52fr) minmax(0,2fr) auto}
+.repeat-num{font-size:.85rem;font-weight:800;color:#42657b;text-align:center;align-self:center}
+.repeat-cell{display:grid;gap:4px;min-width:0}
+.repeat-cell>span{font-size:.74rem;color:#597584;font-weight:650}
+.remove-btn{min-height:35px;border:1px solid #dab9b4;border-radius:6px;color:#9b4a45;background:#fff9f8;padding:6px 11px;font-size:.77rem;font-weight:730}
+.add-btn{border:1px dashed #85b2a0;background:#f0f8f3;color:#285b4d;padding:8px 13px;border-radius:7px;margin:9px 0 4px;font-size:.81rem;font-weight:800;min-height:37px}
+.section-hint{margin:-4px 0 13px;color:var(--muted);font-size:.83rem}
+.status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.status-card{display:grid;grid-template-columns:minmax(0,.55fr) minmax(110px,.7fr) minmax(0,1.6fr);gap:8px;align-items:center;border:1px solid #d4e3e9;border-radius:8px;padding:9px 11px;background:#fafeff;min-width:0}
+.status-card strong{color:#315d78;font-size:.85rem;line-height:1.3}
+.status-card input{min-height:38px}
+.status-card select{min-height:38px}
+.status-card[data-inactive="true"]{background:#f1f3f5;border-color:#d7dfe5}
+.status-card[data-inactive="true"] strong{color:#788a97}
+.status-card[data-inactive="true"] input,.status-card[data-inactive="true"] select{background:#edf1f3;color:#6e8491}
+.status-card:not([data-inactive="true"]):focus-within{border-color:#6ba3be}
+.other-note{margin-top:13px}
+.geriatric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:13px 0 15px}
+.geriatric-item{display:grid;gap:5px;border:1px solid #d4e3e9;border-radius:8px;padding:9px;background:#fafeff;min-width:0}
+.geriatric-item>strong{font-size:.85rem;color:#315d78}
+.geriatric-item .question-line{display:grid;grid-template-columns:minmax(90px,.73fr) minmax(0,1.4fr);gap:7px}
+.geriatric-item .question-line input,.geriatric-item .question-line select{min-height:38px}
+.measurements{background:#eef6f8;border:1px solid #d3e3e9;border-radius:9px;padding:12px;margin-bottom:12px}
+.note-section{background:white;border:1px solid #bdcfda;border-radius:11px;padding:18px 20px;margin-top:20px}
+.note-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid #dce8ed;padding-bottom:12px;margin-bottom:14px}
+.note-heading h2{margin:0;color:var(--deep);font-size:1.13rem}
+.note-heading p{margin:5px 0 0;font-size:.81rem;color:var(--muted)}
+.note-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.note-content{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.55 "Segoe UI",Arial,sans-serif;color:#20323c;min-height:150px}
+.toast{position:fixed;bottom:15px;right:15px;max-width:min(400px,calc(100vw - 30px));padding:12px 17px;border-radius:8px;background:#225941;color:white;box-shadow:0 8px 28px #153c582b;z-index:50;font-weight:700;font-size:.84rem}
+.toast[data-error="true"]{background:#9b4537}
+@media(max-width:1200px){.status-grid{grid-template-columns:1fr}.geriatric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:850px){.grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}.repeat-row[data-group="followup"]{grid-template-columns:28px minmax(0,1fr) minmax(0,1fr) auto}.repeat-row[data-group="followup"] .repeat-cell:nth-of-type(3){grid-column:2/4}.repeat-row[data-group="labs"]{grid-template-columns:28px minmax(0,1fr) minmax(0,1fr) auto}.repeat-row[data-group="labs"] .repeat-cell:nth-of-type(3){grid-column:2/4}}
+@media(max-width:600px){.shell{padding:10px 9px 40px}.brand{padding:13px}.brand img{height:52px;width:52px;flex-basis:52px}.topbar a{font-size:.75rem}.toolbar{padding:11px}.toolbar-actions{width:100%}.toolbar-actions .btn{flex:1 1 42%}.form-section{padding:14px 12px}.grid.two,.grid.three,.grid.four,.geriatric-grid{grid-template-columns:1fr}.status-card{grid-template-columns:minmax(0,1fr) minmax(110px,1fr)}.status-card>input{grid-column:1/-1}.repeat-row,.repeat-row[data-group="medications"],.repeat-row[data-group="followup"],.repeat-row[data-group="labs"],.repeat-row[data-group="plan"]{grid-template-columns:27px minmax(0,1fr) auto}.repeat-row .repeat-cell{grid-column:2}.repeat-row .repeat-num{grid-column:1;grid-row:1/-1}.repeat-row .remove-btn{grid-column:3;grid-row:1;align-self:center}.repeat-row[data-group="followup"] .repeat-cell:nth-of-type(3),.repeat-row[data-group="labs"] .repeat-cell:nth-of-type(3){grid-column:2}.note-section{padding:12px}.geriatric-item .question-line{grid-template-columns:minmax(108px,.7fr) minmax(0,1fr)}}
+@media print{
+ @page{size:A4;margin:14mm 13mm}
+ body{background:white;color:black;font:10pt/1.35 Arial,sans-serif}
+ .no-print,.masthead,.toolbar,.form-paper,.notice,.note-heading,.toast{display:none!important}
+ .shell{max-width:none;padding:0;margin:0}
+ .note-section{border:0;padding:0;margin:0}
+ .note-content{font:10pt/1.4 Arial,sans-serif;white-space:pre-wrap;overflow:visible;min-height:0}
+ .note-content::before{content:"İSTANBUL TIP FAKÜLTESİ — GERİATRİ BİLİM DALI\A ONLINE KONTROL / TAKİP NOTU";display:block;white-space:pre;font:bold 12pt/1.45 Arial;letter-spacing:.015em;margin-bottom:12px;border-bottom:1px solid #bbb;padding-bottom:9px}
+}
