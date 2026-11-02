@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Online Kontrol / Takip Formu | İTF Geriatri</title>
+<meta name="description" content="İTF Geriatri tek sayfalık kontrol ve takip muayene formu; klinik not, geçici taslak ve yazdırma.">
+<link rel="icon" type="image/webp" href="../assets/itf-geriatri-logo.webp">
+<link rel="stylesheet" href="kontrol-takip.css">
+<script defer src="kontrol-takip.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Forma geç</a>
+<header class="masthead no-print">
+ <div class="topbar"><a href="../index.html">← İTF Geriatri Ana Sayfa</a><a href="ilk-muayene.html">Online İlk Muayene Formu</a></div>
+ <div class="brand"><img src="../assets/itf-geriatri-logo.webp" alt="İTF Geriatri logosu" width="64" height="64"><div><h1>Online Kontrol / Takip Formu</h1><p>İstanbul Tıp Fakültesi · Geriatri Bilim Dalı</p></div></div>
+</header>
+<main id="main" class="shell">
+ <div class="notice no-print"><b>Geliştirme sürümü — veri güvenliği:</b> Bu form henüz kurumsal onaylı bir hasta kayıt sistemi değildir. Taslak yalnızca aynı tarayıcı sekmesinde geçici saklanır; veriler sunucuya gönderilmez. Kurumsal onay olmadan gerçek hastaların kimlik veya sağlık bilgilerini girmeyiniz.</div>
+ <div class="toolbar no-print" aria-label="Form işlemleri">
+  <div class="toolbar-title"><strong>Tek Sayfalık Kontrol Notu</strong><small id="saveStatus" role="status" aria-live="polite">Henüz kaydedilmedi</small></div>
+  <div class="toolbar-actions">
+   <button type="button" class="btn light" id="saveDraft">Taslağı Kaydet</button>
+   <button type="button" class="btn light" id="showNote">Klinik Notu Oluştur</button>
+   <button type="button" class="btn primary" id="copyNote">Notu Kopyala</button>
+   <button type="button" class="btn light" id="printNote">Yazdır / PDF</button>
+   <button type="button" class="btn danger" id="resetForm">Tümünü Sıfırla</button>
+  </div>
+ </div>
+ <div class="form-paper" id="formPaper">
+ <section class="form-section">
+  <div class="section-head"><span class="section-num">01</span><h2>Hasta Bilgileri ve Kısa Özgeçmiş</h2></div>
+  <div class="grid three">
+   <label class="field"><span>Hasta Adı Soyadı <small>(isteğe bağlı)</small></span><input id="patientName" data-save autocomplete="off" placeholder="Ad Soyad"></label>
+   <label class="field"><span>Kontrol Tarihi</span><input type="date" id="visitDate" data-save></label>
+   <label class="field"><span>Yaş</span><input id="age" data-save type="number" min="0" max="130" step="1" placeholder="Yaş"></label>
+   <label class="field"><span>Cinsiyet</span><select id="sex" data-save><option value="">Seçilmedi</option><option>Kadın</option><option>Erkek</option></select></label>
+   <label class="field"><span>Okuryazarlık / Eğitim</span><select id="literacy" data-save><option value="">Seçilmedi</option><option>Okuryazar değil</option><option>Okuryazar</option><option>İlkokul</option><option>Ortaokul</option><option>Lise</option><option>Üniversite</option><option>Diğer</option></select></label>
+   <label class="field"><span>Kimle Yaşıyor?</span><input id="household" data-save placeholder="Yalnız, eşiyle, çocuklarıyla…"></label>
+  </div>
+  <h3>Hastalıklar</h3><div class="repeat-list" id="diseasesRows" data-repeat="diseases"></div>
+  <button type="button" class="add-btn no-print" data-add="diseases">+ Hastalık Ekle</button>
+  <h3>Ameliyatlar</h3><div class="repeat-list" id="surgeriesRows" data-repeat="surgeries"></div>
+  <button type="button" class="add-btn no-print" data-add="surgeries">+ Ameliyat Ekle</button>
+  <h3>Alışkanlıklar</h3>
+  <div class="grid two">
+   <label class="field"><span>Sigara</span><select id="smoking" data-save><option value="">Seçilmedi</option><option>Hiç kullanmamış</option><option>Aktif kullanıyor</option><option>Bırakmış</option></select></label>
+   <label class="field"><span>Sigara Ek Bilgi</span><input id="smokingNote" data-save placeholder="Örn. 10 yıl önce bırakmış, 20 paket-yıl"></label>
+   <label class="field"><span>Alkol</span><select id="alcohol" data-save><option value="">Seçilmedi</option><option>Yok</option><option>Var</option><option>Bırakmış</option></select></label>
+   <label class="field"><span>Alkol Ek Bilgi</span><input id="alcoholNote" data-save placeholder="Miktar / sıklık / bırakma tarihi"></label>
+  </div>
+  <h3>İlaçlar</h3><div class="repeat-list" id="medicationsRows" data-repeat="medications"></div>
+  <button type="button" class="add-btn no-print" data-add="medications">+ İlaç Ekle</button>
+ </section>
+ <section class="form-section">
+  <div class="section-head"><span class="section-num">02</span><h2>Osteoporoz, Dişler, Kırık ve Tedaviler</h2></div>
+  <div class="grid two">
+   <label class="field"><span>Osteoporoz Sorgusu / DXA</span><textarea id="osteoporosis" data-save rows="2" placeholder="DXA, T-skoru, kırık riski, ailede kalça kırığı…"></textarea></label>
+   <label class="field"><span>Dişler</span><div class="stack"><select id="teeth" data-save><option value="">Seçilmedi</option><option>Doğal dişler</option><option>Eksik diş</option><option>Parsiyel protez</option><option>Total protez</option><option>Diğer</option></select><input id="teethNote" data-save placeholder="Ek açıklama"></div></label>
+   <label class="field"><span>Kırık Öyküsü</span><textarea id="fractureHistory" data-save rows="2" placeholder="Var/Yok, tarih, bölge, travma mekanizması…"></textarea></label>
+   <label class="field"><span>Tedaviler</span><textarea id="treatments" data-save rows="2" placeholder="Osteoporoz ve diğer mevcut tedaviler; başlangıç ve yanıt…"></textarea></label>
+  </div>
+ </section>
+ <section class="form-section">
+  <div class="section-head"><span class="section-num">03</span><h2>Taramalar</h2></div>
+  <p class="section-hint">Durum seçin; tarih, sonuç, biyopsi veya klinik öneriyi serbestçe yazın. Boş alanlar “Yok” olarak yorumlanmaz.</p>
+  <div id="screeningCards" class="status-grid"></div>
+  <label class="field other-note"><span>Diğer Taramalar / Ek Not</span><textarea id="screeningOther" data-save rows="2" placeholder="Ek tetkikler ve tarih/sonuçlar"></textarea></label>
+ </section>
+ <section class="form-section">
+  <div class="section-head"><span class="section-num">04</span><h2>Aşılamalar</h2></div>
+  <p class="section-hint">Tarihi, öneriyi veya hastanın kabul / ret bilgisini açıklama alanına yazabilirsiniz.</p>
+  <div id="vaccineCards" class="status-grid"></div>
+  <label class="field other-note"><span>Diğer Aşılar / Ek Not</span><textarea id="vaccinesOther" data-save rows="2" placeholder="Diğer aşılar, aşı durumu ve ek notlar"></textarea></label>
+ </section>
+ <section class="form-section">
+  <div class="section-head"><span class="section-num">05</span><h2>Aktif Yakınma ve Geriatrik Sorgu</h2></div>
+  <label class="field"><span>Aktif Yakınması</span><textarea id="chiefComplaint" data-save rows="3" placeholder="Mevcut yakınmalar, süre ve gelişimi"></textarea></label>
+  <div id="geriatricCards" class="geriatric-grid"></div>
+  <div class="grid four measurements">
+   <label class="field"><span>Boy (cm)</span><input type="number" id="height" data-save min="0" step="0.1" placeholder="cm"></label>
+   <label class="field"><span>Kilo (kg)</span><input type="number" id="weight" data-save min="0" step="0.1" placeholder="kg"></label>
+   <label class="field"><span>GYA (/6)</span><input type="number" id="adl" data-save min="0" max="6" step="1" placeholder="0–6"></label>
+   <label class="field"><span>EGYA (/8)</span><input type="number" id="iadl" data-save min="0" max="8" step="1" placeholder="0–8"></label>
+  </div>
+  <div class="grid two">
+   <label class="field"><span>Görme</span><textarea id="vision" data-save rows="2" placeholder="Mevcut durum ve son göz muayenesi…"></textarea></label>
+   <label class="field"><span>İşitme</span><textarea id="hearing" data-save rows="2" placeholder="Mevcut durum, cihaz önerisi ve son muayene…"></textarea></label>
+  </div>
+  <label class="field"><span>Geriatrik Sorgu – Ek Not</span><textarea id="geriatricOther" data-save rows="2" placeholder="Diğer geriatrik bulgular"></textarea></label>
+ </section>
+ <section class="form-section">
+  <div class="section-head"><span class="section-num">06</span><h2>TAKİP — Önceki Önerilerin Değerlendirilmesi</h2></div>
+  <p class="section-hint">Önceki muayenede önerilen işlemi, yapılıp yapılmadığını ve sonucunu ayrı ayrı kaydedin.</p>
+  <div id="followupRows" class="repeat-list" data-repeat="followup"></div>
+  <button type="button" class="add-btn no-print" data-add="followup">+ Takip Maddesi Ekle</button>
+  <h3>Laboratuvar</h3>
+  <div id="labsRows" class="repeat-list" data-repeat="labs"></div>
+  <button type="button" class="add-btn no-print" data-add="labs">+ Laboratuvar Sonucu Ekle</button>
+  <label class="field other-note"><span>Laboratuvar – Toplu Yorum / Diğer Bulgular</span><textarea id="labNote" data-save rows="2" placeholder="Örn. Hemoglobin, böbrek fonksiyonu, önemli değişimler…"></textarea></label>
+ </section>
+ <section class="form-section">
+  <div class="section-head"><span class="section-num">07</span><h2>PLAN</h2></div>
+  <div id="planRows" class="repeat-list" data-repeat="plan"></div>
+  <button type="button" class="add-btn no-print" data-add="plan">+ Plan Maddesi Ekle</button>
+  <label class="field other-note"><span>Kontrol Zamanı / Son Not</span><textarea id="nextVisit" data-save rows="2" placeholder="Örn. 3 ay sonra laboratuvar sonuçlarıyla kontrol"></textarea></label>
+ </section>
+ </div>
+ <section class="note-section" id="noteSection" aria-labelledby="noteHeading">
+  <div class="note-heading no-print"><div><h2 id="noteHeading">Oluşturulan Kontrol / Takip Notu</h2><p>Boş bırakılan yanıtlar notta gösterilmez. Son metni klinik olarak doğrulayın.</p></div><div class="note-buttons"><button type="button" class="btn light" id="copyNoteBottom">Notu Kopyala</button><button type="button" class="btn primary" id="printNoteBottom">Yazdır / PDF</button></div></div>
+  <article id="noteContent" class="note-content" aria-live="polite"></article>
+ </section>
+</main>
+<div class="toast no-print" id="toast" role="status" hidden></div>
+</body></html>
