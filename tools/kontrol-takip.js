@@ -302,32 +302,37 @@ function addPlanOnEnter(event){
  area.dispatchEvent(new Event("input",{bubbles:true}));
 }
 let planVisible=false;
+function pendingScratchItems(scratch,current){
+ const available=new Map();
+ for(const line of current){
+  const key=line.toLocaleLowerCase("tr-TR");
+  available.set(key,(available.get(key)||0)+1);
+ }
+ return scratch.filter(line=>{
+  const key=line.toLocaleLowerCase("tr-TR"),remaining=available.get(key)||0;
+  if(remaining){available.set(key,remaining-1);return false}
+  return true;
+ });
+}
 function updateScratchStatus(){
  const area=$("scratchText"),status=$("scratchStatus");
  if(!area||!status)return;
  const draft=planItems(area.value);
  if(!draft.length){status.textContent="Geçici not";return}
- const plan=new Set(planItems(val("planNarrative")).map(s=>s.toLocaleLowerCase("tr-TR")));
- const awaiting=draft.filter(s=>!plan.has(s.toLocaleLowerCase("tr-TR"))).length;
- status.textContent=awaiting?awaiting+" not PLAN'a aktarılmayı bekliyor":"✓ PLAN'a aktarıldı";
+ const awaiting=pendingScratchItems(draft,planItems(val("planNarrative"))).length;
+ status.textContent=awaiting?awaiting+" / "+draft.length+" not PLAN'a aktarılmayı bekliyor":"✓ "+draft.length+" / "+draft.length+" not PLAN'a aktarıldı";
 }
 function transferScratchToPlan(){
  const scratch=planItems(val("scratchText"));
  if(!scratch.length){updateScratchStatus();return 0}
  const current=planItems(val("planNarrative"));
- const known=new Set(current.map(s=>s.toLocaleLowerCase("tr-TR")));
- let count=0;
- for(const line of scratch){
-  const normalized=line.toLocaleLowerCase("tr-TR");
-  if(known.has(normalized))continue;
-  current.push(line);known.add(normalized);count++;
- }
- if(count){
-  $("planNarrative").value=numberedPlan(current);
+ const pending=pendingScratchItems(scratch,current);
+ if(pending.length){
+  $("planNarrative").value=numberedPlan([...current,...pending]);
   renderNote();saveDraft();
  }
  updateScratchStatus();
- return count;
+ return pending.length;
 }
 function initScratchAndPlan(){
  const panel=$("scratchNote"),toggle=$("scratchToggle"),content=$("scratchContent");
