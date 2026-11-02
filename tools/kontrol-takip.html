@@ -14,6 +14,14 @@
  <div class="topbar"><a href="../index.html">← İTF Geriatri Ana Sayfa</a><a href="ilk-muayene.html">Online İlk Muayene Formu</a></div>
  <div class="brand"><img src="../assets/itf-geriatri-logo.webp" alt="İTF Geriatri logosu" width="64" height="64"><div><h1>Online Kontrol / Takip Formu</h1><p>İstanbul Tıp Fakültesi · Geriatri Bilim Dalı</p></div></div>
 </header>
+<aside class="scratch-note no-print" id="scratchNote" aria-labelledby="scratchTitle">
+ <div class="scratch-heading"><button type="button" id="scratchToggle" aria-expanded="true" aria-controls="scratchContent"><span aria-hidden="true">🗒️</span> <span id="scratchTitle">Muayene Notları</span><span id="scratchChevron" aria-hidden="true">−</span></button></div>
+ <div class="scratch-content" id="scratchContent">
+  <label for="scratchText" class="scratch-hint">Muayene sırasında hızlı not al. PLAN'a gelince otomatik aktarılır.</label>
+  <textarea id="scratchText" data-save rows="7" placeholder="Tetkik önerisi, ilaç değişikliği, kontrol hatırlatması…" spellcheck="true"></textarea>
+  <div class="scratch-bottom"><span id="scratchStatus" role="status" aria-live="polite">Geçici not</span><button id="scratchTransfer" type="button">PLAN'a Aktar</button></div>
+ </div>
+</aside>
 <main id="main" class="shell">
  <div class="notice no-print"><b>Geliştirme sürümü — veri güvenliği:</b> Bu form henüz kurumsal onaylı bir hasta kayıt sistemi değildir. Taslak yalnızca aynı tarayıcı sekmesinde geçici saklanır; veriler sunucuya gönderilmez. Kurumsal onay olmadan gerçek hastaların kimlik veya sağlık bilgilerini girmeyiniz.</div>
  <div class="toolbar no-print" aria-label="Form işlemleri">
@@ -94,7 +102,7 @@
    <textarea id="followupNarrative" data-save rows="7" placeholder="Önceki öneriler, yapılıp yapılmadığı, sonuçlar, başvurular, ilaç değişiklikleri…"></textarea>
   </label>
  </section>
- <section class="form-section">
+ <section class="form-section" id="planSection">
   <div class="section-head"><span class="section-num">07</span><h2>PLAN</h2></div>
   <p class="section-hint">İlk maddeyi yazın; Enter'a bastığınızda otomatik olarak sonraki numaralı madde açılır.</p>
   <label class="field narrative-field"><span>Plan ve Kontrol Önerileri</span>
