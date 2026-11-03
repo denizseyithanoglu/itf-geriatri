@@ -148,8 +148,8 @@ function buildGeriatric(){
   }
   if(kind==="text"){
    return '<label class="geriatric-item geriatric-free"><strong>'+esc(label)+'</strong>'+
-    '<input type="text" data-save id="ger_'+key+'_note" inputmode="numeric" autocomplete="off" maxlength="7" aria-describedby="homeBPHint" placeholder="130/80">\n'+
-    '<small id="homeBPHint">Sistolik: 40–210 · Diyastolik: 10–120 mmHg</small></label>';
+    '<input type="text" data-save id="ger_'+key+'_note" inputmode="numeric" autocomplete="off" maxlength="7" placeholder="130/80">\n'+
+    '</label>';
   }
   const choices=kind==="appetite"?["İyi","Orta","Kötü"]:
    kind==="problem"?["Yok","Var"]:["Evet","Hayır"];
@@ -498,8 +498,7 @@ function generateNote(horizontal=true){
    row(["Düşme (son 6 ay içinde)"]);
    row(["Düşme Korkusu","Baston Kullanımı","Evde TA"]);
    row(["Baş Dönmesi","Ortostatizm"]);
-   row(["İştah","Boy (cm)","Kilo (kg)","BKİ"]);
-   row(["Kilo Kaybı","Çiğneme / Yutma Güçlüğü"]);
+   row(["İştah","Kilo Kaybı","Çiğneme / Yutma Güçlüğü","Boy (cm)","Kilo (kg)","BKİ"]);
    row(["Üriner İnkontinans","Fekal İnkontinans","Kabızlık"]);
    row(["Uyku","REM Uyku Davranış Bozukluğu"]);
    row(["Unutkanlık (yeni başlangıç / son 6 ayda artış)","Anhedoni"]);
@@ -575,15 +574,15 @@ function formatHomeBP(value,inputType=""){
  if(inputType.startsWith("delete")||value.includes("/"))return value;
  if(!/^\d{2,3}$/.test(value))return value;
  const systolic=Number(value);
- return systolic>=40&&systolic<=210?value+"/":value;
+ return systolic>=40&&systolic<=240?value+"/":value;
 }
 function homeBPError(value){
  if(!value.trim())return "";
  const parts=value.trim().split("/");
- if(!/^\d{2,3}$/.test(parts[0])||Number(parts[0])<40||Number(parts[0])>210)
-  return "Sistolik değer 40–210 mmHg arasında olmalıdır.";
- if(parts.length!==2||!/^\d{2,3}$/.test(parts[1])||Number(parts[1])<10||Number(parts[1])>120)
-  return "Diyastolik değer 10–120 mmHg arasında olmalıdır.";
+ if(!/^\d{2,3}$/.test(parts[0])||Number(parts[0])<40||Number(parts[0])>240)
+  return "Sistolik değer 40–240 mmHg arasında olmalıdır.";
+ if(parts.length!==2||!/^\d{2,3}$/.test(parts[1])||Number(parts[1])<10||Number(parts[1])>140)
+  return "Diyastolik değer 10–140 mmHg arasında olmalıdır.";
  return "";
 }
 function initHomeBP(){
