@@ -257,3 +257,8 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
 .anthro-fields output{padding:9px 5px;background:#edf5f9;border-radius:6px;color:#244e6e;font-weight:750;min-height:39px}
 .toolbar-actions{align-items:end}
 .note-mode select{min-height:39px;padding:7px}
+
+/* Blood pressure and pulse share one card with distinct labels. */
+.geriatric-row .home-vitals{grid-template-columns:minmax(0,1fr) minmax(85px,.65fr);gap:10px}
+.home-vitals>label{display:grid;gap:7px;min-width:0;align-content:start}
+.home-vitals strong{font-size:.81rem;color:#315d78;min-height:36px;line-height:1.3}
