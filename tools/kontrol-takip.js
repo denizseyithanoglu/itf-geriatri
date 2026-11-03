@@ -147,9 +147,9 @@ function buildGeriatric(){
     (key==="height"?"cm":key==="weight"?"kg":key==="adl"?"0–6":"0–8")+'"></label>';
   }
   if(kind==="text"){
-   return '<label class="geriatric-item geriatric-free"><strong>'+esc(label)+'</strong>'+
-    '<input type="text" data-save id="ger_'+key+'_note" inputmode="numeric" autocomplete="off" maxlength="7" placeholder="130/80">\n'+
-    '</label>';
+   return '<div class="geriatric-item geriatric-free home-vitals">'+
+    '<label><strong>'+esc(label)+'</strong><input type="text" data-save id="ger_'+key+'_note" inputmode="numeric" autocomplete="off" maxlength="7" placeholder="130/80"></label>'+
+    '<label><strong>Nabız (/dk)</strong><input type="number" id="homePulse" data-save min="30" max="300" step="1" inputmode="numeric" placeholder="/dk"></label></div>';
   }
   const choices=kind==="appetite"?["İyi","Orta","Kötü"]:
    kind==="problem"?["Yok","Var"]:["Evet","Hayır"];
@@ -481,6 +481,7 @@ function generateNote(horizontal=true){
    if(kind==="text")return [name,val("ger_"+id+"_note")];
    return [name,statusDetail("ger",id)];
  }).filter(([,v])=>populated(v));
+ if(val("homePulse"))geriatric.push(["Nabız",val("homePulse")+"/dk"]);
  const bmi=calculateBMI(val("height"),val("weight"));
  if(bmi)geriatric.push(["BKİ",bmi.replace(".",",")+" kg/m²"]);
  if(val("geriatricOther"))geriatric.push(["Ek Not",val("geriatricOther")]);
@@ -496,7 +497,7 @@ function generateNote(horizontal=true){
     if(entries.length)push(entries.join("; "));
    };
    row(["Düşme (son 6 ay içinde)"]);
-   row(["Düşme Korkusu","Baston Kullanımı","Evde TA"]);
+   row(["Düşme Korkusu","Baston Kullanımı","Evde TA","Nabız"]);
    row(["Baş Dönmesi","Ortostatizm"]);
    row(["İştah","Kilo Kaybı","Çiğneme / Yutma Güçlüğü","Boy (cm)","Kilo (kg)","BKİ"]);
    row(["Üriner İnkontinans","Fekal İnkontinans","Kabızlık"]);
@@ -586,6 +587,8 @@ function homeBPError(value){
  return "";
 }
 function initHomeBP(){
+ const pulse=$("homePulse");
+ pulse.addEventListener("change",()=>{if(!pulse.checkValidity())pulse.reportValidity()});
  const field=$("ger_homeBP_note");
  field.addEventListener("input",event=>{
   if(event.isComposing)return;
