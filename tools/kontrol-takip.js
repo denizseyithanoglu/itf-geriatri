@@ -414,7 +414,7 @@ const SHORT_LABELS={
  "Diğer taramalar":"Ek tar","Diğer aşılar":"Ek aşı","Ek Not":"Ek","Sigara Ek Bilgi":"Sigara ek"
 };
 function generateSummaryNote(){
- return generateNote().split("\n").map(line=>{
+ return generateNote(false).split("\n").map(line=>{
   let text=line.trim();
   for(const [full,short] of Object.entries(SHORT_LABELS)){
    if(text.startsWith(full+":")){text=short+text.slice(full.length);break}
@@ -427,17 +427,18 @@ function generateSummaryNote(){
 function selectedNote(){
  return val("noteMode")==="summary"?generateSummaryNote():generateNote();
 }
-function generateNote(){
+function generateNote(horizontal=true){
  const lines=[],push=txt=>{
   if(!populated(txt))return;
-  if(lines.length&&/^(?:HASTALIKLAR|AMELİYATLAR|ALIŞKANLIKLAR|İLAÇLAR|OSTEOPOROZ|TARAMALAR|AŞILAMALAR|AKTİF YAKINMA|GERİATRİK SORGU|TAKİP|LABORATUVAR|PLAN)(?::| —)/.test(txt))
+  if(lines.length&&/^(?:HASTALIKLAR|AMELİYATLAR|ALIŞKANLIKLAR|İLAÇLAR|OSTEOPOROZ, KIRIK, DİŞLER VE TEDAVİLER|TARAMALAR|AŞILAMALAR|AKTİF YAKINMA|GERİATRİK SORGU|TAKİP\/PLAN|LABORATUVAR VE TETKİKLER|PLAN)(?::| —)/.test(txt))
    lines.push("");
   lines.push(txt);
  };
  const list=(title,entries)=>{
   if(!entries.length)return;
   push(title+":");
-  entries.forEach((entry,i)=>push((i+1)+". "+entry));
+  const numbered=entries.map((entry,i)=>(i+1)+". "+entry);
+  if(horizontal)push(numbered.join(" · "));else numbered.forEach(push);
  };
  const intro=[];
  if(val("tc"))intro.push("T.C. Kimlik No: "+val("tc"));
@@ -470,12 +471,12 @@ function generateNote(){
  if(screenings.length){push("TARAMALAR:");screenings.forEach(([n,v])=>push(n+": "+v))}
  const vaccines=VACCINES.map(([id,name])=>[name,statusDetail("vax",id)]).filter(([,v])=>v);
  if(val("vaccinesOther"))vaccines.push(["Diğer aşılar",val("vaccinesOther")]);
- if(vaccines.length){push("AŞILAMALAR:");vaccines.forEach(([n,v])=>push(n+": "+v))}
+ if(vaccines.length){push("AŞILAMALAR:");horizontal?push(vaccines.map(([n,v])=>n+": "+v).join("; ")):vaccines.forEach(([n,v])=>push(n+": "+v))}
  if(val("chiefComplaint"))push("AKTİF YAKINMA: "+val("chiefComplaint"));
  const geriatric=GERIATRIC.map(([id,name,kind])=>{
    if(kind==="measure"){
     const value=val(id);
-    return [name,value?(value+(id==="height"?" cm":id==="weight"?" kg":id==="adl"?"/6":"/8")):""];
+    return [id==="adl"?"GYA":id==="iadl"?"EGYA":name,value?(value+(id==="height"?" cm":id==="weight"?" kg":"")):""];
    }
    if(kind==="text")return [name,val("ger_"+id+"_note")];
    return [name,statusDetail("ger",id)];
@@ -483,10 +484,32 @@ function generateNote(){
  const bmi=calculateBMI(val("height"),val("weight"));
  if(bmi)geriatric.push(["BKİ",bmi.replace(".",",")+" kg/m²"]);
  if(val("geriatricOther"))geriatric.push(["Ek Not",val("geriatricOther")]);
- if(geriatric.length){push("GERİATRİK SORGU:");geriatric.forEach(([n,v])=>push(n+": "+v))}
+ if(geriatric.length){
+  push("GERİATRİK SORGU:");
+  if(!horizontal)geriatric.forEach(([n,v])=>push(n+": "+v));
+  else{
+   const values=new Map(geriatric);
+   const row=names=>{
+    const entries=names.filter(name=>values.has(name)).map(name=>{
+     const text=name+": "+values.get(name);values.delete(name);return text;
+    });
+    if(entries.length)push(entries.join("; "));
+   };
+   row(["Düşme (son 6 ay içinde)"]);
+   row(["Düşme Korkusu","Baston Kullanımı","Evde TA"]);
+   row(["Baş Dönmesi","Ortostatizm"]);
+   row(["İştah","Boy (cm)","Kilo (kg)","BKİ"]);
+   row(["Kilo Kaybı","Çiğneme / Yutma Güçlüğü"]);
+   row(["Üriner İnkontinans","Fekal İnkontinans","Kabızlık"]);
+   row(["Uyku","REM Uyku Davranış Bozukluğu"]);
+   row(["Unutkanlık (yeni başlangıç / son 6 ayda artış)","Anhedoni"]);
+   row(["GYA","EGYA","Görme Sorunu","İşitme Sorunu"]);
+   row([...values.keys()]);
+  }
+ }
  if(val("labNarrative")){push("LABORATUVAR VE TETKİKLER:");push(val("labNarrative"))}
- if(val("followupNarrative")||val("planNarrative"))push("\nTAKİP/PLAN:");
- if(val("followupNarrative")){push("Takip — Önceki Önerilerin Değerlendirilmesi:");push(val("followupNarrative"))}
+ if(val("followupNarrative")||val("planNarrative"))push("TAKİP/PLAN:");
+ if(val("followupNarrative"))push(val("followupNarrative"));
  const plan=planItems(val("planNarrative"));
  if(plan.length){push("PLAN:");push(plan.map((line,i)=>(i+1)+". "+line).join("\n"))}
  return lines.length?lines.join("\n"):"Henüz veri girilmedi. Formu doldurdukça klinik not burada oluşacaktır.";
