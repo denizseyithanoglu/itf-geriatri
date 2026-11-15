@@ -38,5 +38,9 @@ replace('</style></head>', '''/* Standalone presentation; the original clinical 
 #finalActions + .optional-note{display:none!important;}
 #kgdWorkspaceContent{min-width:0;}
 </style></head>''')
+# Full-KGD export controls are not part of the standalone measurement page.
+for name in ('schema', 'formats', 'export'):
+    source = source.replace(f'<script src="kgd-export/{name}.js"></script>', '')
+
 (root / 'tools/fiziksel-performans.html').write_text(source)
 print('Built tools/fiziksel-performans.html')

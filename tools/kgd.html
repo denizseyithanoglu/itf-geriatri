@@ -2251,6 +2251,11 @@
  border-radius:7px;background:#f5faf7;color:#285b4d;font:inherit;font-weight:750;cursor:pointer}
 #kgdImportConfirm{background:#285b4d;color:white;border-color:#285b4d}
 .kgd-import-success{padding:11px 14px;margin:0 0 15px;border:1px solid #a9d1b6;background:#ecf7ef;color:#21583a;border-radius:8px;font-size:.88rem;font-weight:680}
+
+/* Four physical-report groups use compact prose in print and copied notes. */
+.kgd-physical-grouped .kgd-physical-line{display:block;margin:0 0 5px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;break-inside:avoid;}
+.kgd-physical-grouped .compact-inline-pair{display:inline;}
+@media print{.kgd-physical-grouped .kgd-physical-line{margin:0 0 4px;}.kgd-physical-grouped{grid-column:1 / -1;}}
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><div class="kgd-workspace" id="kgdWorkspace"><aside class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite" hidden></div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><div class="wizard-mobile-jump"><label for="wizardMobileSelect">Bölüm seçiniz</label><select id="wizardMobileSelect" aria-label="KGD bölüm seçimi"></select></div>
 <button type="button" id="wizardClearAll" class="wizard-reset-all">Bütün KGD'yi Sıfırla</button>
 <dialog class="kgd-reset-dialog" id="kgdResetDialog" aria-labelledby="kgdResetDialogTitle" aria-describedby="kgdResetDialogText">
@@ -5410,25 +5415,8 @@ function compactKGDStep(i,inline=false){
     const n=gdsScore();
     return simple("Duygudurum",[["GDS-30",done===0?null:n===null?"eksik ("+done+"/30)":n+"/30"+(n<=10?" (normal)":n<=13?" (olası depresyon)":" (pozitif)") ]]);
  }
- if(i===9){
-   const short=["Boy","Kilo","Yağ (%)","FFM","BMR","BKİ","FAS","TUG","OYH","OYH algısı","HGS","HGS algısı","Kol","Bel","Kalça","Baldır","5-CST","Romberg","Postural instabilite","SPPB 1a","SPPB 1b","SPPB 1c","SPPB 2","SPPB 3","SPPB","Olası sarkopeni","Kesin sarkopeni","Ciddi sarkopeni"];
-   const r=sarcoStatus();
-   return simple("Fiziksel Performans",[
-    ...comprehensive[1][1].flatMap((_,j)=>{
-      const item=[kgdPhysicalReportLabel(j,short[j]),
-        kgdPhysicalAnnotatedValue(j,j===5?$("bmiOut")?.textContent:field(1,j),r)];
-      return j===26?[item,
-        ["Kesin Sarkopeni (SMM/W)",moreText.sarcopeniaConfirmedW],
-        ["Kesin Sarkopeni (SMM/BMI)",moreText.sarcopeniaConfirmedBMI]]:[item];
-    }),
-    ["Yaş",kgdRecordedAge()],["Cinsiyet",moreText.clinical_0_4],
-    ["SMM",r.smm===null?null:r.smm.toFixed(2)+" kg"],
-    ["SMM/boy²",kgdPhysicalIndexValue(r.smmi,"kg/m²",r.mass)],
-    ["SMM/kilo",kgdPhysicalIndexValue(r.smmw,"%",r.massW)],
-    ["SMM/BKİ",kgdPhysicalIndexValue(r.smmbmi,"",r.massBMI,3)],
-    ["Sarkopenik Obezite (SMM/W)",moreText.sarcopenicObesity]
-   ]);
- }
+ if(i===9)return kgdPhysicalGroupedReport(false);
+
  return "";
 }
 
@@ -5456,6 +5444,49 @@ function kgdPrintable(title,rows,inline=false){
    data.map(([name,value])=>'<div class="compact-line"><b>'+safe(String(name))+':</b> '+safe(String(value))+'</div>').join("")+
    '</div></section>';
 }
+/* The same ordered groups power full KGD and standalone physical reports.
+   BMI and BKI name the same index; numeric indices and diagnostic flags stay separate. */
+function kgdPhysicalReportGroups(detailed=false){
+ const r=sarcoStatus(),field=i=>moreText["clinical_1_"+i];
+ const value=i=>kgdPhysicalAnnotatedValue(i,field(i),r);
+ const flag=v=>v===true?"Evet":v===false?"Hayır":null;
+ const severe=confirmed=>confirmed===false?false:confirmed===null?null:r.perf;
+ const groups=[
+  [["Yaş",kgdRecordedAge()],["Cinsiyet",moreText.clinical_0_4],
+   ["Boy",field(0)],["Kilo",field(1)],["BKİ",$("bmiOut")?.textContent],
+   ["Bel",field(13)],["Kalça",field(14)],["Baldır",field(15)]],
+  [["BIA yağ (%)",value(2)],["FFM",field(3)],["BMR",field(4)],
+   ["SMM",r.smm===null?null:r.smm.toFixed(2)+" kg"],
+   ["SMM/h²",kgdPhysicalIndexValue(r.smmi,"kg/m²",r.mass)],
+   ["SMM/W",kgdPhysicalIndexValue(r.smmw,"%",r.massW)],
+   ["SMM/BKİ",kgdPhysicalIndexValue(r.smmbmi,"",r.massBMI,3)]],
+  [["FAS",field(6)],["TUG (sn)",value(7)],["OYH (m/sn)",value(8)],
+   ["HGS (kg)",value(10)],["5-CST (sn)",value(16)],["Romberg",field(17)],
+   ["Postural instabilite",field(18)],["SPPB Toplam",value(24)]],
+  [["Olası sarkopeni",flag(r.low)],
+   ["Kesin Sarkopeni (SMM/h²)",flag(r.confirmed)],
+   ["Kesin Sarkopeni (SMM/W)",flag(r.confirmedW)],
+   ["Kesin Sarkopeni (SMM/BMI)",flag(r.confirmedBMI)],
+   ["Ciddi sarkopeni (SMM/h²)",flag(severe(r.confirmed))],
+   ["Ciddi sarkopeni (SMM/W)",flag(severe(r.confirmedW))],
+   ["Ciddi sarkopeni (SMM/BMI)",flag(severe(r.confirmedBMI))],
+   ["Sarkopenik Obezite (SMM/W)",flag(r.obesity)]]
+ ];
+ if(detailed){
+  groups[0].push(["Üst kol (cm)",field(12)]);
+  groups[2].push(["OYH algısı",field(9)],["HGS algısı",field(11)],
+   ...[19,20,21,22,23].map((i,j)=>[["SPPB 1a","SPPB 1b","SPPB 1c","SPPB 2","SPPB 3"][j],field(i)]));
+ }
+ return groups;
+}
+function kgdPhysicalGroupedReport(detailed=false){
+ const groups=kgdPhysicalReportGroups(detailed).map(rows=>rows.filter(([,v])=>kgdPrintPresent(v)));
+ if(!groups.some(rows=>rows.length))return "";
+ return '<section class="'+(detailed?'kgd-detail-section':'compact-section')+' kgd-physical-grouped"><h3>Fiziksel Performans'+(detailed?' ve Ölçümler':'')+'</h3>'+
+  groups.map((rows,i)=>rows.length?'<p class="compact-inline-text kgd-physical-line" data-physical-group="'+(i+1)+'">'+rows.map(([label,value])=>
+   '<span class="compact-inline-pair"><b>'+safe(String(label))+':</b> '+safe(String(value))+'</span>').join(', ')+'</p>':'').join('')+'</section>';
+}
+
 function kgdDetailedBlock(title,rows){
  const data=rows.filter(x=>kgdPrintPresent(x[1]));
  if(!data.length)return "";
@@ -5672,18 +5703,8 @@ function kgdDetailedPrintStep(step){
   });
   return kgdDetailedBlock("GDS-30",[["GDS-30 toplam",kgdGDSPrintScore()],...responses]);
  }
- if(step===9){
-  return kgdDetailedClinical(1,null,"Fiziksel Performans ve Ölçümler")+
-   kgdDetailedBlock("Hesaplanan Değerler",[
-    ["Yaş",kgdRecordedAge()],["Cinsiyet",moreText.clinical_0_4],
-    ["BKİ",$("bmiOut")?.textContent],["SMM",$("smmPhysical")?.textContent],
-    ["Sarkopeni değerlendirmesi",$("sarcoState")?.textContent],
-    ["SMM / boy²",kgdPhysicalIndexValue(sarcoStatus().smmi,"kg/m²",sarcoStatus().mass)],
-    ["SMM / kilo",kgdPhysicalIndexValue(sarcoStatus().smmw,"%",sarcoStatus().massW)],
-    ["SMM / BKİ",kgdPhysicalIndexValue(sarcoStatus().smmbmi,"",sarcoStatus().massBMI,3)],
-    ["Sarkopenik Obezite (SMM/W)",moreText.sarcopenicObesity]
-   ]);
- }
+ if(step===9)return kgdPhysicalGroupedReport(true);
+
  return "";
 }
 /* Returns only the current tab's compact clinical text, not full-KGD or detailed data.
