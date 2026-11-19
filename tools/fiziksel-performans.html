@@ -5679,10 +5679,9 @@ function kgdDetailedPrintStep(step){
    kgdDetailedBlock("RUDB Semptomları",[["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null]])+
    kgdDetailedBlock("Üriner Bulgular",urinaryExtras());
  if(step===4){
-  const mnaLF=moreScore("additional_0_",12);
   return kgdDetailedClinical(4,[0,1,2,3,4,5,6,7,8,9,10,15],"Beslenme Soruları")+
    kgdDetailedScale("mna")+
-   kgdDetailedBlock("MNA toplam",[["MNA-LF ek puanı",mnaLF===null?null:mnaLF+"/16"],["MNA toplam",kgdMNATotalScore()]])+
+   kgdDetailedBlock("Beslenme Değerlendirmesi — Toplam Puan",[["MNA-LF",kgdMNATotalScore()]])+
    kgdDetailedExtra(0,"MNA-LF (7–18. maddeler)",additional[0][1].map((_,i)=>i));
  }
  if(step===5)return kgdDetailedScale("adl")+kgdDetailedScale("iadl")+
