@@ -13,6 +13,7 @@ Updated: 2026-11-19. Keep this file short and update only when project structure
 - KGD appointment and follow-up forms: `tools/ilk-muayene.*`, `tools/kontrol-takip.*`.
 - Report/output logic: `tools/form-output.js`.
 - KGD full-summary print layout: `compactKGDStep()` in `tools/kgd.html`; Sosyal Öykü uses 3 ordered compact rows, and Özgeçmiş lists positive diagnoses, fractures, medications beside family history, and habits under family history.
+- Full KGD short report groups MNA-SF, combined /30 MNA-LF, function/QoL, frailty, cognition, and mood as one `KGD Tarama Anketi` section (one line per domain). Physical Performance remains separate: units are shown, `%` is directly prefixed, probable sarcopenia follows SPPB, and confirmed/severe results are grouped by SMM index. Detailed reports and saved clinical field keys remain unchanged.
 - Data export: `tools/kgd-export/`.
 - Physical performance: `tools/fiziksel-performans.html`, `scripts/build-physical-performance.py`.
 - Patient self-assessment: `tools/self-assessment.html`.
