@@ -2,12 +2,12 @@
 (function () {
  'use strict';
  const cleanSummary = text => String(text ?? '').replace(/[ \t]*\|[ \t]*/g, ' ').replace(/[ \t]+\n/g, '\n');
- function filename(date, name) {
+ function filename(date, name, form = '') {
   let day = String(date || '').trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(day)) day = day.split('-').reverse().join('.');
   if (!day) day = new Date().toLocaleDateString('tr-TR');
   const safe = value => value.normalize('NFC').replace(/[<>:"/\\|?*\u0000-\u001f]/g, '').replace(/\s+/g, '').replace(/[. ]+$/g, '');
-  return safe(day) + '_' + (safe(String(name || '').trim()) || 'Isimsiz');
+  return safe(day) + '_' + (safe(String(name || '').trim()) || 'Isimsiz') + (safe(String(form || '').trim()) ? '_' + safe(String(form).trim()) : '');
  }
  let preparePrint = () => {};
  let restorePrint = () => {};
@@ -16,7 +16,7 @@
   preparePrint = () => {
    if (originalTitle === null) originalTitle = document.title;
    const values = identity();
-   document.title = filename(values.date, values.name);
+   document.title = filename(values.date, values.name, values.form);
   };
   restorePrint = () => {
    if (originalTitle !== null) document.title = originalTitle;
