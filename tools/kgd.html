@@ -261,6 +261,20 @@
  #printSheet .compact-detail{break-inside:avoid;min-width:0;padding:3px 0;border-bottom:1px dotted #ddd}
  #printSheet .compact-detail dt{font-weight:650;font-size:8.2pt;color:#444}
  #printSheet .compact-detail dd{margin:0;font-size:9pt;overflow-wrap:anywhere;white-space:pre-wrap}
+ #printSheet .compact-summary-row{display:grid;gap:4px 7px;margin:4px 0 9px}
+ #printSheet .compact-summary-cell{min-width:0;border-bottom:1px dotted #ddd;padding:2px 0;break-inside:avoid}
+ #printSheet .compact-summary-cell dt{font-weight:650;font-size:7.7pt;color:#444}
+ #printSheet .compact-summary-cell dd{margin:1px 0 0;font-size:8.5pt;overflow-wrap:anywhere;white-space:pre-wrap}
+ #printSheet .compact-diagnoses{margin:5px 0 9px;font-size:9pt;line-height:1.45}
+ #printSheet .compact-history-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:7px 0 10px}
+ #printSheet .compact-history-columns > div{min-width:0}
+ #printSheet .compact-history-columns h4,#printSheet .compact-sensory-heading{margin:6px 0 4px;font-size:9pt;color:#285b4d}
+ #printSheet .compact-med-list{margin:3px 0 0;padding-left:19px;white-space:pre-wrap}
+ #printSheet .compact-med-list li{padding:1px 0;overflow-wrap:anywhere}
+ #printSheet .compact-family-line{padding:2px 0;border-bottom:1px dotted #ddd;white-space:pre-wrap;overflow-wrap:anywhere}
+ #printSheet .compact-history-habits{margin-top:7px;padding-top:3px;border-top:1px solid #ddd}
+ #printSheet .compact-history-habits .compact-summary-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #printSheet .compact-sensory-fields{margin-top:8px}
  #printSheet .print-head{font-size:12pt}
  #printSheet .print-note{font-size:7pt;color:#444;border-top:1px solid #bbb;margin-top:14px}
 }
@@ -5338,37 +5352,73 @@ function compactKGDStep(i,inline=false){
    return label+": "+(done===v.length?v.reduce((a,b)=>a+Number(b),0)+(j===0?"/16":"/"+v.length):"eksik ("+done+"/"+v.length+" yanıt)");
  };
  const clinicalLines=(j,indices)=>indices.map(k=>[comprehensive[j][1][k],field(j,k)]);
+ const compactRow=rows=>{
+  const data=rows.filter(([,value])=>present(value));
+  if(!data.length)return "";
+  return '<dl class="compact-summary-row" style="grid-template-columns:repeat('+data.length+',minmax(0,1fr))">'+
+   data.map(([label,value])=>'<div class="compact-summary-cell"><dt>'+safe(label)+'</dt><dd>'+safe(String(value))+'</dd></div>').join("")+'</dl>';
+ };
  if(i===0){
-   return detailed("Sosyal Öykü",[
-     ["Ad Soyad",field(0,0)],["T.C. Kimlik No",field(0,1)],
-     ["KGD Tarihi",field(0,2)],["Doğum Tarihi",field(0,3)],
-     ["Yaş",field(0,3)?$("ageOut")?.textContent:null],["Cinsiyet",field(0,4)],
-     ["Telefon",field(0,5)],["Eğitim",field(0,6)],
-     ["Medeni Durum",field(0,7)],["Kimle Yaşıyor",field(0,8)],
-     ["Ev Halkı Sayısı",field(0,9)],["Nerede Yaşıyor",field(0,10)],
-     ["Desteğe İhtiyaç",field(0,11)],["Destek Veren",field(0,12)],
-     ["Memleket",moreText.patientHometown],["Adres",moreText.patientAddress],
-     ["Meslek",moreText.patientProfession],["Çalışma",moreText.employmentStatus],
-     ["Gelir",moreText.patientIncome],["Yaşlılık Yaşı",moreText.oldAgeNoIdea==="Evet"?"Fikrim yok":field(0,13)]
-   ]);
+  const groups=[
+   [["T.C. Kimlik No",field(0,1)],["Doğum Tarihi",field(0,3)],
+    ["Ad Soyad",field(0,0)],["Yaş / Cinsiyet",
+     [field(0,3)?$("ageOut")?.textContent:null,field(0,4)].filter(present).join(" / ")],
+    ["KGD Tarihi",field(0,2)],["Yaşlılık Algısı",moreText.oldAgeNoIdea==="Evet"?"Fikrim yok":field(0,13)],
+    ["Telefon",field(0,5)]],
+   [["Memleket",moreText.patientHometown],["Adres",moreText.patientAddress],
+    ["Medeni Durum",field(0,7)],["Kimle Yaşıyor",field(0,8)],
+    ["Nerede Yaşıyor",field(0,10)],["Ev Halkı Sayısı",field(0,9)]],
+   [["Desteğe İhtiyaç",field(0,11)],["Destek Veren",field(0,12)],
+    ["Eğitim",field(0,6)],["Meslek",moreText.patientProfession],
+    ["Çalışma",moreText.employmentStatus],["Gelir",moreText.patientIncome]]
+  ];
+  if(inline)return kgdProbelInlineSummary("Sosyal Öykü",groups.flat());
+  const content=groups.map(compactRow).join("");
+  return content?'<section class="compact-section"><h3>Sosyal Öykü</h3>'+content+'</section>':"";
  }
  if(i===1){
-   const answered=historyDiagnoses.some(k=>present(field(6,k)))||otherHistoryDiseases().length>0;
-   const pairs=[
-    ["Hastalık Sayısı",answered?field(6,2):null],
-    ["İlaç Sayısı",currentMedications().some(x=>x.trim())?field(6,1):null],
-    ...historyDiagnoses.map(k=>[comprehensive[6][1][k],field(6,k)]),
-    ["OA GYA Etkisi",field(6,0)],["Kırık",moreText.historyFracture],
-    ["Kırığın enerji düzeyi",moreText.historyFracture==="Evet"?field(2,15):null],
-    ["Kırık zamanı",moreText.historyFracture==="Evet"?field(2,16):null],
-    ["Kırık bölgesi",moreText.historyFracture==="Evet"?field(2,17):null],
-    ["Diğer Hastalıklar",field(6,18)],["İlaçlar",field(6,19)],
-    ["Soygeçmiş",field(6,20)],
-    ["Sigara",field(3,0)],["Paket/Yıl",field(3,1)],
-    ["Alkol",field(3,2)],["Alkol Miktarı",moreText.alcoholQuantity],
-    ...Array.from({length:11},(_,j)=>[comprehensive[3][1][j+3],field(3,j+3)])
-   ];
-   return detailed("Özgeçmiş, İlaçlar ve Görme-İşitme",pairs);
+  const diagnosisNames=historyDiagnoses.filter(k=>k!==17&&field(6,k)==="Evet").map(k=>
+   k===14&&field(6,0)==="Evet"?"Osteoartrit (GYA etkiliyor)":comprehensive[6][1][k]
+  ).concat(otherHistoryDiseases());
+  const fracture=[
+   ["Total Endoprotez",field(6,17)],["Kırık",moreText.historyFracture],
+   ["Kırık Zamanı",moreText.historyFracture==="Evet"?field(2,16):null],
+   ["Kırığın Enerji Düzeyi",moreText.historyFracture==="Evet"?field(2,15):null],
+   ["Kırık Bölgesi",moreText.historyFracture==="Evet"?field(2,17):null]
+  ];
+  const medications=currentMedications().map(x=>String(x).trim()).filter(Boolean);
+  const familyLines=String(field(6,20)||"")
+   .replace(/[,;]\s*(?=(?:anne|baba)\s*[:：-])/giu,"\n")
+   .replace(/\s+(?=(?:anne|baba)\s*[:：-])/giu,"\n")
+   .split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const habits=[
+   ["Sigara",field(3,0)],["Paket/Yıl",field(3,1)],
+   ["Alkol",field(3,2)],["Alkol Miktarı",moreText.alcoholQuantity]
+  ];
+  const sight=Array.from({length:7},(_,j)=>[comprehensive[3][1][j+3],field(3,j+3)]);
+  const hearing=Array.from({length:4},(_,j)=>[comprehensive[3][1][j+10],field(3,j+10)]);
+  const label="Özgeçmiş, İlaçlar ve Görme-İşitme";
+  if(inline)return kgdProbelInlineSummary(label,[
+   ["Hastalıklar",diagnosisNames.join(", ")],...fracture,
+   ["İlaçlar",medications.join("; ")],["Soygeçmiş",familyLines.join("; ")],...habits,...sight,...hearing
+  ]);
+  const diagnoses=diagnosisNames.length?'<p class="compact-diagnoses"><strong>Hastalıklar:</strong> '+safe(diagnosisNames.join(", "))+'</p>':"";
+  const fractureRow=compactRow(fracture);
+  const medicationsBlock=medications.length?'<div><h4>İlaçlar</h4><ol class="compact-med-list">'+
+   medications.map(m=>'<li>'+safe(m)+'</li>').join("")+'</ol></div>':"";
+  const familyBlock=familyLines.length?'<h4>Soygeçmiş</h4>'+
+   familyLines.map(line=>'<div class="compact-family-line">'+safe(line)+'</div>').join(""):"";
+  const habitsBlock=compactRow(habits);
+  const familyAndHabits=familyBlock||habitsBlock?'<div>'+familyBlock+
+   (habitsBlock?'<div class="compact-history-habits"><h4>Sigara ve Alkol</h4>'+habitsBlock+'</div>':"")+'</div>':"";
+  const medicationAndFamily=medicationsBlock||familyAndHabits?'<div class="compact-history-columns">'+
+   (medicationsBlock||'<div></div>')+(familyAndHabits||'<div></div>')+'</div>':"";
+  const visionRows=compactRow(sight),hearingRows=compactRow(hearing);
+  const sensory=visionRows||hearingRows?'<div class="compact-sensory-fields">'+
+   (visionRows?'<h4 class="compact-sensory-heading">Görme</h4>'+visionRows:"")+
+   (hearingRows?'<h4 class="compact-sensory-heading">İşitme</h4>'+hearingRows:"")+'</div>':"";
+  const content=diagnoses+fractureRow+medicationAndFamily+sensory;
+  return content?'<section class="compact-section"><h3>'+safe(label)+'</h3>'+content+'</section>':"";
  }
  if(i===2)return simple("Fiziksel Aktivite ve Düşmeler",[
   ...clinicalLines(2,[0,1,2,3,4,5,6,7,8,9,10,11,12,13]),
