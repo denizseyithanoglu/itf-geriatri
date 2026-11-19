@@ -2269,6 +2269,8 @@
 /* Four physical-report groups use compact prose in print and copied notes. */
 .kgd-physical-grouped .kgd-physical-line{display:block;margin:0 0 5px;line-height:1.35;white-space:normal;overflow-wrap:anywhere;break-inside:avoid;}
 .kgd-physical-grouped .compact-inline-pair{display:inline;}
+.kgd-physical-diagnoses .kgd-physical-line{margin:0 0 2px}
+.kgd-screening-summary .kgd-screening-line{display:block;margin:0 0 4px;line-height:1.4;break-inside:avoid;overflow-wrap:anywhere}
 @media print{.kgd-physical-grouped .kgd-physical-line{margin:0 0 4px;}.kgd-physical-grouped{grid-column:1 / -1;}}
 </style></head><body><header><a id="home" href="../index.html"></a><h1 id="title"></h1><div id="sub"></div></header><main class="wrap"><p class="warn" id="warning"></p><p id="intro"></p><div class="kgd-workspace" id="kgdWorkspace"><aside class="wizard-shell no-print" aria-label="KGD Bölüm Navigasyonu"><div class="wizard-overview"><div><strong id="wizardStepTitle">KGD Formu</strong><p id="wizardStepHint">Bölümler arasında geçiş yapabilirsiniz.</p></div><div class="wizard-save-status" id="wizardSaveStatus" role="status" aria-live="polite" hidden></div></div><nav id="wizardTabs" class="wizard-tabs" aria-label="KGD bölümleri"></nav><div class="wizard-mobile-jump"><label for="wizardMobileSelect">Bölüm seçiniz</label><select id="wizardMobileSelect" aria-label="KGD bölüm seçimi"></select></div>
 <button type="button" id="wizardClearAll" class="wizard-reset-all">Bütün KGD'yi Sıfırla</button>
@@ -5534,9 +5536,40 @@ function kgdPhysicalReportGroups(detailed=false){
 function kgdPhysicalGroupedReport(detailed=false){
  const groups=kgdPhysicalReportGroups(detailed).map(rows=>rows.filter(([,v])=>kgdPrintPresent(v)));
  if(!groups.some(rows=>rows.length))return "";
+ if(!detailed){
+  const withUnit=(value,unit)=>{
+   if(!kgdPrintPresent(value))return value;
+   const match=String(value).match(/^(-?\d+(?:[.,]\d+)?)(.*)$/u);
+   if(!match)return value;
+   const [,number,suffix]=match;
+   if(unit==="%")return "%"+number+suffix.replace(/^\s*%/u,"");
+   return suffix.trimStart().startsWith(unit)?String(value):number+" "+unit+suffix;
+  };
+  const units=[
+   {"Yaş":"yaş","Boy":"cm","Kilo":"kg","BKİ":"kg/m²","Bel":"cm","Kalça":"cm","Baldır":"cm"},
+   {"BIA yağ (%)":"%","FFM":"kg","BMR":"kcal/gün","SMM":"kg","SMM/W":"%"},
+   {"TUG (sn)":"sn","OYH (m/sn)":"m/sn","HGS (kg)":"kg","5-CST (sn)":"sn"}
+  ];
+  for(let i=0;i<3;i++)groups[i]=groups[i].map(([label,value])=>{
+   const unit=units[i][label];
+   const shortLabel={"BIA yağ (%)":"BIA yağ","TUG (sn)":"TUG","OYH (m/sn)":"OYH","HGS (kg)":"HGS","5-CST (sn)":"5-CST","SPPB Toplam":"SPPB"}[label]||label;
+   return [shortLabel,unit?withUnit(value,unit):value];
+  });
+  const flags=groups[3];
+  const indexed=(offset)=>["SMM/h²","SMM/W","SMM/BKİ"].map((name,j)=>
+   [name,flags[offset+j]?.[1]]).filter(([,value])=>kgdPrintPresent(value))
+   .map(([name,value])=>name+": "+value).join(", ");
+  groups[2].push(["Olası Sarkopeni",flags[0]?.[1]]);
+  groups[3]=[["Kesin Sarkopeni",indexed(1)],["Ciddi Sarkopeni",indexed(4)],
+   ["Sarkopenik Obezite (SMM/W)",flags[7]?.[1]]].filter(([,v])=>kgdPrintPresent(v));
+ }
  return '<section class="'+(detailed?'kgd-detail-section':'compact-section')+' kgd-physical-grouped"><h3>Fiziksel Performans'+(detailed?' ve Ölçümler':'')+'</h3>'+
-  groups.map((rows,i)=>rows.length?'<p class="compact-inline-text kgd-physical-line" data-physical-group="'+(i+1)+'">'+rows.map(([label,value])=>
-   '<span class="compact-inline-pair"><b>'+safe(String(label))+':</b> '+safe(String(value))+'</span>').join(', ')+'</p>':'').join('')+'</section>';
+  groups.map((rows,i)=>!rows.length?'':(!detailed&&i===3?
+   '<div class="kgd-physical-diagnoses" data-physical-group="4">'+rows.map(([label,value])=>
+    '<p class="kgd-physical-line"><b>'+safe(String(label))+':</b> '+safe(String(value))+'</p>').join('')+'</div>':
+   '<p class="compact-inline-text kgd-physical-line" data-physical-group="'+(i+1)+'">'+rows.map(([label,value])=>
+    '<span class="compact-inline-pair"><b>'+safe(String(label))+':</b> '+safe(String(value))+'</span>').join(', ')+'</p>')).
+  join('')+'</section>';
 }
 
 function kgdDetailedBlock(title,rows){
@@ -5609,21 +5642,16 @@ function kgdGDSPrintScore(){
 function kgdShortPrintStep(step,inline=false){
  if([0,1,2,9].includes(step))return compactKGDStep(step,inline);
  if(step===3)return compactKGDStep(4,inline);
- if(step===4){
-  const l=moreScore("additional_0_",12);
-  return kgdPrintable("Beslenme Değerlendirmesi",[
-   ["MNA-SF",kgdScalePrintScore("mna")],
-   ["MNA-LF ek puanı",l===null?null:l+"/16"],
-   ["MNA toplam",kgdMNATotalScore()]
-  ],inline);
- }
+ if(step===4)return kgdPrintable("Beslenme Değerlendirmesi",[
+  ["MNA-SF",kgdScalePrintScore("mna")],["MNA-LF",kgdMNATotalScore()]
+ ],inline);
  if(step===5){
   const vas=moreAnswers.eq5dHealthVAS;
   return kgdPrintable("Yaşam Aktiviteleri ve Kalitesi",[
    ["GYA",kgdScalePrintScore("adl")],
    ["EGYA",kgdScalePrintScore("iadl")],
    ["EQ-5D",kgdEQScore()],
-   ["EQ5D Skala",kgdPrintPresent(vas)?vas+"/100":null]
+   ["Sağlık VAS",kgdPrintPresent(vas)?"%"+vas:null]
   ],inline);
  }
  if(step===6)return kgdPrintable("Kırılganlık ve Sarkopeni",[
@@ -5779,6 +5807,36 @@ async function copyKGDSectionSummary(step){
   window.prompt("Özeti seçip kopyalayabilirsiniz:",FormOutput.cleanSummary(text));
  }
 }
+/* Full summary: consolidate KGD screening questionnaires into one heading and five compact lines. */
+function kgdScreeningCompactSummary(){
+ const vas=moreAnswers.eq5dHealthVAS;
+ const groups=[
+  ["Beslenme Değerlendirmesi",[
+   ["MNA-SF",kgdScalePrintScore("mna")],["MNA-LF",kgdMNATotalScore()]]],
+  ["Yaşam Aktiviteleri ve Kalitesi",[
+   ["GYA",kgdScalePrintScore("adl")],["EGYA",kgdScalePrintScore("iadl")],
+   ["EQ-5D",kgdEQScore()],["Sağlık VAS",kgdPrintPresent(vas)?"%"+vas:null]]],
+  ["Kırılganlık ve Sarkopeni",[
+   ["FRAIL",kgdScalePrintScore("frail")],["SARC-F",kgdScalePrintScore("sarcf")],
+   ["SOF",kgdScalePrintScore("sof")]]],
+  ["Bilişsel Değerlendirme",[
+   ["Mini-COG kayıt",miniCogMemoryScore([0,1,2])],
+   ["Saat çizme",kgdPrintPresent(moreAnswers.clock)?moreAnswers.clock+"/5":null],
+   ["Mini-COG hatırlama",miniCogMemoryScore([4,5,6])],
+   ["Mini-COG kognitif bozukluk",moreAnswers.miniCogImpairment],
+   ["MMSE ("+(mmseVariant==="standard"?"standart":"eğitimsiz")+")",kgdMMSEPrintScore()]]],
+  ["Duygudurum",[["GDS-30",kgdGDSPrintScore()]]]
+ ];
+ const lines=groups.map(([title,rows])=>{
+  const fields=rows.filter(([,v])=>kgdPrintPresent(v));
+  if(!fields.length)return "";
+  return '<p class="compact-inline-text kgd-screening-line"><b>'+safe(title)+':</b> '+
+   fields.map(([label,value])=>'<span class="compact-inline-pair"><b>'+
+    safe(label)+':</b> '+safe(String(value))+'</span>').join(', ')+'</p>';
+ }).filter(Boolean);
+ return lines.length?'<section class="compact-section kgd-screening-summary"><h3>KGD Tarama Anketi</h3>'+
+  lines.join('')+'</section>':"";
+}
 function printKGD(step,style){
  summarize();
  writeKGDDraft();
@@ -5787,7 +5845,10 @@ function printKGD(step,style){
  const all=step===null;
  const title=all?"Tüm KGD":wizardGroups[step].tr;
  const steps=all?wizardGroups.slice(0,-1).map((_,i)=>i):[step];
- const contents=steps.map(i=>detailed?kgdDetailedPrintStep(i):kgdShortPrintStep(i,!all)).filter(Boolean).join("");
+ const contents=all&&!detailed?
+  steps.filter(i=>i<4).map(i=>kgdShortPrintStep(i,false)).filter(Boolean).join("")+
+  kgdScreeningCompactSummary()+kgdShortPrintStep(9,false):
+  steps.map(i=>detailed?kgdDetailedPrintStep(i):kgdShortPrintStep(i,!all)).filter(Boolean).join("");
  holder.dataset.mode=all?"full":"section";
  holder.dataset.printStyle=detailed?"detailed":"summary";
  holder.innerHTML='<header class="print-head"><strong>İTF Geriatri — '+safe(title)+' — '+(detailed?"Detaylı Rapor":"Özet Rapor")+'</strong><span>'+new Date().toLocaleDateString("tr-TR")+'</span></header>'+
