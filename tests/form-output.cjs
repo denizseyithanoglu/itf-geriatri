@@ -2,6 +2,10 @@
 const fs=require('fs'),path=require('path'),assert=require('assert');
 const {JSDOM,VirtualConsole}=require('jsdom');
 async function run(file){
+ const form=file.includes('ilk-muayene')?'İlkMuayene-Detaylı':
+  file.includes('kontrol-takip')?'KontrolTakip-Detaylı':
+  file.includes('fiziksel-performans')?'KGD-Ölçümler-Özet':'KGD-Özet';
+ const expectedTitle='18.11.2026_ÇağrıÖztürk_'+form;
  const dir=path.dirname(file);
  const html=fs.readFileSync(file,'utf8').replace(/<script\b[^>]*src="([^"]+)"[^>]*><\/script>/g,(tag,src)=>{
   if(/^https?:/.test(src))return '';
@@ -15,12 +19,13 @@ async function run(file){
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
   Object.defineProperty(w.navigator,'clipboard',{value:{writeText:async text=>{if(reject)throw Error('Denied');copied=text;}}});
   w.document.execCommand=()=>{legacyParent=w.document.activeElement.parentElement.tagName;return legacy};
-  w.print=()=>{w.dispatchEvent(new w.Event('beforeprint'));assert.equal(w.document.title,'18.11.2026_ÇağrıÖztürk');w.dispatchEvent(new w.Event('afterprint'));};
+  w.print=()=>{w.dispatchEvent(new w.Event('beforeprint'));assert.equal(w.document.title,expectedTitle);w.dispatchEvent(new w.Event('afterprint'));};
  }});await new Promise(r=>setTimeout(r,20));const w=dom.window;
  assert.deepEqual(errors.map(e=>e.message),[],file);
  assert.equal(w.FormOutput.cleanSummary('A: 1 | B: 2\nC | D'),'A: 1 B: 2\nC D');
  assert.equal(w.FormOutput.filename('2026-11-18',' Çağrı Öztürk '),'18.11.2026_ÇağrıÖztürk');
  assert.equal(w.FormOutput.filename('18.11.2026',''),'18.11.2026_Isimsiz');
+ assert.equal(w.FormOutput.filename('2026-11-18',' Çağrı Öztürk ','KGD-Özet'),'18.11.2026_ÇağrıÖztürk_KGD-Özet');
  if(file.includes('ilk-muayene')){
   w.document.getElementById('ad').value='Çağrı Öztürk';w.document.getElementById('basvuru').value='2026-11-18';
   for(let i=0;i<4;i++){await w.eval(`copySummaryText(summaryAsText(${i}))`);assert(copied.includes('SEKME ÖZETİ'));assert(!copied.includes('|'));}
@@ -33,7 +38,7 @@ async function run(file){
   await w.eval('copyKGDSectionSummary(0)');assert(copied.includes('Çağrı'));assert(!copied.includes('|'));
  }
  const original=w.document.title;w.FormOutput.print();assert.equal(w.document.title,original);
- const nativePrint=w.print;w.print=()=>{assert.equal(w.document.title,'18.11.2026_ÇağrıÖztürk');throw Error('print unavailable');};assert.throws(()=>w.FormOutput.print(),/print unavailable/);assert.equal(w.document.title,original);w.print=nativePrint;
+ const nativePrint=w.print;w.print=()=>{assert.equal(w.document.title,expectedTitle);throw Error('print unavailable');};assert.throws(()=>w.FormOutput.print(),/print unavailable/);assert.equal(w.document.title,original);w.print=nativePrint;
  reject=true;legacy=true;
  const modal=w.document.createElement('dialog');modal.open=true;w.document.body.append(modal);
  assert(await w.FormOutput.copySummary('A | B'));assert.equal(legacyParent,'DIALOG');assert(!modal.querySelector('textarea'));
