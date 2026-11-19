@@ -5534,7 +5534,8 @@ function kgdPhysicalReportGroups(detailed=false){
  return groups;
 }
 function kgdPhysicalGroupedReport(detailed=false){
- const groups=kgdPhysicalReportGroups(detailed).map(rows=>rows.filter(([,v])=>kgdPrintPresent(v)));
+ const originalGroups=kgdPhysicalReportGroups(detailed);
+ const groups=originalGroups.map(rows=>rows.filter(([,v])=>kgdPrintPresent(v)));
  if(!groups.some(rows=>rows.length))return "";
  if(!detailed){
   const withUnit=(value,unit)=>{
@@ -5555,11 +5556,11 @@ function kgdPhysicalGroupedReport(detailed=false){
    const shortLabel={"BIA yağ (%)":"BIA yağ","TUG (sn)":"TUG","OYH (m/sn)":"OYH","HGS (kg)":"HGS","5-CST (sn)":"5-CST","SPPB Toplam":"SPPB"}[label]||label;
    return [shortLabel,unit?withUnit(value,unit):value];
   });
-  const flags=groups[3];
+  const flags=originalGroups[3];
   const indexed=(offset)=>["SMM/h²","SMM/W","SMM/BKİ"].map((name,j)=>
    [name,flags[offset+j]?.[1]]).filter(([,value])=>kgdPrintPresent(value))
    .map(([name,value])=>name+": "+value).join(", ");
-  groups[2].push(["Olası Sarkopeni",flags[0]?.[1]]);
+  if(kgdPrintPresent(flags[0]?.[1]))groups[2].push(["Olası Sarkopeni",flags[0][1]]);
   groups[3]=[["Kesin Sarkopeni",indexed(1)],["Ciddi Sarkopeni",indexed(4)],
    ["Sarkopenik Obezite (SMM/W)",flags[7]?.[1]]].filter(([,v])=>kgdPrintPresent(v));
  }
