@@ -1,5 +1,5 @@
 "use strict";
-FormOutput.configurePrint(()=>({date:document.getElementById("visitDate")?.value,name:document.getElementById("patientName")?.value}));
+FormOutput.configurePrint(()=>({date:document.getElementById("visitDate")?.value,name:document.getElementById("patientName")?.value,form:document.getElementById("noteMode")?.value==="summary"?"KontrolTakip-Özet":"KontrolTakip-Detaylı"}));
 /* İTF Geriatri — single-page control/follow-up note. All draft content stays
    in sessionStorage for this tab; no network calls or patient-data uploads. */
 const DRAFT_KEY="itf_geriatri_kontrol_takip_session_v1";
