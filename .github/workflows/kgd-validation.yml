@@ -735,7 +735,7 @@ jobs:
             'MNA-LF automatic unhide should operate on the fifth tab');
           assert.ok(src.includes('nutritionItems.slice(11,15).forEach(el=>pain.appendChild(el))'),
             'Pain and VAS items retain their original clinical_4_11–14 identifiers');
-          assert.ok(src.includes('(sleep.querySelector(".section-bar")||sleep.querySelector("h2")).after(pain,transferredSleep)'),
+          assert.ok(src.includes('pain,sleepTopic,urinaryTopic,fecalTopic,constipationTopic,sexualTopic'),
             'Pain and VAS must appear first in the 4th tab');
           assert.ok(!src.includes('activity.appendChild(pain)'),
             'Chronic pain must no longer appear in Activity tab');
