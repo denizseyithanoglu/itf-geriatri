@@ -772,7 +772,7 @@ jobs:
             'Full KGD overview must have exactly the new tab order: '+JSON.stringify(orderedPositions));
           assert.ok(src.includes('if(step===3)return compactKGDStep(4,inline)'),
             '4th tab single-section short print must be Pain/Sleep');
-          assert.ok(src.includes('if(step===4){')&&src.includes('["MNA toplam",kgdMNATotalScore()]'),
+          assert.ok(src.includes('["MNA-LF",kgdMNATotalScore()]')&&!src.includes('["MNA-LF ek puanı",'),
             '5th tab short print includes MNA combined score');
           assert.ok(src.includes('if(step===3)return kgdDetailedClinical(4,[11,12,13,14]'),
             '4th tab detailed print begins with Pain/VAS');
