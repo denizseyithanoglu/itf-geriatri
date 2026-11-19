@@ -1364,3 +1364,22 @@ button.action.danger:hover{background:#ffebe7}
  #page2 .symptom-review-other{margin-top:4px;padding-top:5px}
  #page2 .symptom-review-other textarea{min-height:36px}
 }
+
+/* Compact, full-content summary and four-page clinical printouts. Screen layout unchanged. */
+@media print{
+ body.printing-summary .summary-sheet{font:8.5pt/1.25 Arial,sans-serif!important}
+ body.printing-summary .summary-sheet h1{font-size:12pt;margin:0 0 3px}
+ body.printing-summary .summary-sheet .summary-subtitle{font-size:8pt;margin:0 0 5px;padding-bottom:3px}
+ body.printing-summary .summary-sheet .summary-meta{gap:3px 9px;margin-bottom:6px;font-size:8pt}
+ body.printing-summary .summary-sheet section{break-inside:auto;margin-bottom:5px}
+ body.printing-summary .summary-sheet h2{font-size:9pt;padding:3px 5px;margin:5px 0 3px}
+ body.printing-summary .summary-sheet h3{font-size:8.5pt;margin:4px 0 2px}
+ body.printing-summary .summary-sheet ul{padding:0;margin:0;list-style:none}
+ body.printing-summary .summary-sheet li{display:inline;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+ body.printing-summary .summary-sheet li::after{content:"; "}
+ body.printing-summary .summary-sheet li:last-child::after{content:""}
+ .page .block{margin-bottom:3px}
+ .page .block-inner{padding:3px 4px}
+ .page .fields{gap:2px 4px}
+ .page .group{margin-bottom:2px}
+}
