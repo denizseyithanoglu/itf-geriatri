@@ -12,6 +12,7 @@ Updated: 2026-11-19. Keep this file short and update only when project structure
 - Online comprehensive geriatric assessment (KGD): `tools/kgd.html`.
 - KGD appointment and follow-up forms: `tools/ilk-muayene.*`, `tools/kontrol-takip.*`.
 - Report/output logic: `tools/form-output.js`.
+- KGD full-summary print layout: `compactKGDStep()` in `tools/kgd.html`; Sosyal Öykü uses 3 ordered compact rows, and Özgeçmiş lists positive diagnoses, fractures, medications beside family history, and habits under family history.
 - Data export: `tools/kgd-export/`.
 - Physical performance: `tools/fiziksel-performans.html`, `scripts/build-physical-performance.py`.
 - Patient self-assessment: `tools/self-assessment.html`.
