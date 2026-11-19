@@ -465,6 +465,8 @@ jobs:
             $:()=>button,
             alert:()=>{throw Error('Unexpected empty-summary warning')}
           };
+          cpctx.window=cpctx;cpctx.isSecureContext=true;
+          vm.runInNewContext(readFileSync('tools/form-output.js','utf8'),cpctx);
           vm.runInNewContext(src.slice(clipboardStart,clipboardEnd),cpctx);
           assert.equal(cpctx.kgdSectionSummaryPlainText(10),'','Do not copy the full-KGD summary');
           await cpctx.copyKGDSectionSummary(6);
