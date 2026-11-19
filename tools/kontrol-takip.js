@@ -1,4 +1,5 @@
 "use strict";
+FormOutput.configurePrint(()=>({date:document.getElementById("visitDate")?.value,name:document.getElementById("patientName")?.value}));
 /* İTF Geriatri — single-page control/follow-up note. All draft content stays
    in sessionStorage for this tab; no network calls or patient-data uploads. */
 const DRAFT_KEY="itf_geriatri_kontrol_takip_session_v1";
@@ -534,19 +535,12 @@ async function copyNote(){
  transferScratchToPlan();
  const text=selectedNote();
  if(text.startsWith("Henüz veri girilmedi")){notify("Önce formu doldurun.",true);return}
- try{
-  if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);
-  else{
-   const input=document.createElement("textarea");input.value=text;input.style.position="fixed";
-   input.style.left="-9999px";document.body.appendChild(input);input.select();
-   const ok=document.execCommand("copy");input.remove();if(!ok)throw Error("copy failed");
-  }
-  notify("Kontrol notu panoya kopyalandı.");
- }catch(e){notify("Kopyalama başarısız. Not metnini seçip kopyalayabilirsiniz.",true)}
+ const success=await FormOutput.copySummary(text);
+ notify(success?"Kontrol notu panoya kopyalandı.":"Kopyalama başarısız. Not metnini seçip kopyalayabilirsiniz.",!success);
 }
 function printNote(){
  transferScratchToPlan();
- renderNote();window.print();
+ renderNote();FormOutput.print();
 }
 function requestReset(){
  if(!window.confirm("Bütün Kontrol / Takip Formu ve bu sekmedeki geçici taslak sıfırlanacak. Emin misiniz?"))return;
