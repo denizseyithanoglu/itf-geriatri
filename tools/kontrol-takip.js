@@ -650,6 +650,12 @@ function init(){
  buildStatusItems("vaccineCards",VACCINES,"vax");
  buildGeriatric();
  initHomeBP();
+ ["adl","iadl"].forEach(id=>{
+  const score=$(id);
+  score.addEventListener("change",()=>{
+   if(score.value&&!score.checkValidity())score.reportValidity();
+  });
+ });
  GROUPS.forEach(group=>addRow(group));
  loadDraft();
  setDefaultVisitDate();
