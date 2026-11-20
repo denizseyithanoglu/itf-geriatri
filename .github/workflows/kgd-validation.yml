@@ -774,8 +774,9 @@ jobs:
             '4th tab single-section short print must be Pain/Sleep');
           assert.ok(src.slice(shortStart,shortEnd).includes('["MNA-LF",kgdMNATotalScore()]')&&!src.slice(shortStart,shortEnd).includes('["MNA-LF ek puanı",'),
             '5th tab short print includes MNA combined score');
-          assert.ok(src.includes('if(step===3)return kgdDetailedClinical(4,[11,12,13,14]'),
-            '4th tab detailed print begins with Pain/VAS');
+          assert.ok(src.includes('...kgdDetailedClinicalRows(4,[11,12,13,14,16,17,18])')&&
+            src.includes('kgdDetailedBlock("Ağrı, Uyku Kalitesi ve Boşaltım",main.concat(extras))'),
+            '4th tab detailed print combines Pain/VAS and sleep/voiding answers');
           assert.ok(src.includes('if(step===4){')&&src.includes('kgdDetailedScale("mna")'),
             '5th tab detailed print contains MNA');
           assert.ok(src.includes('const steps=all?wizardGroups.slice(0,-1).map((_,i)=>i):[step]'),
