@@ -35,11 +35,12 @@ const GERIATRIC=[
  ["height","Boy (cm)","measure"],
  ["weight","Kilo (kg)","measure"],
  ["loss","Kilo Kaybı","binary"],
- ["swallow","Çiğneme / Yutma Güçlüğü","binary"],
+ ["chew","Çiğneme Güçlüğü","binary"],
+ ["swallow","Yutma Güçlüğü","binary"],
  ["urinary","Üriner İnkontinans","binary"],
  ["fecal","Fekal İnkontinans","binary"],
  ["constipation","Kabızlık","binary"],
- ["sleep","Uyku","binary"],
+ ["sleep","Uyku Bozukluğu","binary"],
  ["rbd","REM Uyku Davranış Bozukluğu","binary"],
  ["memory","Unutkanlık (yeni başlangıç / son 6 ayda artış)","binary"],
  ["anhedonia","Anhedoni","binary"],
@@ -49,10 +50,10 @@ const GERIATRIC=[
  ["hearing","İşitme Sorunu","problem"]
 ];
 const GERIATRIC_GROUPS=[
- ["fall","fear","cane"],["dizziness","orthostasis","homeBP"],
- ["appetite","anthropometry","loss"],["swallow","urinary","fecal"],
- ["constipation","sleep","rbd"],["memory","anhedonia","adl"],
- ["iadl","vision","hearing"]
+ ["fall","fear","cane","dizziness","orthostasis","homeBP"],
+ ["appetite","anthropometry","loss","chew","swallow","urinary"],
+ ["fecal","constipation","sleep","rbd","memory","anhedonia"],
+ ["dailyFunction","vision","hearing"]
 ];
 const STATUS_OPTIONS=["","Var","Yok","Yapıldı","Yapılmadı","Önerildi","Reddetti","Bilinmiyor"];
 const REPEATS={
@@ -134,12 +135,12 @@ function buildGeriatric(){
    '<label>Boy (cm)<input id="height" data-save type="number" min="0" step="0.1" placeholder="cm"></label>'+
    '<label>Kilo (kg)<input id="weight" data-save type="number" min="0" step="0.1" placeholder="kg"></label>'+
    '<label>BKİ (kg/m²)<output id="bmiValue" aria-live="polite">—</output></label></div></div>';
+  if(id==="dailyFunction")return '<div class="geriatric-item geriatric-function"><strong>GYA / EGYA</strong>'+
+   '<div class="function-scores">'+
+   '<label>GYA<input id="adl" data-save type="number" inputmode="numeric" min="0" max="6" step="1" placeholder="0–6" aria-label="GYA puanı 0 ile 6 arası"></label>'+
+   '<label>EGYA<input id="iadl" data-save type="number" inputmode="numeric" min="0" max="8" step="1" placeholder="0–8" aria-label="EGYA puanı 0 ile 8 arası"></label>'+
+   '</div></div>';
   const [key,label,kind]=byKey[id];
-  if(key==="adl"||key==="iadl"){
-   const max=key==="adl"?6:8;
-   return '<label class="geriatric-item geriatric-measure"><strong>'+esc(label)+'</strong><select id="'+key+'" data-save><option value="">Seçilmedi</option>'+
-    Array.from({length:max+1},(_,n)=>'<option value="'+n+'">'+n+'</option>').join("")+'</select></label>';
-  }
   if(kind==="measure"){
    const bounds={height:'min="0" step="0.1"',weight:'min="0" step="0.1"',
     adl:'min="0" max="6" step="1"',iadl:'min="0" max="8" step="1"'};
@@ -286,7 +287,7 @@ function numberedPlan(lines){
  return lines.map((line,i)=>(i+1)+". "+line).join("\n");
 }
 function ensureFirstNumber(area){
- if(/^\s*\d+[.)](?:\s|$)/.test(area.value))return;
+ if(!area.value.trim()||/^\s*\d+(?:[.)]|$)/.test(area.value))return;
  const start=area.selectionStart,end=area.selectionEnd;
  area.value="1. "+area.value;
  area.setSelectionRange(start+3,end+3);
@@ -308,7 +309,6 @@ function addPlanOnEnter(event){
  }
  area.dispatchEvent(new Event("input",{bubbles:true}));
 }
-let planVisible=false;
 function pendingScratchItems(scratch,current){
  const available=new Map();
  for(const line of current){
@@ -423,23 +423,6 @@ function initScratchAndPlan(){
   else if(!val("scratchText"))notify("Post-it üzerinde henüz not bulunmuyor.",true);
   else notify("Bu notlar zaten PLAN bölümünde bulunuyor.");
  };
- const activate=()=>{
-  planVisible=true;
-  const count=transferScratchToPlan();
-  if(count)notify(count+" muayene notu PLAN'a otomatik aktarıldı.");
- };
- if("IntersectionObserver" in window){
-  const observer=new IntersectionObserver(entries=>{
-   for(const entry of entries){
-    if(entry.target.id!=="planSection")continue;
-    if(entry.isIntersecting)activate();
-    else planVisible=false;
-   }
-  },{threshold:0.1});
-  observer.observe($("planSection"));
- }
- $("planSection").addEventListener("focusin",activate);
- $("scratchText").addEventListener("blur",()=>{if(planVisible)transferScratchToPlan()});
  updateScratchStatus();
 }
 
@@ -472,7 +455,7 @@ const SHORT_LABELS={
  "Takip — Önceki Önerilerin Değerlendirilmesi":"Takip","PLAN":"Plan",
  "Düşme (son 6 ay içinde)":"Düşme/6ay","Düşme Korkusu":"Düşme kork.",
  "Baston Kullanımı":"Baston","Baş Dönmesi":"Baş dön.","Ortostatizm":"Ortost","Evde TA":"TA",
- "Boy (cm)":"Boy","Kilo (kg)":"Kilo","Kilo Kaybı":"Kilo kaybı","Çiğneme / Yutma Güçlüğü":"Çiğn/yutma",
+ "Boy (cm)":"Boy","Kilo (kg)":"Kilo","Kilo Kaybı":"Kilo kaybı","Çiğneme Güçlüğü":"Çiğneme","Yutma Güçlüğü":"Yutma",
  "Üriner İnkontinans":"Üİ","Fekal İnkontinans":"Fİ","Kabızlık":"Kabız",
  "REM Uyku Davranış Bozukluğu":"RDB","Unutkanlık (yeni başlangıç / son 6 ayda artış)":"Unutkanlık/6ay",
  "GYA (/6)":"GYA","EGYA (/8)":"EGYA","Görme Sorunu":"Görme sor.","İşitme Sorunu":"İşitme sor.",
@@ -566,9 +549,9 @@ function generateNote(horizontal=true){
    row(["Düşme (son 6 ay içinde)"]);
    row(["Düşme Korkusu","Baston Kullanımı","Evde TA","Nabız"]);
    row(["Baş Dönmesi","Ortostatizm"]);
-   row(["İştah","Kilo Kaybı","Çiğneme / Yutma Güçlüğü","Boy (cm)","Kilo (kg)","BKİ"]);
+   row(["İştah","Kilo Kaybı","Çiğneme Güçlüğü","Yutma Güçlüğü","Boy (cm)","Kilo (kg)","BKİ"]);
    row(["Üriner İnkontinans","Fekal İnkontinans","Kabızlık"]);
-   row(["Uyku","REM Uyku Davranış Bozukluğu"]);
+   row(["Uyku Bozukluğu","REM Uyku Davranış Bozukluğu"]);
    row(["Unutkanlık (yeni başlangıç / son 6 ayda artış)","Anhedoni"]);
    row(["GYA","EGYA","Görme Sorunu","İşitme Sorunu"]);
    row([...values.keys()]);
@@ -598,14 +581,12 @@ function notify(message,error=false){
  toastTimer=setTimeout(()=>{root.hidden=true},3500);
 }
 async function copyNote(){
- transferScratchToPlan();
  const text=selectedNote();
  if(text.startsWith("Henüz veri girilmedi")){notify("Önce formu doldurun.",true);return}
  const success=await FormOutput.copySummary(text);
  notify(success?"Kontrol notu panoya kopyalandı.":"Kopyalama başarısız. Not metnini seçip kopyalayabilirsiniz.",!success);
 }
 function printNote(){
- transferScratchToPlan();
  renderNote();FormOutput.print();
 }
 function requestReset(){
@@ -676,7 +657,6 @@ function init(){
  renderNote();initScratchAndPlan();
  ["planNarrative","medicationsNarrative","scratchText"].forEach(id=>{
   const area=$(id);
-  area.addEventListener("focus",()=>ensureFirstNumber(area));
   area.addEventListener("input",event=>{if(!event.isComposing)ensureFirstNumber(area)});
   area.addEventListener("keydown",addPlanOnEnter);
  });
@@ -728,7 +708,7 @@ function init(){
  });
  $("noteMode").addEventListener("change",renderNote);
  $("saveDraft").onclick=()=>saveDraft(true);
- $("showNote").onclick=()=>{transferScratchToPlan();renderNote();$("noteSection").scrollIntoView({behavior:"smooth",block:"start"})};
+ $("showNote").onclick=()=>{renderNote();$("noteSection").scrollIntoView({behavior:"smooth",block:"start"})};
  $("copyNote").onclick=copyNote;$("copyNoteBottom").onclick=copyNote;
  $("printNote").onclick=printNote;$("printNoteBottom").onclick=printNote;
  $("resetForm").onclick=requestReset;
