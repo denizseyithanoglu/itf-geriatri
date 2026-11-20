@@ -5758,7 +5758,7 @@ function kgdDetailedPrintStep(step){
   const sensory=kgdDetailedClinicalRows(3);
   return kgdDetailedBlock("Özgeçmiş ve Hastalıklar",history.slice(0,19))+
    kgdDetailedBlock("İlaçlar, Soygeçmiş ve Alışkanlıklar",[
-    ...history.slice(19,21),...sensory.slice(0,3),
+    ...history.slice(19),...sensory.slice(0,3),
     ["Alkol miktarı",moreText.alcoholQuantity]])+
    kgdDetailedBlock("Görme ve İşitme",sensory.slice(3))+
    kgdDetailedBlock("Kırık Öyküsü",[
