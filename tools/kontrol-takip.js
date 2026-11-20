@@ -451,7 +451,7 @@ const SHORT_LABELS={
  "İLAÇLAR":"İlaç","OSTEOPOROZ, KIRIK, DİŞLER VE TEDAVİLER":"Kemik/diş",
  "Osteoporoz sorgusu":"OP/DXA","Kırık öyküsü":"Kırık","Tedaviler":"Ted","Diğer notlar":"Ek",
  "TARAMALAR":"Tar","AŞILAMALAR":"Aşı","AKTİF YAKINMA":"Şik","GERİATRİK SORGU":"GS",
- "LABORATUVAR VE TETKİKLER":"Lab/Tet","TAKİP/PLAN":"Takip/Plan",
+ "LABORATUVAR VE TETKİKLER":"Lab/Tet","TAKİP":"Takip",
  "Takip — Önceki Önerilerin Değerlendirilmesi":"Takip","PLAN":"Plan",
  "Düşme (son 6 ay içinde)":"Düşme/6ay","Düşme Korkusu":"Düşme kork.",
  "Baston Kullanımı":"Baston","Baş Dönmesi":"Baş dön.","Ortostatizm":"Ortost","Evde TA":"TA",
@@ -558,8 +558,7 @@ function generateNote(horizontal=true){
   }
  }
  if(val("labNarrative")){push("LABORATUVAR VE TETKİKLER:");push(val("labNarrative"))}
- if(val("followupNarrative")||val("planNarrative"))push("TAKİP/PLAN:");
- if(val("followupNarrative"))push(val("followupNarrative"));
+ if(val("followupNarrative")){push("TAKİP:");push(val("followupNarrative"))}
  const plan=planItems(val("planNarrative"));
  if(plan.length){push("PLAN:");push(plan.map((line,i)=>(i+1)+". "+line).join("\n"))}
  return lines.length?lines.join("\n"):"Henüz veri girilmedi. Formu doldurdukça klinik not burada oluşacaktır.";
@@ -580,14 +579,20 @@ function notify(message,error=false){
  clearTimeout(toastTimer);
  toastTimer=setTimeout(()=>{root.hidden=true},3500);
 }
-async function copyNote(){
+function setNoteMode(mode){
+ $("noteMode").value=mode;
+ renderNote();
+}
+async function copySummaryNote(){
+ setNoteMode("summary");
  const text=selectedNote();
  if(text.startsWith("Henüz veri girilmedi")){notify("Önce formu doldurun.",true);return}
  const success=await FormOutput.copySummary(text);
- notify(success?"Kontrol notu panoya kopyalandı.":"Kopyalama başarısız. Not metnini seçip kopyalayabilirsiniz.",!success);
+ notify(success?"Özet kontrol notu panoya kopyalandı.":"Kopyalama başarısız. Özet notu seçip kopyalayabilirsiniz.",!success);
 }
-function printNote(){
- renderNote();FormOutput.print();
+function printSelectedNote(mode){
+ setNoteMode(mode);
+ FormOutput.print();
 }
 function requestReset(){
  if(!window.confirm("Bütün Kontrol / Takip Formu ve bu sekmedeki geçici taslak sıfırlanacak. Emin misiniz?"))return;
@@ -712,11 +717,10 @@ function init(){
    renumber(group);renderNote();saveDraft();
   }
  });
- $("noteMode").addEventListener("change",renderNote);
  $("saveDraft").onclick=()=>saveDraft(true);
- $("showNote").onclick=()=>{renderNote();$("noteSection").scrollIntoView({behavior:"smooth",block:"start"})};
- $("copyNote").onclick=copyNote;$("copyNoteBottom").onclick=copyNote;
- $("printNote").onclick=printNote;$("printNoteBottom").onclick=printNote;
+ $("printSummaryNote").onclick=()=>printSelectedNote("summary");
+ $("copySummaryNote").onclick=copySummaryNote;
+ $("printDetailedNote").onclick=()=>printSelectedNote("detailed");
  $("resetForm").onclick=requestReset;
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
