@@ -5750,9 +5750,10 @@ function kgdDetailedPrintStep(step){
  if(step===0){
   const social=kgdDetailedClinicalRows(0);
   const order=[1,3,0,2,4,5,13,7,8,10,9,11,12,6];
+  const fields=order.map(i=>social[i]);
+  fields.splice(3,0,["Yaş",moreText.clinical_0_3?$("ageOut")?.textContent:null]);
   return kgdDetailedBlock("Sosyal Öykü",[
-   ...order.map(i=>social[i]),
-   ["Yaş",moreText.clinical_0_3?$("ageOut")?.textContent:null],
+   ...fields,
    ["Memleket",moreText.patientHometown],["Adres",moreText.patientAddress],
    ["Meslek",moreText.patientProfession],["Çalışma",moreText.employmentStatus],
    ["Gelir",moreText.patientIncome],["Yaşlılık yaşı fikri yok",moreText.oldAgeNoIdea]
