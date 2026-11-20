@@ -447,6 +447,20 @@
  #printSheet[data-print-style="detailed"] .kgd-detail-row dt::after{content:": "}
  #printSheet[data-print-style="detailed"] .kgd-physical-line{margin-bottom:3px;line-height:1.25}
  #printSheet[data-print-style="detailed"] .print-note{margin-top:7px}
+ #printSheet[data-print-style="detailed"] .kgd-detail-section dl{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px 9px;margin:0}
+ #printSheet[data-print-style="detailed"] .kgd-detail-section.kgd-detail-scale dl{
+  grid-template-columns:repeat(2,minmax(0,1fr))}
+ #printSheet[data-print-style="detailed"] .kgd-detail-row{
+  display:block!important;min-width:0;padding:2px 2px 3px;
+  font-size:7.4pt;line-height:1.19;break-inside:avoid;
+  border-bottom:1px dotted #dedede;white-space:pre-wrap;overflow-wrap:anywhere}
+ #printSheet[data-print-style="detailed"] .kgd-detail-row dt,
+ #printSheet[data-print-style="detailed"] .kgd-detail-row dd{display:inline;margin:0}
+ #printSheet[data-print-style="detailed"] .kgd-detail-row dt{font-weight:700}
+ #printSheet[data-print-style="detailed"] .kgd-detail-row dt::after{content:": "}
+ #printSheet[data-print-style="detailed"] .kgd-detail-wide{grid-column:1 / -1}
+ #printSheet[data-print-style="detailed"] .kgd-physical-grouped{margin-top:7px}
 
 }
 
@@ -5586,11 +5600,15 @@ function kgdPhysicalGroupedReport(detailed=false){
 }
 
 function kgdDetailedBlock(title,rows){
- const data=rows.filter(x=>kgdPrintPresent(x[1]));
+ const data=rows.filter(([,value])=>kgdPrintPresent(value));
  if(!data.length)return "";
- return '<section class="kgd-detail-section"><h3>'+safe(title)+'</h3><dl>'+
-   data.map(([label,value])=>'<div class="kgd-detail-row"><dt>'+safe(String(label))+'</dt><dd>'+safe(String(value))+'</dd></div>').join("")+
-   '</dl></section>';
+ const scaleLayout=data.length>=24||data.filter(([label])=>String(label).length>72).length>=3;
+ return '<section class="kgd-detail-section'+(scaleLayout?' kgd-detail-scale':'')+'"><h3>'+safe(title)+'</h3><dl>'+
+   data.map(([label,value])=>{
+    const key=String(label),answer=String(value);
+    const wide=key.length>108||answer.length>140;
+    return '<div class="kgd-detail-row'+(wide?' kgd-detail-wide':'')+'"><dt>'+safe(key)+'</dt><dd>'+safe(answer)+'</dd></div>';
+   }).join("")+'</dl></section>';
 }
 function kgdScalePrintScore(id){
  const form=forms.find(x=>x.id===id);if(!form)return null;
@@ -5689,7 +5707,9 @@ function kgdDetailedScale(id){
  form.items.forEach((item,i)=>{
   const el=$(id+"_"+i);if(!el||el.value==="")return;
   const choice=el.options[el.selectedIndex];
-  entries.push([(i+1)+". "+item,(choice?.textContent?.trim()||el.value)+" ("+scaleItemScore(form,i,el.value)+" puan)"]);
+  const response=choice?.textContent?.trim()||el.value;
+  const alreadyScored=response.includes(" puan — ")||response.includes(" puan - ");
+  entries.push([(i+1)+". "+item,alreadyScored?response:response+" ("+scaleItemScore(form,i,el.value)+" puan)"]);
  });
  if(id==="frail")entries.push(["İşaretlenen hastalıklar",frailSelected.size?[...frailSelected].sort((a,b)=>a-b).map(i=>frailDiseases[i]).join(", "):frailNone?"Hiçbiri":null]);
  return kgdDetailedBlock(form.tr,entries);
