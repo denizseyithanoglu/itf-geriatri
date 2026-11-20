@@ -5714,30 +5714,32 @@ function kgdDetailedScale(id){
  if(id==="frail")entries.push(["İşaretlenen hastalıklar",frailSelected.size?[...frailSelected].sort((a,b)=>a-b).map(i=>frailDiseases[i]).join(", "):frailNone?"Hiçbiri":null]);
  return kgdDetailedBlock(form.tr,entries);
 }
-function kgdDetailedClinical(j,indices,title){
+function kgdDetailedClinicalRows(j,indices){
  const status=j===1?sarcoStatus():null;
- return kgdDetailedBlock(title||comprehensive[j][0],
-  (indices||comprehensive[j][1].map((_,i)=>i)).flatMap(k=>{
-   const entry=[
-    status?kgdPhysicalReportLabel(k,comprehensive[j][1][k]):comprehensive[j][1][k],
-    status?
-     kgdPhysicalAnnotatedValue(k,moreText["clinical_"+j+"_"+k],status):
-     moreText["clinical_"+j+"_"+k]
-   ];
-   return status&&k===26?[entry,
-    ["Kesin Sarkopeni (SMM/W)",moreText.sarcopeniaConfirmedW],
-    ["Kesin Sarkopeni (SMM/BMI)",moreText.sarcopeniaConfirmedBMI]]:[entry];
-  }));
+ return (indices||comprehensive[j][1].map((_,i)=>i)).flatMap(k=>{
+  const entry=[
+   status?kgdPhysicalReportLabel(k,comprehensive[j][1][k]):comprehensive[j][1][k],
+   status?
+    kgdPhysicalAnnotatedValue(k,moreText["clinical_"+j+"_"+k],status):
+    moreText["clinical_"+j+"_"+k]
+  ];
+  return status&&k===26?[entry,
+   ["Kesin Sarkopeni (SMM/W)",moreText.sarcopeniaConfirmedW],
+   ["Kesin Sarkopeni (SMM/BMI)",moreText.sarcopeniaConfirmedBMI]]:[entry];
+ });
 }
-function kgdDetailedExtra(j,title,indices){
- return kgdDetailedBlock(title,indices.map(i=>{
+function kgdDetailedClinical(j,indices,title){
+ return kgdDetailedBlock(title||comprehensive[j][0],kgdDetailedClinicalRows(j,indices));
+}
+function kgdDetailedExtra(j,title,indices,prefix=[]){
+ return kgdDetailedBlock(title,prefix.concat(indices.map(i=>{
   const answer=moreAnswers["additional_"+j+"_"+i];
   if(!kgdPrintPresent(answer))return [additional[j][1][i],null];
   let description=String(answer)+" puan";
   if(j===0)description=(mnaLFOptions[i]?.find(option=>String(option[1])===String(answer))?.[0]||description);
   if(j===1)description=(eqOptions[i]?.[Number(answer)-1]||description)+" ("+answer+"/3)";
   return [additional[j][1][i],description];
- }));
+ })));
 }
 function kgdDetailedPrintStep(step){
  if(step===0){
