@@ -155,7 +155,16 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
  box-shadow:0 6px 27px #233c3d30;
  transform:rotate(-.5deg)
 }
-.scratch-heading{background:#f4e7a8;border-bottom:1px solid #e4cf79}
+.scratch-heading{display:flex;align-items:stretch;background:#f4e7a8;border-bottom:1px solid #e4cf79}
+.scratch-heading>.scratch-drag-handle{
+ flex:0 0 36px;width:36px;min-width:36px;min-height:36px;
+ padding:4px;border:0;border-right:1px solid #e4cf79;
+ background:transparent;color:#655221;font:800 1.25rem/1 system-ui,sans-serif;
+ cursor:grab;touch-action:none;user-select:none
+}
+.scratch-heading>.scratch-drag-handle:active{cursor:grabbing}
+.scratch-heading>#scratchToggle{flex:1 1 auto;min-width:0;width:auto}
+.scratch-note[data-dragging="true"]{box-shadow:0 11px 32px #233c3d4d}
 .scratch-heading>button{
  display:flex;align-items:center;gap:6px;padding:9px 10px;width:100%;
  border:0;background:transparent;color:#655221;
@@ -179,7 +188,7 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
  background:#fbefbd;color:#665324;font-weight:750;font-size:.7rem
 }
 #scratchTransfer:hover{background:#f5e5a3}
-.scratch-note[data-collapsed="true"]{width:auto}
+.scratch-note[data-collapsed="true"]{width:auto;min-width:190px}
 @media(max-width:1050px){
  .patient-primary{grid-template-columns:repeat(2,minmax(0,1fr))}
  .patient-secondary{grid-template-columns:minmax(130px,.5fr) minmax(0,1.5fr)}
