@@ -308,3 +308,26 @@ h3{margin:17px 0 8px;color:#315d78;font-size:.95rem}
  .geriatric-questions{margin:9px 0 11px}
  .note-section{padding:12px}
 }
+
+/* Geriatric survey: six balanced cards per desktop row, one shared GYA/EGYA score card. */
+@media screen {
+ .geriatric-row,.geriatric-row[data-columns="2"]{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .geriatric-row .geriatric-function .function-scores{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;align-items:start
+ }
+ .geriatric-row .geriatric-function .function-scores label{
+  display:grid;gap:4px;min-width:0;font-weight:650;color:#315d78
+ }
+ .geriatric-row .geriatric-function .function-scores input{
+  display:block;width:100%;min-width:0;max-width:100%
+ }
+}
+@media screen and (max-width:1450px){
+ .geriatric-row,.geriatric-row[data-columns="2"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media screen and (max-width:900px){
+ .geriatric-row,.geriatric-row[data-columns="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media screen and (max-width:700px){
+ .geriatric-row,.geriatric-row[data-columns="2"]{grid-template-columns:minmax(0,1fr)}
+}
