@@ -5794,12 +5794,14 @@ function kgdDetailedPrintStep(step){
  if(step===4){
   return kgdDetailedClinical(4,[0,1,2,3,4,5,6,7,8,9,10,15],"Beslenme Soruları")+
    kgdDetailedScale("mna")+
-   kgdDetailedBlock("Beslenme Değerlendirmesi — Toplam Puan",[["MNA-LF",kgdMNATotalScore()]])+
-   kgdDetailedExtra(0,"MNA-LF (7–18. maddeler)",additional[0][1].map((_,i)=>i));
+   kgdDetailedExtra(0,"MNA-LF (7–18. maddeler)",additional[0][1].map((_,i)=>i),
+    [["MNA-LF toplam",kgdMNATotalScore()]]);
  }
  if(step===5)return kgdDetailedScale("adl")+kgdDetailedScale("iadl")+
-   kgdDetailedBlock("EQ-5D Sonucu",[["EQ-5D",kgdEQScore()],["EQ5D Skala",kgdPrintPresent(moreAnswers.eq5dHealthVAS)?moreAnswers.eq5dHealthVAS+"/100":null]])+
-   kgdDetailedExtra(1,"EQ-5D: Yanıtlar",[0,1,2,3,4]);
+  kgdDetailedExtra(1,"EQ-5D",[0,1,2,3,4],[
+   ["EQ-5D toplam",kgdEQScore()],
+   ["Sağlık VAS",kgdPrintPresent(moreAnswers.eq5dHealthVAS)?"%"+moreAnswers.eq5dHealthVAS:null]
+  ]);
  if(step===6)return kgdDetailedScale("frail")+kgdDetailedScale("sarcf")+kgdDetailedScale("sof");
  if(step===7){
   const wordIndices=[0,1,2,4,5,6];
