@@ -464,6 +464,11 @@
 
 }
 
+/* The report itself is the only printable content; screen help belongs on screen. */
+@media print{
+ #warning,#intro,#finalActions + .optional-note{display:none!important}
+}
+
 /* Departmental PDF style: compact MMSE cards and source-based clinician notes. */
 @media screen {
  #mmse-assessment .mmse-group .mmse-instruction{font-size:.79rem;line-height:1.48;color:#586c63;background:#f6faf7;border-left:3px solid #aec8b5;padding:7px 10px;margin:7px 0 12px}
