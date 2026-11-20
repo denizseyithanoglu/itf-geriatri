@@ -5743,36 +5743,54 @@ function kgdDetailedExtra(j,title,indices,prefix=[]){
 }
 function kgdDetailedPrintStep(step){
  if(step===0){
-  return kgdDetailedClinical(0,null,"Sosyal Öykü")+
-   kgdDetailedBlock("Ek Sosyal Bilgiler",[
-    ["Yaş",moreText.clinical_0_3?$("ageOut")?.textContent:null],
-    ["Memleket",moreText.patientHometown],["Adres",moreText.patientAddress],
-    ["Meslek",moreText.patientProfession],["Çalışma",moreText.employmentStatus],
-    ["Gelir",moreText.patientIncome],["Yaşlılık yaşı fikri yok",moreText.oldAgeNoIdea]
+  const social=kgdDetailedClinicalRows(0);
+  const order=[1,3,0,2,4,5,13,7,8,10,9,11,12,6];
+  return kgdDetailedBlock("Sosyal Öykü",[
+   ...order.map(i=>social[i]),
+   ["Yaş",moreText.clinical_0_3?$("ageOut")?.textContent:null],
+   ["Memleket",moreText.patientHometown],["Adres",moreText.patientAddress],
+   ["Meslek",moreText.patientProfession],["Çalışma",moreText.employmentStatus],
+   ["Gelir",moreText.patientIncome],["Yaşlılık yaşı fikri yok",moreText.oldAgeNoIdea]
+  ]);
+ }
+ if(step===1){
+  const history=kgdDetailedClinicalRows(6);
+  const sensory=kgdDetailedClinicalRows(3);
+  return kgdDetailedBlock("Özgeçmiş ve Hastalıklar",history.slice(0,19))+
+   kgdDetailedBlock("İlaçlar, Soygeçmiş ve Alışkanlıklar",[
+    ...history.slice(19,21),...sensory.slice(0,3),
+    ["Alkol miktarı",moreText.alcoholQuantity]])+
+   kgdDetailedBlock("Görme ve İşitme",sensory.slice(3))+
+   kgdDetailedBlock("Kırık Öyküsü",[
+    ["Hiç kırık oldu mu?",moreText.historyFracture],
+    ["Kırığın enerji düzeyi",moreText.historyFracture==="Evet"?moreText.clinical_2_15:null],
+    ["Kırık zamanı",moreText.historyFracture==="Evet"?moreText.clinical_2_16:null],
+    ["Kırık bölgesi",moreText.historyFracture==="Evet"?moreText.clinical_2_17:null]
    ]);
  }
- if(step===1)return kgdDetailedClinical(6,null,"Özgeçmiş ve İlaçlar")+
-    kgdDetailedClinical(3,null,"Alışkanlıklar, Görme ve İşitme")+
-    kgdDetailedBlock("Kırık Öyküsü",[
-     ["Hiç kırık oldu mu?",moreText.historyFracture],
-     ["Kırığın enerji düzeyi",moreText.historyFracture==="Evet"?moreText.clinical_2_15:null],
-     ["Kırık zamanı",moreText.historyFracture==="Evet"?moreText.clinical_2_16:null],
-     ["Kırık bölgesi",moreText.historyFracture==="Evet"?moreText.clinical_2_17:null]
-    ])+
-    kgdDetailedBlock("Ek Özgeçmiş",[["Alkol miktarı",moreText.alcoholQuantity]]);
- if(step===2)return kgdDetailedClinical(2,[0,1,2,3,4,5,6,7,8,9,10,11,12,13],"Fiziksel Aktivite ve Düşmeler")+
-   kgdDetailedBlock("Düşme ve Hastane Yatışı Ayrıntıları",[
-    ["Düşmenin zamanı",moreText.activityFallWhen],
-    ["Düşmenin sonucu",moreText.activityFallOutcome],
-    ["Son 1 yılda hastane yatışı sayısı",moreText.activityHospitalCount1],
-    ["Son 3 yılda hastane yatışı sayısı",moreText.activityHospitalCount3],
-    ["Hastane yatışı detayı / Ek notlar",moreText.activityHospitalNotes]
-   ]);
- if(step===3)return kgdDetailedClinical(4,[11,12,13,14],"Kronik Ağrı ve Verbal Analog Skalası (VAS)")+
-   kgdDetailedClinical(4,[16,17,18],"Uyku Yakınmaları")+
-   kgdDetailedClinical(5,null,"Ağrı, Uyku Kalitesi ve Boşaltım")+
-   kgdDetailedBlock("RUDB Semptomları",[["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null]])+
-   kgdDetailedBlock("Üriner Bulgular",urinaryExtras());
+ if(step===2)return kgdDetailedBlock("Fiziksel Aktivite ve Düşmeler",[
+  ...kgdDetailedClinicalRows(2,[0,1,2,3,4,5,6,7,8,9,10,11,12,13]),
+  ["Düşmenin zamanı",moreText.activityFallWhen],
+  ["Düşmenin sonucu",moreText.activityFallOutcome],
+  ["Son 1 yılda hastane yatışı sayısı",moreText.activityHospitalCount1],
+  ["Son 3 yılda hastane yatışı sayısı",moreText.activityHospitalCount3],
+  ["Hastane yatışı detayı / Ek notlar",moreText.activityHospitalNotes]
+ ]);
+ if(step===3){
+  const main=[...kgdDetailedClinicalRows(4,[11,12,13,14,16,17,18]),
+   ...kgdDetailedClinicalRows(5),
+   ["RUDB semptom sayısı",moreText.clinical_5_0==="Evet"?rbdSymptomCount()+"/3":null]];
+  const extras=urinaryExtras().filter(([label,value])=>{
+   if(label==="Noktüri sıklığı (kez/gece)"&&
+    String(value||"")===String(moreText.clinical_5_7||""))return false;
+   if(label==="Uyku: Yetersiz uyku"&&
+    moreText.clinical_4_18==="Yetersiz uyku"&&value==="Evet")return false;
+   if(label==="Uyku: Fazla uyuma"&&
+    moreText.clinical_4_18==="Fazla uyuma"&&value==="Evet")return false;
+   return true;
+  });
+  return kgdDetailedBlock("Ağrı, Uyku Kalitesi ve Boşaltım",main.concat(extras));
+ }
  if(step===4){
   return kgdDetailedClinical(4,[0,1,2,3,4,5,6,7,8,9,10,15],"Beslenme Soruları")+
    kgdDetailedScale("mna")+
