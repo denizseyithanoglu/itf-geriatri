@@ -341,6 +341,68 @@ function transferScratchToPlan(){
  updateScratchStatus();
  return pending.length;
 }
+/* Draggable Post-it: position belongs to this browser tab, not the patient draft. */
+const SCRATCH_POSITION_KEY="itf_geriatri_kontrol_postit_position_v1";
+function initScratchDrag(panel){
+ const handle=$("scratchDragHandle");
+ const margin=8;
+ const clamp=(value,max)=>Math.max(margin,Math.min(value,Math.max(margin,max)));
+ const place=(left,top)=>{
+  panel.style.left=clamp(left,window.innerWidth-panel.offsetWidth-margin)+"px";
+  panel.style.top=clamp(top,window.innerHeight-panel.offsetHeight-margin)+"px";
+  panel.style.right="auto";
+ };
+ const keepVisible=()=>{
+  if(panel.style.left)place(parseFloat(panel.style.left),parseFloat(panel.style.top));
+ };
+ const persist=()=>{
+  if(!panel.style.left)return;
+  try{sessionStorage.setItem(SCRATCH_POSITION_KEY,JSON.stringify({
+   left:parseFloat(panel.style.left),top:parseFloat(panel.style.top)
+  }))}catch(_){}
+ };
+ try{
+  const saved=JSON.parse(sessionStorage.getItem(SCRATCH_POSITION_KEY)||"null");
+  if(saved&&Number.isFinite(saved.left)&&Number.isFinite(saved.top))place(saved.left,saved.top);
+ }catch(_){}
+ let drag=null;
+ handle.addEventListener("pointerdown",event=>{
+  if(event.button!==0||drag)return;
+  event.preventDefault();
+  const rect=panel.getBoundingClientRect();
+  drag={id:event.pointerId,x:event.clientX,y:event.clientY,left:rect.left,top:rect.top};
+  handle.setPointerCapture(event.pointerId);
+  panel.dataset.dragging="true";
+ });
+ handle.addEventListener("pointermove",event=>{
+  if(!drag||event.pointerId!==drag.id)return;
+  place(drag.left+event.clientX-drag.x,drag.top+event.clientY-drag.y);
+ });
+ const finish=event=>{
+  if(!drag||event.pointerId!==drag.id)return;
+  drag=null;
+  delete panel.dataset.dragging;
+  if(handle.hasPointerCapture(event.pointerId))handle.releasePointerCapture(event.pointerId);
+  persist();
+ };
+ handle.addEventListener("pointerup",finish);
+ handle.addEventListener("pointercancel",finish);
+ handle.addEventListener("lostpointercapture",event=>{
+  if(drag&&drag.id===event.pointerId){drag=null;delete panel.dataset.dragging;persist()}
+ });
+ handle.addEventListener("keydown",event=>{
+  if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key))return;
+  event.preventDefault();
+  const step=event.shiftKey?30:10;
+  const rect=panel.getBoundingClientRect();
+  const dx=event.key==="ArrowRight"?step:event.key==="ArrowLeft"?-step:0;
+  const dy=event.key==="ArrowDown"?step:event.key==="ArrowUp"?-step:0;
+  place(rect.left+dx,rect.top+dy);
+  persist();
+ });
+ window.addEventListener("resize",keepVisible);
+ return keepVisible;
+}
 function initScratchAndPlan(){
  const panel=$("scratchNote"),toggle=$("scratchToggle"),content=$("scratchContent");
  const setExpanded=expanded=>{
@@ -350,7 +412,11 @@ function initScratchAndPlan(){
   content.hidden=!expanded;
  };
  setExpanded(!window.matchMedia?.("(max-width: 700px)")?.matches);
- toggle.onclick=()=>setExpanded(toggle.getAttribute("aria-expanded")!=="true");
+ const keepScratchVisible=initScratchDrag(panel);
+ toggle.onclick=()=>{
+  setExpanded(toggle.getAttribute("aria-expanded")!=="true");
+  keepScratchVisible();
+ };
  $("scratchTransfer").onclick=()=>{
   const count=transferScratchToPlan();
   if(count)notify(count+" muayene notu PLAN bölümüne aktarıldı.");
@@ -544,7 +610,7 @@ function printNote(){
 }
 function requestReset(){
  if(!window.confirm("Bütün Kontrol / Takip Formu ve bu sekmedeki geçici taslak sıfırlanacak. Emin misiniz?"))return;
- try{sessionStorage.removeItem(DRAFT_KEY)}catch(e){}
+ try{sessionStorage.removeItem(DRAFT_KEY);sessionStorage.removeItem(SCRATCH_POSITION_KEY)}catch(e){}
  window.location.reload();
 }
 function resetSection(section){
